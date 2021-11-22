@@ -13,5 +13,8 @@ public:
     int _listenfd;
 };
 
+class ThreadSahreDataClient : public ThreadShareData {
+
+};
 
 #endif
