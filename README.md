@@ -1,4 +1,4 @@
-**Kingpin is a C++ network programming framework based on TCP/IP + epoll + pthread. Inspired by *nginx* / *muduo*.**
+**Kingpin is a C++ network programming framework based on TCP/IP + epoll + pthread, aims to implement a library for the high concurrent servers and crawlers. Inspired by *nginx* / *muduo*.**
 
 # Features
 
