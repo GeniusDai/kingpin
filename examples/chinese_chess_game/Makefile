@@ -4,7 +4,7 @@ SERVER = StartServer
 CLIENT = StartClient
 
 CXX = /bin/g++
-CXXFLAGS = -O0 -Wall -Wno-sign-compare -std=c++11 -g -I ../../include
+CXXFLAGS = -O0 -Wall -Wno-sign-compare -std=c++11 -g -I ../../include/core -I ../../include/utils
 
 LDFLAGS = -lpthread
 
