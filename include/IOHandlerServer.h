@@ -14,7 +14,7 @@ public:
     void _run() {
         cout << "start thread " << this_thread::get_id() << endl;
         while (true) {
-            int timeout = 100;
+            int timeout = 10;
 
             if (this->_tsd_ptr->_m.try_lock()) {
                 timeout = -1;

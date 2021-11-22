@@ -22,13 +22,12 @@ template<
 class EpollTPServer {
 public:
     int _thrNum;
-    int _listenfd;
     int _port;
     shared_ptr<EpollTP<_IOHandler, _ThreadShareData> > _tp;
     _ThreadShareData *_tsd_ptr;
 
     EpollTPServer(int thrNum, int port, _ThreadShareData *tsd_ptr) : _thrNum(thrNum), _port(port), _tsd_ptr(tsd_ptr) {
-        _listenfd = _listen();
+        _tsd_ptr->_listenfd = _listen();
         _tp = make_shared<EpollTP<_IOHandler, _ThreadShareData> >(_thrNum, _tsd_ptr);
     }
 

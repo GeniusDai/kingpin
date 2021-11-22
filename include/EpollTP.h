@@ -28,7 +28,7 @@ public:
         }
 
         for (auto h : _handlers) {
-            h->run();
+            h->join();
         }
     }
 };
