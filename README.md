@@ -6,6 +6,8 @@
 
 * Multi-threads competing for mutex to register read event for listening socket
 
+* Avoid excessive wrapper of classes and functions to get thing complecated
+
 # Repository Contents
 
 Guide to header files:
