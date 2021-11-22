@@ -59,8 +59,6 @@ public:
 
     virtual void run() = 0;
 
-    virtual void onConnect(int conn) = 0;
-
     virtual void onReadable(int conn) = 0;
 
     virtual void onWritable(int conn) = 0;

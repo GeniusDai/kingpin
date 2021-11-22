@@ -11,6 +11,8 @@ public:
 
     IOHandlerServer(_ThreadShareData *tsd_ptr) : IOHandler<_ThreadShareData>(tsd_ptr) {}
 
+    virtual void onConnect(int conn) = 0;
+
     void _run() {
         cout << "start thread " << this_thread::get_id() << endl;
         while (true) {

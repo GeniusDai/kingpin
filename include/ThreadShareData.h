@@ -2,6 +2,7 @@
 #define __ThreadShareData_H_
 
 #include <mutex>
+#include <unordered_set>
 
 using namespace std;
 
@@ -14,7 +15,9 @@ public:
 };
 
 class ThreadSahreDataClient : public ThreadShareData {
-
+public：
+    mutex _m;
+    unordered_set<int> _connfds;
 };
 
 #endif
