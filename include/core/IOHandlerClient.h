@@ -11,10 +11,14 @@ public:
 
     IOHandlerClient(_ThreadShareData *tsd_ptr) : IOHandler<_ThreadShareData>(*tsd_ptr) {}
 
+    virtual void onInit() = 0;
+
     void _run() {
         cout << "start thread " << this_thread::get_id() << endl;
         while (true) {
-            int num = epoll_wait(this->_epfd, this->_evs, MAX_SIZE, -1);
+            int timeout = 10;
+
+            int num = epoll_wait(this->_epfd, this->_evs, MAX_SIZE, 10);
 
             for (int i = 0; i < num; ++i) {
                 if (this->_evs[i].events & EPOLLIN) {
