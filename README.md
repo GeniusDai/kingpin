@@ -26,4 +26,8 @@ Guide to header files:
 
 # Todo
 
+* Thread safe logger
+
+* Crawler related
+
 **Please notice kingpin is still in development!**
