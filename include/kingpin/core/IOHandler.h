@@ -62,6 +62,8 @@ public:
     virtual void onReadable(int conn, uint32_t events) = 0;
 
     virtual void onWritable(int conn, uint32_t events) = 0;
+
+    virtual void onPassivelyClosed(int conn) = 0;
 };
 
 #endif
