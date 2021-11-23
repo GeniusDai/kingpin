@@ -1,6 +1,5 @@
 #include "Server.h"
-#include "EpollTPServer.h"
-
+#include "kingpin/core/EpollTPServer.h"
 
 int main(int argc, char **argv) {
     ChessGameShareData data;

@@ -11,7 +11,7 @@
 #include <iostream>
 #include <memory>
 
-#include "EpollTP.h"
+#include "kingpin/core/EpollTP.h"
 
 using namespace std;
 
@@ -21,17 +21,14 @@ template<
 >
 class EpollTPServer {
 public:
-    int _thrNum;
-    int _port;
     shared_ptr<EpollTP<_IOHandler, _ThreadShareData> > _tp;
-    _ThreadShareData *_tsd_ptr;
 
-    EpollTPServer(int thrNum, int port, _ThreadShareData *tsd_ptr) : _thrNum(thrNum), _port(port), _tsd_ptr(tsd_ptr) {
-        _tsd_ptr->_listenfd = _listen();
-        _tp = make_shared<EpollTP<_IOHandler, _ThreadShareData> >(_thrNum, _tsd_ptr);
+    EpollTPServer(int thrNum, int port, _ThreadShareData *tsd_ptr) {
+        tsd_ptr->_listenfd = _listen(port);
+        _tp = make_shared<EpollTP<_IOHandler, _ThreadShareData> >(thrNum, tsd_ptr);
     }
 
-    int _listen() {
+    int _listen(int port) {
         int sock = ::socket(AF_INET, SOCK_STREAM, 0);
         if (sock < 0) {
             throw FatalException("socket error");
@@ -39,13 +36,13 @@ public:
         struct sockaddr_in addr;
         ::bzero(&addr, sizeof(addr));
         addr.sin_family = AF_INET;
-        addr.sin_port = htons(this->_port);
+        addr.sin_port = htons(port);
         addr.sin_addr.s_addr = htonl(INADDR_ANY);
         if (::bind(sock, (sockaddr *)&addr, sizeof(addr)) < 0) {
             throw FatalException("bind error");
         }
         ::listen(sock, 2);
-        cout << "listening in port " << this->_port << endl;
+        cout << "listening in port " << port << endl;
         return sock;
     }
 

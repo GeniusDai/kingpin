@@ -5,7 +5,7 @@
 
 using namespace std;
 
-#include "EpollTP.h"
+#include "kingpin/core/EpollTP.h"
 
 template <
     template<typename _ThreadShareData> class _IOHandler,
@@ -13,12 +13,10 @@ template <
 >
 class EpollTPClient {
 public:
-    int _thrNum;
     shared_ptr<EpollTP<_IOHandler, _ThreadShareData> > _tp;
-    _ThreadShareData *_tsd_ptr;
 
-    EpollTPClient(int thrNum, _ThreadShareData *tsd_ptr) : _thrNum(thrNum), _tsd_ptr(tsd_ptr) {
-        _tp = make_shared<EpollTP<_IOHandler, _ThreadShareData> >(_thrNum, _tsd_ptr);
+    EpollTPClient(int thrNum, _ThreadShareData *tsd_ptr) {
+        _tp = make_shared<EpollTP<_IOHandler, _ThreadShareData> >(thrNum, tsd_ptr);
     }
 
     void run() {

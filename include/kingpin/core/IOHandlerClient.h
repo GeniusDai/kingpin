@@ -1,7 +1,7 @@
 #ifndef __IOHANDLER_CLIENT_H
 #define __IOHANDLER_CLIENT_H
 
-#include "IOHandler.h"
+#include "kingpin/core/IOHandler.h"
 
 template <typename _ThreadShareData>
 class IOHandlerClient {
@@ -21,17 +21,15 @@ public:
             int num = epoll_wait(this->_epfd, this->_evs, MAX_SIZE, 10);
 
             for (int i = 0; i < num; ++i) {
-                if (this->_evs[i].events & EPOLLIN) {
-                    cout << "conn " << this->_evs[i].data.fd << " readable" << endl;
-                    this->onReadable(this->_evs[i].data.fd);
+                int fd = this->_evs[i].data.fd;
+                uint32_t events = this->_evs[i].events;
+                if (events & EPOLLIN) {
+                    cout << "conn " << fd << " readable" << endl;
+                    this->onReadable(fd, events);
                 }
-                if (this->_evs[i].events & EPOLLRDHUP) {
-                    cout << "conn " << this->_evs[i].data.fd << " passively closed" << endl;
-                    this->onPassivelyClose(this->_evs[i].data.fd);
-                }
-                if (this->_evs[i].events & EPOLLOUT) {
-                    cout << "conn " << this->_evs[i].data.fd << " writable" << endl;
-                    this->onWritable(this->_evs[i].data.fd);
+                if (events & EPOLLOUT) {
+                    cout << "conn " << fd << " writable" << endl;
+                    this->onWritable(fd, events);
                 }
             }
         }

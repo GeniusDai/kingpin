@@ -11,7 +11,7 @@
 #include <thread>
 #include <sstream>
 
-#include "Exception.h"
+#include "kingpin/core/Exception.h"
 
 using namespace std;
 
@@ -59,11 +59,9 @@ public:
 
     virtual void run() = 0;
 
-    virtual void onReadable(int conn) = 0;
+    virtual void onReadable(int conn, uint32_t events) = 0;
 
-    virtual void onWritable(int conn) = 0;
-
-    virtual void onPassivelyClose(int conn) = 0;
+    virtual void onWritable(int conn, uint32_t events) = 0;
 };
 
 #endif

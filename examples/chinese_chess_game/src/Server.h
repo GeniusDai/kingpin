@@ -13,8 +13,8 @@
 #include <unordered_map>
 #include <unordered_set>
 
-#include "IOHandlerServer.h"
-#include "ThreadShareData.h"
+#include "kingpin/core/IOHandlerServer.h"
+#include "kingpin/core/ThreadShareData.h"
 
 using namespace std;
 
@@ -49,7 +49,7 @@ public:
         this->RegisterFd(conn, EPOLLIN);
     }
 
-    void onReadable(int conn) {
+    void onReadable(int conn, uint32_t events) {
         char buf[100];
         int len = read(conn, buf, 100);
         if (len == 0) {
@@ -91,11 +91,7 @@ public:
         }
     }
 
-    void onWritable(int conn) {
-
-    }
-
-    void onPassivelyClose(int conn) {
+    void onWritable(int conn, uint32_t events) {
 
     }
 };

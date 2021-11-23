@@ -1,7 +1,7 @@
 #ifndef __IOHANDLER_SERVER_H
 #define __IOHANDLER_SERVER_H
 
-#include "IOHandler.h"
+#include "kingpin/core/IOHandler.h"
 
 template <typename _ThreadShareData>
 class IOHandlerServer : public IOHandler<_ThreadShareData> {
@@ -27,25 +27,23 @@ public:
             int num = epoll_wait(this->_epfd, this->_evs, MAX_SIZE, timeout);
 
             for (int i = 0; i < num; ++i) {
-                if (this->_evs[i].data.fd == this->_tsd_ptr->_listenfd) {
-                    int conn = ::accept4(this->_tsd_ptr->_listenfd, NULL, NULL, SOCK_NONBLOCK);
+                int fd = this->_evs[i].data.fd;
+                uint32_t events = this->_evs[i].events;
+                if (fd == this->_tsd_ptr->_listenfd) {
+                    int conn = ::accept4(fd, NULL, NULL, SOCK_NONBLOCK);
                     cout << "new connection " << conn << " accepted" << endl;
-                    this->RemoveFd(this->_tsd_ptr->_listenfd);
+                    this->RemoveFd(fd);
                     this->_tsd_ptr->_m.unlock();
                     cout << "thread " << this_thread::get_id() << " release lock" << endl;
                     this->onConnect(conn);
                 } else {
-                    if (this->_evs[i].events & EPOLLIN) {
-                        cout << "conn " << this->_evs[i].data.fd << " readable" << endl;
-                        this->onReadable(this->_evs[i].data.fd);
+                    if (events & EPOLLIN) {
+                        cout << "conn " << fd << " readable" << endl;
+                        this->onReadable(fd, events);
                     }
-                    if (this->_evs[i].events & EPOLLRDHUP) {
-                        cout << "conn " << this->_evs[i].data.fd << " passively closed" << endl;
-                        this->onPassivelyClose(this->_evs[i].data.fd);
-                    }
-                    if (this->_evs[i].events & EPOLLOUT) {
-                        cout << "conn " << this->_evs[i].data.fd << " writable" << endl;
-                        this->onWritable(this->_evs[i].data.fd);
+                    if (events & EPOLLOUT) {
+                        cout << "conn " << fd << " writable" << endl;
+                        this->onWritable(fd, events);
                     }
                 }
             }
