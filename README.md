@@ -26,9 +26,9 @@ core:
 
 * EpollTP.h: Thread pool, initialized by multi-thread shared data.
 
-# Todo
+* Logger.h: Multi-thread safe logger, use backend thread, will end elegantly in the destruction.
 
-* Thread safe logger
+# Todo
 
 * Crawler related
 
