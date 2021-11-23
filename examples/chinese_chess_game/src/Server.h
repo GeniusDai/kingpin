@@ -46,34 +46,39 @@ public:
             write(oppo, initMsg, strlen(initMsg));
             cout << "match client " << conn << "&" << oppo << endl;
         }
-        this->RegisterFd(conn, EPOLLIN);
+        this->RegisterFd(conn, EPOLLIN | EPOLLRDHUP);
+    }
+
+    void onPassivelyClosed(int conn) {
+        cout << "client closed the socket, will close " << conn << endl;
+        this->RemoveFd(conn);
+        ::close(conn);
+        this->_tsd_ptr->message.erase(conn);
+        if (this->_tsd_ptr->match.find(conn) != this->_tsd_ptr->match.cend()) {
+            cout << "find oppo, will close socket " << this->_tsd_ptr->match[conn] << endl;
+            this->RemoveFd(this->_tsd_ptr->match[conn]);
+            ::close(this->_tsd_ptr->match[conn]);
+            this->_tsd_ptr->message.erase(this->_tsd_ptr->match[conn]);
+            this->_tsd_ptr->match.erase(this->_tsd_ptr->match[conn]);
+        } else {
+            this->_tsd_ptr->single.erase(conn);
+        }
+        this->_tsd_ptr->match.erase(conn);
     }
 
     void onReadable(int conn, uint32_t events) {
         char buf[100];
         int len = read(conn, buf, 100);
-        if (len == 0) {
-            cout << "client closed the socket, will close " << conn << endl;
-            ::close(conn);
-            this->RemoveFd(conn);
-            this->_tsd_ptr->message.erase(conn);
-            if (this->_tsd_ptr->match.find(conn) != this->_tsd_ptr->match.cend()) {
-                cout << "find oppo, will close socket " << this->_tsd_ptr->match[conn] << endl;
-                ::close(this->_tsd_ptr->match[conn]);
-                this->RemoveFd(this->_tsd_ptr->match[conn]);
-                this->_tsd_ptr->message.erase(this->_tsd_ptr->match[conn]);
-                this->_tsd_ptr->match.erase(this->_tsd_ptr->match[conn]);
-            } else {
-                this->_tsd_ptr->single.erase(conn);
-            }
-            this->_tsd_ptr->match.erase(conn);
-            return;
+        if (len != 0) {
+            appendOrSendMessage(conn, buf, len);
         }
 
-        _appendOrSendMessage(conn, buf, len);
+        if (events & EPOLLRDHUP) {
+            onPassivelyClosed(conn);
+        }
     }
 
-    void _appendOrSendMessage(int conn, char *buf, int len) {
+    void appendOrSendMessage(int conn, char *buf, int len) {
         int curr = this->_tsd_ptr->message[conn].second;
         if (len + curr >= _msgBufferSize) {
             throw "buffer overflow error";
