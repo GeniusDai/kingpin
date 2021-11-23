@@ -12,7 +12,9 @@
 
 # Repository Contents
 
-Guide to header files:
+Guide to kingpin header files.
+
+core:
 
 * IOHandler.h: Virtual base class got a epoll fd, derived class shall implement run function for thread and handler functions for IO.
 
