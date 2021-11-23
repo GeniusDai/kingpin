@@ -37,6 +37,7 @@ public:
     }
 
     void RegisterFd(int fd, uint32_t events) {
+        cout << "register fd " << fd << " " << events << endl;
         struct epoll_event ev;
         ev.data.fd = fd;
         ev.events = events;
@@ -49,6 +50,7 @@ public:
     }
 
     void RemoveFd(int fd) {
+        cout << "remove fd " << fd << endl;
         if (::epoll_ctl(_epfd, EPOLL_CTL_DEL, fd, NULL) == -1) {
             stringstream ss;
             ss << "remove fd " << fd << " error";
