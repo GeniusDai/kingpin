@@ -19,8 +19,10 @@ public:
             int timeout = 10;
 
             if (this->_tsd_ptr->_m.try_lock()) {
+                INFO << "thread get lock" << END;
                 onInit();
                 this->_tsd_ptr->_m.unlock();
+                INFO << "thread release lock" << END;
             }
 
             int num = epoll_wait(this->_epfd, this->_evs, MAX_SIZE, timeout);

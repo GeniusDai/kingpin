@@ -16,7 +16,7 @@
 
 using namespace std;
 
-const int LISTEN_NUM = 5;
+const int LISTEN_NUM = 10;
 
 template<
     template<typename _ThreadShareData> class _IOHandler,

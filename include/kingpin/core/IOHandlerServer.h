@@ -1,7 +1,11 @@
 #ifndef __IOHANDLER_SERVER_H
 #define __IOHANDLER_SERVER_H
 
+#include <chrono>
+
 #include "kingpin/core/IOHandler.h"
+
+using namespace std;
 
 template <typename _ThreadShareData>
 class IOHandlerServer : public IOHandler<_ThreadShareData> {
@@ -16,7 +20,7 @@ public:
     void _run() {
         INFO << "thread start" << END;
         while (true) {
-            int timeout = 10;
+            int timeout = 5;
 
             if (this->_tsd_ptr->_m.try_lock()) {
                 timeout = -1;
@@ -36,6 +40,7 @@ public:
                     this->_tsd_ptr->_m.unlock();
                     INFO << "thread release lock" << END;
                     this->onConnect(conn);
+                    this_thread::sleep_for(chrono::milliseconds(1));
                 } else {
                     if (events & EPOLLIN) {
                         INFO << "conn " << fd << " readable" << END;

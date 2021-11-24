@@ -38,7 +38,7 @@ public:
     }
 
     void RegisterFd(int fd, uint32_t events) {
-        INFO << "register fd " << fd << " " << events << END;
+        INFO << "register fd " << fd << END;
         struct epoll_event ev;
         ev.data.fd = fd;
         ev.events = events;
