@@ -16,7 +16,7 @@
 
 using namespace std;
 
-class Logger {
+class Logger final {
     int _level;
 
     static const int _buffer_size = 5 * 1024 * 1024;

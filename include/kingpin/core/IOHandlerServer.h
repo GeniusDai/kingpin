@@ -53,6 +53,8 @@ public:
     void run() {
         this->_t = make_shared<thread>(&IOHandlerServer::_run, this);
     }
+
+    virtual ~IOHandlerServer() {}
 };
 
 #endif

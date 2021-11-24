@@ -6,18 +6,23 @@
 
 using namespace std;
 
-class ThreadShareData {};
+class ThreadShareData {
+public:
+    virtual ~ThreadShareData() {}
+};
 
 class ThreadShareDataServer : public ThreadShareData {
 public:
     mutex _m;
     int _listenfd;
+    virtual ~ThreadShareDataServer() {}
 };
 
 class ThreadShareDataClient : public ThreadShareData {
 public:
     mutex _m;
     unordered_set<int> _connfds;
+    virtual ~ThreadShareDataClient() {}
 };
 
 #endif

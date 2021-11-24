@@ -11,7 +11,7 @@ template <
     template<typename _ThreadShareData> class _IOHandler,
     typename _ThreadShareData
 >
-class EpollTPClient {
+class EpollTPClient final {
 public:
     shared_ptr<EpollTP<_IOHandler, _ThreadShareData> > _tp;
 

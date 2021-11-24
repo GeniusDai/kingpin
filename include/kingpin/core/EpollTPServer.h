@@ -16,11 +16,13 @@
 
 using namespace std;
 
+const int LISTEN_NUM = 5;
+
 template<
     template<typename _ThreadShareData> class _IOHandler,
     typename _ThreadShareData
 >
-class EpollTPServer {
+class EpollTPServer final {
 public:
     shared_ptr<EpollTP<_IOHandler, _ThreadShareData> > _tp;
 
@@ -42,7 +44,7 @@ public:
         if (::bind(sock, (sockaddr *)&addr, sizeof(addr)) < 0) {
             throw FatalException("bind error");
         }
-        ::listen(sock, 2);
+        ::listen(sock, LISTEN_NUM);
         INFO << "listening in port " << port << END;
         return sock;
     }

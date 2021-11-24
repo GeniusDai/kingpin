@@ -38,6 +38,8 @@ public:
     void run() {
         this->_t = make_shared<thread>(IOHandlerClient::_run, this);
     }
+
+    virtual ~IOHandlerClient() {}
 };
 
 #endif
