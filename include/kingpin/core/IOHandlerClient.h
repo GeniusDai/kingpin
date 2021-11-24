@@ -4,7 +4,7 @@
 #include "kingpin/core/IOHandler.h"
 
 template <typename _ThreadShareData>
-class IOHandlerClient {
+class IOHandlerClient : public IOHandler<_ThreadShareData> {
 public:
     IOHandlerClient(const IOHandlerClient &) = delete;
     IOHandlerClient &operator=(const IOHandlerClient &) = delete;
