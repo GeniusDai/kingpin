@@ -24,7 +24,7 @@ Default:
 Screenshot
 ----------
 
-![image](https://github.com/GeniusDai/kingpin/raw/main/pictures/PlayChess.png)
+![image](https://github.com/GeniusDai/kingpin/raw/dev/pictures/PlayChess.png)
 
 TODO
 ----
