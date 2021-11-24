@@ -1,12 +1,16 @@
-**Kingpin is a C++ network programming framework based on TCP/IP + epoll + pthread, aims to implement a library for the high concurrent servers and crawlers. Inspired by *nginx* / *muduo*.**
+**Kingpin is a C++ network programming framework based on TCP/IP + epoll + pthread, aims to implement a library for the high concurrent servers and clients. Inspired by *nginx* / *muduo*.**
 
 # Features
 
 * Per epoll per thread, one socket handled by one thread
 
-* Server: Multi-threads competing for mutex to register read event for listening socket
+* Thread pool and epoll for both server's and client's concurrency
 
-* Client: Multi-threads competing for mutex to get fd from connection pool
+* High performance server using multi-threads competing for mutex to register read event for listening socket
+
+* High performance client using multi-threads competing for mutex to get file descriptor from connection pool
+
+* High performance asynchronous logger using backend thread to print debug info with timestamp and tid
 
 * Avoid excessive wrapper of classes and functions to get thing complecated
 
@@ -30,6 +34,4 @@ core:
 
 # Todo
 
-* Crawler related
-
-**Please notice kingpin is still in development!**
+* Web crawler for demo
