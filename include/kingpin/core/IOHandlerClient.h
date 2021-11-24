@@ -9,7 +9,7 @@ public:
     IOHandlerClient(const IOHandlerClient &) = delete;
     IOHandlerClient &operator=(const IOHandlerClient &) = delete;
 
-    IOHandlerClient(_ThreadShareData *tsd_ptr) : IOHandler<_ThreadShareData>(*tsd_ptr) {}
+    IOHandlerClient(_ThreadShareData *tsd_ptr) : IOHandler<_ThreadShareData>(tsd_ptr) {}
 
     virtual void onInit() = 0;
 
@@ -18,7 +18,12 @@ public:
         while (true) {
             int timeout = 10;
 
-            int num = epoll_wait(this->_epfd, this->_evs, MAX_SIZE, 10);
+            if (this->_tsd_ptr->_m.try_lock()) {
+                onInit();
+                this->_tsd_ptr->_m.unlock();
+            }
+
+            int num = epoll_wait(this->_epfd, this->_evs, MAX_SIZE, timeout);
 
             for (int i = 0; i < num; ++i) {
                 int fd = this->_evs[i].data.fd;
@@ -36,7 +41,7 @@ public:
     }
 
     void run() {
-        this->_t = make_shared<thread>(IOHandlerClient::_run, this);
+        this->_t = make_shared<thread>(&IOHandlerClient::_run, this);
     }
 
     virtual ~IOHandlerClient() {}
