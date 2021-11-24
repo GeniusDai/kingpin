@@ -3,8 +3,8 @@ BIN = bin
 SERVER = StartServer
 CLIENT = StartClient
 
-CXX = /bin/g++
-CXXFLAGS = -O0 -Wall -Wno-sign-compare -std=c++11 -g -I ../../include
+CXX = g++
+CXXFLAGS = -O0 -Wall -Wno-write-strings -Wno-sign-compare -std=c++11 -g -I ../../include
 
 LDFLAGS = -lpthread
 

@@ -15,6 +15,7 @@
 
 #include "kingpin/core/IOHandlerServer.h"
 #include "kingpin/core/ThreadShareData.h"
+#include "kingpin/core/Logger.h"
 
 using namespace std;
 
@@ -36,7 +37,7 @@ public:
         this->_tsd_ptr->message[conn] = make_pair(unique_ptr<char []>(new char[_msgBufferSize]), 0);
         if (this->_tsd_ptr->single.empty()) {
             this->_tsd_ptr->single.insert(conn);
-            cout << "single client " << conn << endl;
+            INFO << "single client " << conn << END;
         } else {
             auto iter = this->_tsd_ptr->single.begin();
             int oppo = *iter;
@@ -44,18 +45,18 @@ public:
             this->_tsd_ptr->match[oppo] = conn;
             this->_tsd_ptr->match[conn] = oppo;
             write(oppo, initMsg, strlen(initMsg));
-            cout << "match client " << conn << "&" << oppo << endl;
+            INFO << "match client " << conn << "&" << oppo << END;
         }
         this->RegisterFd(conn, EPOLLIN | EPOLLRDHUP);
     }
 
     void onPassivelyClosed(int conn) {
-        cout << "client closed the socket, will close " << conn << endl;
+        INFO << "client closed the socket, will close " << conn << END;
         this->RemoveFd(conn);
         ::close(conn);
         this->_tsd_ptr->message.erase(conn);
         if (this->_tsd_ptr->match.find(conn) != this->_tsd_ptr->match.cend()) {
-            cout << "find oppo, will close socket " << this->_tsd_ptr->match[conn] << endl;
+            INFO << "find oppo, will close socket " << this->_tsd_ptr->match[conn] << END;
             this->RemoveFd(this->_tsd_ptr->match[conn]);
             ::close(this->_tsd_ptr->match[conn]);
             this->_tsd_ptr->message.erase(this->_tsd_ptr->match[conn]);
@@ -88,11 +89,11 @@ public:
         }
         this->_tsd_ptr->message[conn].second = curr + len;
         if (this->_tsd_ptr->message[conn].first[curr+len-1] == '\n') {
-            cout << "receive message from " << conn << endl;
+            INFO << "receive message from " << conn << END;
             ::write(this->_tsd_ptr->match[conn], this->_tsd_ptr->message[conn].first.get(), this->_tsd_ptr->message[conn].second);
             this->_tsd_ptr->message[conn].second = 0;
         } else {
-            cout << "receive partial message from " << conn << endl;
+            INFO << "receive partial message from " << conn << END;
         }
     }
 
