@@ -12,6 +12,7 @@
 #include <memory>
 
 #include "kingpin/core/EpollTP.h"
+#include "kingpin/core/Logger.h"
 
 using namespace std;
 
@@ -42,7 +43,7 @@ public:
             throw FatalException("bind error");
         }
         ::listen(sock, 2);
-        cout << "listening in port " << port << endl;
+        INFO << "listening in port " << port << END;
         return sock;
     }
 

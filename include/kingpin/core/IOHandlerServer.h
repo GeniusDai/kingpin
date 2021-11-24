@@ -14,13 +14,13 @@ public:
     virtual void onConnect(int conn) = 0;
 
     void _run() {
-        cout << "start thread " << this_thread::get_id() << endl;
+        INFO << "thread start" << END;
         while (true) {
             int timeout = 10;
 
             if (this->_tsd_ptr->_m.try_lock()) {
                 timeout = -1;
-                cout << "thread " << this_thread::get_id() << " get lock" << endl;
+                INFO << "thread get lock" << END;
                 this->RegisterFd(this->_tsd_ptr->_listenfd, EPOLLIN);
             }
 
@@ -31,18 +31,18 @@ public:
                 uint32_t events = this->_evs[i].events;
                 if (fd == this->_tsd_ptr->_listenfd) {
                     int conn = ::accept4(fd, NULL, NULL, SOCK_NONBLOCK);
-                    cout << "new connection " << conn << " accepted" << endl;
+                    INFO << "new connection " << conn << " accepted" << END;
                     this->RemoveFd(fd);
                     this->_tsd_ptr->_m.unlock();
-                    cout << "thread " << this_thread::get_id() << " release lock" << endl;
+                    INFO << "thread release lock" << END;
                     this->onConnect(conn);
                 } else {
                     if (events & EPOLLIN) {
-                        cout << "conn " << fd << " readable" << endl;
+                        INFO << "conn " << fd << " readable" << END;
                         this->onReadable(fd, events);
                     }
                     if (events & EPOLLOUT) {
-                        cout << "conn " << fd << " writable" << endl;
+                        INFO << "conn " << fd << " writable" << END;
                         this->onWritable(fd, events);
                     }
                 }

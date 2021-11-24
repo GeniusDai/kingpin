@@ -14,7 +14,7 @@ public:
     virtual void onInit() = 0;
 
     void _run() {
-        cout << "start thread " << this_thread::get_id() << endl;
+        INFO << "thread start" << END;
         while (true) {
             int timeout = 10;
 
@@ -24,11 +24,11 @@ public:
                 int fd = this->_evs[i].data.fd;
                 uint32_t events = this->_evs[i].events;
                 if (events & EPOLLIN) {
-                    cout << "conn " << fd << " readable" << endl;
+                    INFO << "conn " << fd << " readable" << END;
                     this->onReadable(fd, events);
                 }
                 if (events & EPOLLOUT) {
-                    cout << "conn " << fd << " writable" << endl;
+                    INFO << "conn " << fd << " writable" << END;
                     this->onWritable(fd, events);
                 }
             }
