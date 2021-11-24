@@ -23,6 +23,8 @@ public:
                 onInit();
                 this->_tsd_ptr->_m.unlock();
                 INFO << "thread release lock" << END;
+                this_thread::sleep_for(chrono::microseconds(1));
+                timeout = -1;
             }
 
             int num = epoll_wait(this->_epfd, this->_evs, MAX_SIZE, timeout);
