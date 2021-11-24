@@ -1,19 +1,5 @@
 # Chinese Chess Game
 
-About
------
-
-Implemented by *C++*
-
-Pre-requirement
----------------
-
-* Linux OS: For epoll
-
-* g++ >= 4.8.5
-
-* make >= 3.82
-
 Build and Run
 -------------
 
@@ -38,7 +24,7 @@ Default:
 Screenshot
 ----------
 
-![image](https://github.com/GeniusDai/ChineseChessGame/raw/main/pictures/PlayChess.png)
+![image](https://github.com/GeniusDai/Kingpin/raw/main/pictures/PlayChess.png)
 
 TODO
 ----
@@ -46,10 +32,6 @@ TODO
 High Priority:
 
 * Data is not multi-thread safe
-
-* Implement thread safe logger
-
-* Exception handler
 
 Low Priority:
 
