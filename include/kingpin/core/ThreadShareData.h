@@ -14,7 +14,7 @@ public:
     int _listenfd;
 };
 
-class ThreadSahreDataClient : public ThreadShareData {
+class ThreadShareDataClient : public ThreadShareData {
 public:
     mutex _m;
     unordered_set<int> _connfds;
