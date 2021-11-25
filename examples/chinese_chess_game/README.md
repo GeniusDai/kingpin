@@ -33,18 +33,8 @@ Screenshot
 TODO
 ----
 
-High Priority:
-
-* Data is not multi-thread safe
-
 Low Priority:
 
 * Validity of chess be accessed
 
-* Complie source code to dynamic libs
-
 * TCP/IP be encrypted by SSL/TLS
-
-* Implement GUI by QT
-
-* Add Unittest by gtest
