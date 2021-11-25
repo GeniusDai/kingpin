@@ -147,7 +147,7 @@ public:
         move += sep;
         int begin = -1;
         vector<int> ans;
-        for (int i = 0; i < move.size(); ++i) {
+        for (size_t i = 0; i < move.size(); ++i) {
             if (move[i] != sep) {
                 if (begin < 0) begin = i;
             } else {
@@ -169,7 +169,7 @@ public:
         cout << "->  To  : ";
         cin >> ans[2] >> ans[3];
         string data;
-        for (int i = 0; i < ans.size(); ++i) {
+        for (size_t i = 0; i < ans.size(); ++i) {
             data += to_string(ans[i]);
             if (i != ans.size() - 1) data += " ";
         }
