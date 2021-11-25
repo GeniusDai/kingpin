@@ -3,13 +3,13 @@
 
 #include "kingpin/core/IOHandler.h"
 
-template <typename _ThreadShareData>
-class IOHandlerClient : public IOHandler<_ThreadShareData> {
+template <typename _ThreadSharedData>
+class IOHandlerForClient : public IOHandler<_ThreadSharedData> {
 public:
-    IOHandlerClient(const IOHandlerClient &) = delete;
-    IOHandlerClient &operator=(const IOHandlerClient &) = delete;
+    IOHandlerForClient(const IOHandlerForClient &) = delete;
+    IOHandlerForClient &operator=(const IOHandlerForClient &) = delete;
 
-    IOHandlerClient(_ThreadShareData *tsd_ptr) : IOHandler<_ThreadShareData>(tsd_ptr) {}
+    IOHandlerForClient(_ThreadSharedData *tsd_ptr) : IOHandler<_ThreadSharedData>(tsd_ptr) {}
 
     virtual void onInit() = 0;
 
@@ -23,7 +23,6 @@ public:
                 onInit();
                 this->_tsd_ptr->_m.unlock();
                 INFO << "thread release lock" << END;
-                this_thread::sleep_for(chrono::microseconds(1));
                 timeout = -1;
             }
 
@@ -45,10 +44,10 @@ public:
     }
 
     void run() {
-        this->_t = make_shared<thread>(&IOHandlerClient::_run, this);
+        this->_t = make_shared<thread>(&IOHandlerForClient::_run, this);
     }
 
-    virtual ~IOHandlerClient() {}
+    virtual ~IOHandlerForClient() {}
 };
 
 #endif

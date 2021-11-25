@@ -4,16 +4,17 @@
 #include <chrono>
 
 #include "kingpin/core/IOHandler.h"
+#include "kingpin/utils/Utils.h"
 
 using namespace std;
 
-template <typename _ThreadShareData>
-class IOHandlerServer : public IOHandler<_ThreadShareData> {
+template <typename _ThreadSharedData>
+class IOHandlerForServer : public IOHandler<_ThreadSharedData> {
 public:
-    IOHandlerServer(const IOHandlerServer &) = delete;
-    IOHandlerServer &operator=(const IOHandlerServer &) = delete;
+    IOHandlerForServer(const IOHandlerForServer &) = delete;
+    IOHandlerForServer &operator=(const IOHandlerForServer &) = delete;
 
-    IOHandlerServer(_ThreadShareData *tsd_ptr) : IOHandler<_ThreadShareData>(tsd_ptr) {}
+    IOHandlerForServer(_ThreadSharedData *tsd_ptr) : IOHandler<_ThreadSharedData>(tsd_ptr) {}
 
     virtual void onConnect(int conn) = 0;
 
@@ -22,7 +23,7 @@ public:
         while (true) {
             int timeout = 5;
 
-            if (this->_tsd_ptr->_m.try_lock()) {
+            if (this->_tsd_ptr->_listenfd_lock.try_lock()) {
                 timeout = -1;
                 INFO << "thread get lock" << END;
                 this->RegisterFd(this->_tsd_ptr->_listenfd, EPOLLIN);
@@ -35,9 +36,12 @@ public:
                 uint32_t events = this->_evs[i].events;
                 if (fd == this->_tsd_ptr->_listenfd) {
                     int conn = ::accept4(fd, NULL, NULL, SOCK_NONBLOCK);
+                    if (conn < 0) {
+                        fatalError("syscall accept4 error");
+                    }
                     INFO << "new connection " << conn << " accepted" << END;
                     this->RemoveFd(fd);
-                    this->_tsd_ptr->_m.unlock();
+                    this->_tsd_ptr->_listenfd_lock.unlock();
                     INFO << "thread release lock" << END;
                     this->onConnect(conn);
                     this_thread::sleep_for(chrono::milliseconds(1));
@@ -56,10 +60,10 @@ public:
     }
 
     void run() {
-        this->_t = make_shared<thread>(&IOHandlerServer::_run, this);
+        this->_t = make_shared<thread>(&IOHandlerForServer::_run, this);
     }
 
-    virtual ~IOHandlerServer() {}
+    virtual ~IOHandlerForServer() {}
 };
 
 #endif

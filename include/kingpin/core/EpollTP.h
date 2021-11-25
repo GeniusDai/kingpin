@@ -8,17 +8,17 @@
 #include "kingpin/core/IOHandler.h"
 
 template <
-    template<typename _ThreadShareData> class _IOHandler,
-    typename _ThreadShareData
+    template<typename _ThreadSharedData> class _IOHandler,
+    typename _ThreadSharedData
 >
 class EpollTP final {
-    vector<shared_ptr<_IOHandler<_ThreadShareData> > > _handlers;
+    vector<shared_ptr<_IOHandler<_ThreadSharedData> > > _handlers;
     int _thrNum;
-    _ThreadShareData *_tsd_ptr;
+    _ThreadSharedData *_tsd_ptr;
 public:
-    EpollTP(int thrNum, _ThreadShareData *tsd_ptr) : _thrNum(thrNum), _tsd_ptr(tsd_ptr) {
+    EpollTP(int thrNum, _ThreadSharedData *tsd_ptr) : _thrNum(thrNum), _tsd_ptr(tsd_ptr) {
         for (int i = 0; i < thrNum; ++i) {
-            _handlers.emplace_back(make_shared<_IOHandler<_ThreadShareData> >(_tsd_ptr));
+            _handlers.emplace_back(make_shared<_IOHandler<_ThreadSharedData> >(_tsd_ptr));
         }
     }
 

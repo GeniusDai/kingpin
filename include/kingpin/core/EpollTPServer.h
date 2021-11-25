@@ -16,19 +16,19 @@
 
 using namespace std;
 
-const int LISTEN_NUM = 10;
+const int LISTEN_NUM = 1024;
 
 template<
-    template<typename _ThreadShareData> class _IOHandler,
-    typename _ThreadShareData
+    template<typename _ThreadSharedData> class _IOHandler,
+    typename _ThreadSharedData
 >
 class EpollTPServer final {
 public:
-    shared_ptr<EpollTP<_IOHandler, _ThreadShareData> > _tp;
+    shared_ptr<EpollTP<_IOHandler, _ThreadSharedData> > _tp;
 
-    EpollTPServer(int thrNum, int port, _ThreadShareData *tsd_ptr) {
+    EpollTPServer(int thrNum, int port, _ThreadSharedData *tsd_ptr) {
         tsd_ptr->_listenfd = _listen(port);
-        _tp = make_shared<EpollTP<_IOHandler, _ThreadShareData> >(thrNum, tsd_ptr);
+        _tp = make_shared<EpollTP<_IOHandler, _ThreadSharedData> >(thrNum, tsd_ptr);
     }
 
     int _listen(int port) {

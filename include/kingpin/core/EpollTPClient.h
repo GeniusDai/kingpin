@@ -8,15 +8,15 @@ using namespace std;
 #include "kingpin/core/EpollTP.h"
 
 template <
-    template<typename _ThreadShareData> class _IOHandler,
-    typename _ThreadShareData
+    template<typename _ThreadSharedData> class _IOHandler,
+    typename _ThreadSharedData
 >
 class EpollTPClient final {
 public:
-    shared_ptr<EpollTP<_IOHandler, _ThreadShareData> > _tp;
+    shared_ptr<EpollTP<_IOHandler, _ThreadSharedData> > _tp;
 
-    EpollTPClient(int thrNum, _ThreadShareData *tsd_ptr) {
-        _tp = make_shared<EpollTP<_IOHandler, _ThreadShareData> >(thrNum, tsd_ptr);
+    EpollTPClient(int thrNum, _ThreadSharedData *tsd_ptr) {
+        _tp = make_shared<EpollTP<_IOHandler, _ThreadSharedData> >(thrNum, tsd_ptr);
     }
 
     void run() {
