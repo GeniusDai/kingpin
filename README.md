@@ -30,7 +30,7 @@ core:
 
 * EpollTP.h: Thread pool, initialized by multi-thread shared data.
 
-* Logger.h: Multi-thread safe logger, use backend thread, will end elegantly in the destruction.
+* Logger.h: Multi-thread safe logger, using backend thread for asynchrous output, line buffered.
 
 # Todo
 
