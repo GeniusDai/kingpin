@@ -11,27 +11,29 @@
 #include <unordered_set>
 
 #include "kingpin/core/EpollTPServer.h"
-#include "kingpin/core/IOHandlerServer.h"
-#include "kingpin/core/ThreadShareData.h"
+#include "kingpin/core/IOHandlerForServer.h"
+#include "kingpin/core/ThreadSharedData.h"
 #include "kingpin/core/Logger.h"
 
 using namespace std;
 
-class ChessGameShareData : public ThreadShareDataServer {
+class ChessGameShareData : public ThreadSharedDataServer {
 public:
+    mutex _m;
     unordered_map<int, int> match;
     unordered_set<int> single;
     unordered_map<int, pair<unique_ptr<char []>, int> > message;
 };
 
 template <typename ChessGameShareData>
-class ChessGameIOHandler : public IOHandlerServer<ChessGameShareData> {
+class ChessGameIOHandler : public IOHandlerForServer<ChessGameShareData> {
     static const int _msgBufferSize = 100;
     const char *initMsg = "0 0 0 0\n";
 public:
-    ChessGameIOHandler(ChessGameShareData *tsd_ptr) : IOHandlerServer<ChessGameShareData>(tsd_ptr) {}
+    ChessGameIOHandler(ChessGameShareData *tsd_ptr) : IOHandlerForServer<ChessGameShareData>(tsd_ptr) {}
 
     void onConnect(int conn) {
+        unique_lock<mutex> lg(this->_tsd_ptr->_m);
         this->_tsd_ptr->message[conn] = make_pair(unique_ptr<char []>(new char[_msgBufferSize]), 0);
         if (this->_tsd_ptr->single.empty()) {
             this->_tsd_ptr->single.insert(conn);
@@ -66,8 +68,11 @@ public:
     }
 
     void onReadable(int conn, uint32_t events) {
+        unique_lock<mutex> lg(this->_tsd_ptr->_m);
         char buf[100];
+        ::memset(buf, 0, 100);
         int len = read(conn, buf, 100);
+        INFO << "read from " << conn << " " << buf << END;
         if (len != 0) {
             appendOrSendMessage(conn, buf, len);
         }
