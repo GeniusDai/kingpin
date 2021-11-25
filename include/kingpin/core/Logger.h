@@ -20,7 +20,7 @@ class Logger final {
     int _level;
 
     static const int _buffer_size = 5 * 1024 * 1024;
-    shared_ptr<char[]> _buffer;
+    shared_ptr<char> _buffer;
     int _curr = 0;
 
     recursive_mutex _m;
@@ -38,7 +38,7 @@ public:
 
     Logger(int level) : _level(level) {
         if (_level != 1 && _level != 2) return;
-        _buffer = shared_ptr<char[]>(new char[_buffer_size]);
+        _buffer = shared_ptr<char>(new char[_buffer_size]);
         ::memset(static_cast<void *>(_buffer.get()), 0, sizeof(char)*_buffer_size);
         _thr_ptr = make_shared<thread>(&Logger::_run, this);
     }
@@ -59,7 +59,7 @@ public:
         if (this->_flush) _write_debug();
         this->_flush = false;
 
-        ::sprintf(static_cast<char *>(_buffer.get()) + _curr, "%s", str);
+        ::sprintf(_buffer.get() + _curr, "%s", str);
         _curr += ::strlen(str);
         return *this;
     }
@@ -67,7 +67,7 @@ public:
     // Flush the stdout/stderr
     Logger &operator<<(const Logger &) {
 
-        ::sprintf(static_cast<char *>(_buffer.get()) + _curr, "\n");
+        ::sprintf(_buffer.get() + _curr, "\n");
         _curr += 1;
 
         // Pay attention while loop may cause race condition here
@@ -83,12 +83,11 @@ public:
     }
 
     void _write_head() {
-        const char *str;
+        const char *str = "- [INFO] ";
         assert(_level == 1 || _level == 2);
-        if (_level == 1) str = static_cast<char *>("- [INFO] ");
-        else str = static_cast<char *>("- [ERROR] ");
+        if (_level == 2) str = "- [ERROR] ";
 
-        ::sprintf(static_cast<char *>(_buffer.get()) + _curr, "%s", str);
+        ::sprintf(_buffer.get() + _curr, "%s", str);
         _curr += strlen(str);
     }
 
@@ -98,9 +97,9 @@ public:
         if (t == -1) throw FatalException("get time failed");
         const char *str = ctime(&t);
 
-        ::sprintf(static_cast<char *>(_buffer.get()) + _curr, "[%s", str);
+        ::sprintf(_buffer.get() + _curr, "[%s", str);
         _curr += strlen(str) + 0;   // to rewrite newline
-        ::sprintf(static_cast<char *>(_buffer.get()) + _curr, "] ");
+        ::sprintf((_buffer.get()) + _curr, "] ");
         _curr += strlen(str) + 2;
     }
 
@@ -109,7 +108,7 @@ public:
         ss << std::this_thread::get_id();
         const char *str = ss.str().c_str();
 
-        ::sprintf(static_cast<char *>(_buffer.get()) + _curr, "[TID %s] ", str);
+        ::sprintf(_buffer.get() + _curr, "[TID %s] ", str);
         _curr += strlen(str) + 7;
     }
 
@@ -130,7 +129,7 @@ public:
                     break;
                 }
                 _curr = 0;
-                ::memset(static_cast<void *>(_buffer.get()), 0, sizeof(char)*_buffer_size);
+                ::memset(_buffer.get(), 0, sizeof(char)*_buffer_size);
                 assert(_flush);
             }
         }
