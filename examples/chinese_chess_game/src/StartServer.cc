@@ -13,6 +13,7 @@
 #include "kingpin/core/EpollTPServer.h"
 #include "kingpin/core/IOHandlerForServer.h"
 #include "kingpin/core/ThreadSharedData.h"
+#include "kingpin/core/Exception.h"
 #include "kingpin/core/Logger.h"
 
 using namespace std;
@@ -30,11 +31,13 @@ class ChessGameIOHandler : public IOHandlerForServer<ChessGameShareData> {
     static const int _msgBufferSize = 100;
     const char *initMsg = "0 0 0 0\n";
 public:
-    ChessGameIOHandler(ChessGameShareData *tsd_ptr) : IOHandlerForServer<ChessGameShareData>(tsd_ptr) {}
+    ChessGameIOHandler(ChessGameShareData *tsd_ptr) :
+        IOHandlerForServer<ChessGameShareData>(tsd_ptr) {}
 
     void onConnect(int conn) {
         unique_lock<mutex> lg(this->_tsd_ptr->_m);
-        this->_tsd_ptr->message[conn] = make_pair(unique_ptr<char []>(new char[_msgBufferSize]), 0);
+        this->_tsd_ptr->message[conn] = make_pair(
+            unique_ptr<char []>(new char[_msgBufferSize]), 0);
         if (this->_tsd_ptr->single.empty()) {
             this->_tsd_ptr->single.insert(conn);
             INFO << "single client " << conn << END;
@@ -44,8 +47,8 @@ public:
             this->_tsd_ptr->single.erase(iter);
             this->_tsd_ptr->match[oppo] = conn;
             this->_tsd_ptr->match[conn] = oppo;
-            write(oppo, initMsg, strlen(initMsg));
-            INFO << "match client " << conn << "&" << oppo << END;
+            ::write(oppo, initMsg, strlen(initMsg));
+            INFO << "match client " << conn << " & " << oppo << END;
         }
         this->RegisterFd(conn, EPOLLIN | EPOLLRDHUP);
     }
@@ -85,7 +88,7 @@ public:
     void appendOrSendMessage(int conn, char *buf, int len) {
         int curr = this->_tsd_ptr->message[conn].second;
         if (len + curr >= _msgBufferSize) {
-            throw "buffer overflow error";
+            throw FatalException("buffer overflow error");
         }
         for (int i = 0; i < len; ++i) {
             this->_tsd_ptr->message[conn].first[curr+i] = buf[i];
@@ -93,7 +96,9 @@ public:
         this->_tsd_ptr->message[conn].second = curr + len;
         if (this->_tsd_ptr->message[conn].first[curr+len-1] == '\n') {
             INFO << "receive message from " << conn << END;
-            ::write(this->_tsd_ptr->match[conn], this->_tsd_ptr->message[conn].first.get(), this->_tsd_ptr->message[conn].second);
+            ::write(this->_tsd_ptr->match[conn],
+                this->_tsd_ptr->message[conn].first.get(),
+                this->_tsd_ptr->message[conn].second);
             this->_tsd_ptr->message[conn].second = 0;
         } else {
             INFO << "receive partial message from " << conn << END;

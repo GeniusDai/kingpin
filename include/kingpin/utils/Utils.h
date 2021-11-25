@@ -4,12 +4,12 @@
 #include "kingpin/core/Exception.h"
 
 void fatalError(const char *str) {
-    perror(str);
+    ::perror(str);
     throw FatalException(str);
 }
 
 void nonFatalError(const char *str) {
-    perror(str);
+    ::perror(str);
     throw NonFatalException(str);
 }
 
