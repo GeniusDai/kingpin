@@ -27,3 +27,6 @@ run-server:
 
 run-client:
 	$(BIN)/StartClient
+
+run-test:
+	$(BIN)/StartTest
