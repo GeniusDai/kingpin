@@ -23,7 +23,7 @@ public:
     mutex _m;
     unordered_map<int, int> match;
     unordered_set<int> single;
-    unordered_map<int, pair<unique_ptr<char []>, int> > message;
+    unordered_map<int, pair<unique_ptr<char>, int> > message;
 };
 
 template <typename ChessGameShareData>
@@ -37,7 +37,7 @@ public:
     void onConnect(int conn) {
         unique_lock<mutex> lg(this->_tsd_ptr->_m);
         this->_tsd_ptr->message[conn] = make_pair(
-            unique_ptr<char []>(new char[_msgBufferSize]), 0);
+            unique_ptr<char>(new char[_msgBufferSize]), 0);
         if (this->_tsd_ptr->single.empty()) {
             this->_tsd_ptr->single.insert(conn);
             INFO << "single client " << conn << END;
@@ -91,10 +91,10 @@ public:
             throw FatalException("buffer overflow error");
         }
         for (int i = 0; i < len; ++i) {
-            this->_tsd_ptr->message[conn].first[curr+i] = buf[i];
+            this->_tsd_ptr->message[conn].first.get()[curr+i] = buf[i];
         }
         this->_tsd_ptr->message[conn].second = curr + len;
-        if (this->_tsd_ptr->message[conn].first[curr+len-1] == '\n') {
+        if (this->_tsd_ptr->message[conn].first.get()[curr+len-1] == '\n') {
             INFO << "receive message from " << conn << END;
             ::write(this->_tsd_ptr->match[conn],
                 this->_tsd_ptr->message[conn].first.get(),

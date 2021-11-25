@@ -4,8 +4,8 @@ SERVER = StartServer
 CLIENT = StartClient
 TEST = StartTest
 
-CXX = g++
-CXXFLAGS = -O0 -Wall -Wno-write-strings -Wno-sign-compare -std=c++11 -g -I ../../include
+CXX = /bin/g++
+CXXFLAGS = -O0 -Wall -std=c++11 -g -I ../../include
 
 LDFLAGS = -lpthread
 
