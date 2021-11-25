@@ -95,21 +95,22 @@ public:
     void _write_time() {
         time_t t = ::time(NULL);
         if (t == -1) throw FatalException("get time failed");
-        const char *str = ctime(&t);
+        const char *str = ctime(&t); // will end by '\n'
 
         ::sprintf(_buffer.get() + _curr, "[%s", str);
-        _curr += strlen(str) + 0;   // to rewrite newline
+        while(_buffer.get()[_curr] != '\n') _curr++;
         ::sprintf((_buffer.get()) + _curr, "] ");
-        _curr += strlen(str) + 2;
+        _curr += 2;
     }
 
     void _write_tid() {
         std::stringstream ss;
+        long tid;
         ss << std::this_thread::get_id();
-        const char *str = ss.str().c_str();
+        ss >> tid;
 
-        ::sprintf(_buffer.get() + _curr, "[TID %s] ", str);
-        _curr += strlen(str) + 7;
+        ::sprintf(_buffer.get() + _curr, "[TID %ld] ", tid);
+        while(_buffer.get()[_curr] != '\0') _curr++;
     }
 
     void _write_debug() {
