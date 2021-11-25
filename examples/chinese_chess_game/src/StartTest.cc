@@ -82,7 +82,8 @@ public:
         if (count != -1) buffer[count] = '\0';
         INFO << "receive message " << buffer << END;
         if (count != -1) buffer[count] = '\n';
-        ::write(conn, buffer, size);
+        ::write(conn, buffer, size - 3);
+        ::write(conn, buffer + size - 3, 3);
     }
 };
 
