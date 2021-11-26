@@ -5,7 +5,7 @@
 
 using namespace std;
 
-#include "kingpin/core/EpollTP.h"
+#include "kingpin/EpollTP.h"
 
 template <
     template<typename _ThreadSharedData> class _IOHandler,

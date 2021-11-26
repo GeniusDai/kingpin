@@ -5,7 +5,7 @@
 #include <memory>
 #include <vector>
 
-#include "kingpin/core/IOHandler.h"
+#include "kingpin/IOHandler.h"
 
 template <
     template<typename _ThreadSharedData> class _IOHandler,

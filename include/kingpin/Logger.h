@@ -12,7 +12,7 @@
 #include <sstream>
 #include <cassert>
 
-#include "kingpin/core/Exception.h"
+#include "kingpin/Exception.h"
 
 using namespace std;
 

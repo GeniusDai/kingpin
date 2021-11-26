@@ -5,11 +5,11 @@
 #include <fcntl.h>
 #include <unistd.h>
 
-#include "kingpin/core/EpollTPClient.h"
-#include "kingpin/core/IOHandlerForClient.h"
-#include "kingpin/core/ThreadSharedData.h"
-#include "kingpin/core/Logger.h"
-#include "kingpin/utils/Utils.h"
+#include "kingpin/EpollTPClient.h"
+#include "kingpin/IOHandlerForClient.h"
+#include "kingpin/ThreadSharedData.h"
+#include "kingpin/Logger.h"
+#include "kingpin/Utils.h"
 
 using namespace std;
 

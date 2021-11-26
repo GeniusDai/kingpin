@@ -1,7 +1,7 @@
 #ifndef _UTILS_H_1_
 #define _UTILS_H_1_
 
-#include "kingpin/core/Exception.h"
+#include "kingpin/Exception.h"
 
 void fatalError(const char *str) {
     ::perror(str);

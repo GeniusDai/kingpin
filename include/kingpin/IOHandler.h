@@ -11,9 +11,9 @@
 #include <thread>
 #include <sstream>
 
-#include "kingpin/core/Exception.h"
-#include "kingpin/core/Logger.h"
-#include "kingpin/utils/Utils.h"
+#include "kingpin/Exception.h"
+#include "kingpin/Logger.h"
+#include "kingpin/Utils.h"
 
 using namespace std;
 

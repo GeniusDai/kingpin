@@ -6,7 +6,7 @@
 #include <thread>
 #include <ctime>
 
-#include "kingpin/core/Logger.h"
+#include "kingpin/Logger.h"
 
 using namespace std;
 

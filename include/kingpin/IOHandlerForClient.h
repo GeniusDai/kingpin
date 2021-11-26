@@ -1,7 +1,7 @@
 #ifndef __IOHANDLER_CLIENT_H
 #define __IOHANDLER_CLIENT_H
 
-#include "kingpin/core/IOHandler.h"
+#include "kingpin/IOHandler.h"
 
 template <typename _ThreadSharedData>
 class IOHandlerForClient : public IOHandler<_ThreadSharedData> {

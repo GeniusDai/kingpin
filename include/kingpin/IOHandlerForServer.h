@@ -3,8 +3,8 @@
 
 #include <chrono>
 
-#include "kingpin/core/IOHandler.h"
-#include "kingpin/utils/Utils.h"
+#include "kingpin/IOHandler.h"
+#include "kingpin/Utils.h"
 
 using namespace std;
 

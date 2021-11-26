@@ -10,11 +10,11 @@
 #include <unordered_map>
 #include <unordered_set>
 
-#include "kingpin/core/EpollTPServer.h"
-#include "kingpin/core/IOHandlerForServer.h"
-#include "kingpin/core/ThreadSharedData.h"
-#include "kingpin/core/Exception.h"
-#include "kingpin/core/Logger.h"
+#include "kingpin/EpollTPServer.h"
+#include "kingpin/IOHandlerForServer.h"
+#include "kingpin/ThreadSharedData.h"
+#include "kingpin/Exception.h"
+#include "kingpin/Logger.h"
 
 using namespace std;
 

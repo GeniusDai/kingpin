@@ -11,8 +11,8 @@
 #include <iostream>
 #include <memory>
 
-#include "kingpin/core/EpollTP.h"
-#include "kingpin/core/Logger.h"
+#include "kingpin/EpollTP.h"
+#include "kingpin/Logger.h"
 
 using namespace std;
 
