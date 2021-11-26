@@ -70,9 +70,7 @@ Procedure for the async logger:
 
 # Repository Contents
 
-Guide to kingpin header files.
-
-core:
+Guide to kingpin header files:
 
 * IOHandler.h: Virtual base class got a epoll fd, derived class shall implement run function for thread and handler functions for IO.
 
@@ -85,6 +83,8 @@ core:
 * EpollTP.h: Thread pool, initialized by multi-thread shared data.
 
 * Logger.h: Multi-thread safe logger, using backend thread for asynchrous output, line buffered.
+
+* Utils.h: Some utility functions.
 
 # Todo
 
