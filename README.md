@@ -14,6 +14,10 @@
 
 * Avoid excessive wrapper of classes and functions to get thing complecated
 
+# Design Overview
+
+![image](https://github.com/GeniusDai/kingpin/raw/dev/pictures/kingpin.png)
+
 # Repository Contents
 
 Guide to kingpin header files.
