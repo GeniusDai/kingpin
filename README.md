@@ -88,7 +88,7 @@ Guide to kingpin header files:
 
 Examples that use kingpin framework:
 
-* [chinese_chess_game](https://github.com/GeniusDai/kingpin/examples/chinese_chess_game)
+* [chinese_chess_game](https://github.com/GeniusDai/kingpin/tree/dev/examples/chinese_chess_game)
 
 # Todo List
 
