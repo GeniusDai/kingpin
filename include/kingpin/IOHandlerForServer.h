@@ -16,7 +16,7 @@ public:
 
     IOHandlerForServer(_ThreadSharedData *tsd_ptr) : IOHandler<_ThreadSharedData>(tsd_ptr) {}
 
-    virtual void onConnect(int conn) = 0;
+    virtual void onConnect(int conn) {}
 
     void _run() {
         INFO << "thread start" << END;

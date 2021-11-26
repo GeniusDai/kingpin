@@ -65,7 +65,7 @@ public:
 
     virtual void run() = 0;
 
-    virtual void onReadable(int conn, uint32_t events) = 0;
+    virtual void onReadable(int conn, uint32_t events) {}
 
     virtual void onWritable(int conn, uint32_t events) {}
 

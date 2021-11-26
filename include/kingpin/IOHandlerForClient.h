@@ -11,7 +11,7 @@ public:
 
     IOHandlerForClient(_ThreadSharedData *tsd_ptr) : IOHandler<_ThreadSharedData>(tsd_ptr) {}
 
-    virtual void onInit() = 0;
+    virtual void onInit() {}
 
     void _run() {
         INFO << "thread start" << END;
