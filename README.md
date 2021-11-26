@@ -86,6 +86,14 @@ Guide to kingpin header files:
 
 * Utils.h: Some utility functions.
 
-# Todo
+Examples that use kingpin framework:
 
-* Web crawler for demo
+* [chinese_chess_game](https://github.com/GeniusDai/kingpin/examples/chinese_chess_game)
+
+# Todo List
+
+Demo:
+
+* Web crawler
+
+* Big file download server
