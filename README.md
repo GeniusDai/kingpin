@@ -18,16 +18,6 @@
 
 ![image](https://github.com/GeniusDai/kingpin/raw/dev/pictures/kingpin.001.png)
 
-Procedure for the EpollTPClient:
-
-1. Init the connected sockets using the connect syscall.
-
-2. Register the connected sockets.
-
-3. Wait for the epoll events.
-
-4. Handle the connected sockets.
-
 Procedure for the EpollTPServer:
 
 1. Trying to get mutex from thread shared data, if it's locked, it won't block.
@@ -43,6 +33,16 @@ Procedure for the EpollTPServer:
 6. Register the connected sockets.
 
 7. Release the mutex.
+
+Procedure for the EpollTPClient:
+
+1. Init the connected sockets using the connect syscall.
+
+2. Register the connected sockets.
+
+3. Wait for the epoll events.
+
+4. Handle the connected sockets.
 
 ![image](https://github.com/GeniusDai/kingpin/raw/dev/pictures/kingpin.002.png)
 
