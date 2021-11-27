@@ -27,11 +27,11 @@ template <
 >
 class EpollTP final {
     vector<shared_ptr<_IOHandler<_ThreadSharedData> > > _handlers;
-    int _thrNum;
+    int _thr_num;
     _ThreadSharedData *_tsd_ptr;
 public:
-    EpollTP(int thrNum, _ThreadSharedData *tsd_ptr) : _thrNum(thrNum), _tsd_ptr(tsd_ptr) {
-        for (int i = 0; i < thrNum; ++i) {
+    EpollTP(int thr_num, _ThreadSharedData *tsd_ptr) : _thr_num(thr_num), _tsd_ptr(tsd_ptr) {
+        for (int i = 0; i < thr_num; ++i) {
             _handlers.emplace_back(make_shared<_IOHandler<_ThreadSharedData> >(_tsd_ptr));
         }
     }
@@ -55,8 +55,8 @@ class EpollTPClient final {
 public:
     shared_ptr<EpollTP<_IOHandler, _ThreadSharedData> > _tp;
 
-    EpollTPClient(int thrNum, _ThreadSharedData *tsd_ptr) {
-        _tp = make_shared<EpollTP<_IOHandler, _ThreadSharedData> >(thrNum, tsd_ptr);
+    EpollTPClient(int thr_num, _ThreadSharedData *tsd_ptr) {
+        _tp = make_shared<EpollTP<_IOHandler, _ThreadSharedData> >(thr_num, tsd_ptr);
     }
 
     void run() {
@@ -72,9 +72,9 @@ class EpollTPServer final {
 public:
     shared_ptr<EpollTP<_IOHandler, _ThreadSharedData> > _tp;
 
-    EpollTPServer(int thrNum, int port, _ThreadSharedData *tsd_ptr) {
+    EpollTPServer(int thr_num, int port, _ThreadSharedData *tsd_ptr) {
         tsd_ptr->_listenfd = _listen(port);
-        _tp = make_shared<EpollTP<_IOHandler, _ThreadSharedData> >(thrNum, tsd_ptr);
+        _tp = make_shared<EpollTP<_IOHandler, _ThreadSharedData> >(thr_num, tsd_ptr);
     }
 
     int _listen(int port) {
