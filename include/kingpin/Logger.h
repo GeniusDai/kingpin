@@ -13,33 +13,25 @@
 #include <cassert>
 
 #include "kingpin/Exception.h"
+#include "kingpin/Buffer.h"
 
 using namespace std;
 
 class Logger final {
     int _level;
 
-    static const int _buffer_size = 5 * 1024 * 1024;
-    shared_ptr<char> _buffer;
-    int _curr = 0;
+    Buffer _buffer;
 
     recursive_mutex _m;
     condition_variable_any _thr_cv;
     shared_ptr<thread> _thr_ptr;
     int _recur_level = 0;
-
     bool _stop = false;
-
     bool _flush = true;
 
 public:
-    bool _enable_time = true;
-    bool _enable_tid = true;
-
     Logger(int level) : _level(level) {
         if (_level != 1 && _level != 2) return;
-        _buffer = shared_ptr<char>(new char[_buffer_size]);
-        ::memset(static_cast<void *>(_buffer.get()), 0, sizeof(char)*_buffer_size);
         _thr_ptr = make_shared<thread>(&Logger::_run, this);
     }
 
@@ -59,21 +51,16 @@ public:
         if (this->_flush) _write_debug();
         this->_flush = false;
 
-        ::sprintf(_buffer.get() + _curr, "%s", str);
-        _curr += ::strlen(str);
+        _buffer.appendToBuffer(str);
         return *this;
     }
 
-    // Flush the stdout/stderr
+    // Release lock and notify cv
     Logger &operator<<(const Logger &) {
-
-        ::sprintf(_buffer.get() + _curr, "\n");
-        _curr += 1;
+        _buffer.appendToBuffer("\n");
 
         // Pay attention while loop may cause race condition here
-        for (int i = 0; i < _recur_level-1; ++i) {
-            _m.unlock();
-        }
+        for (int i = 0; i < _recur_level-1; ++i) { _m.unlock(); }
         _recur_level = 0;
         _flush = true;
         _m.unlock();
@@ -83,56 +70,46 @@ public:
     }
 
     void _write_head() {
-        const char *str = "- [INFO] ";
         assert(_level == 1 || _level == 2);
+        const char *str = "- [INFO] ";
         if (_level == 2) str = "- [ERROR] ";
-
-        ::sprintf(_buffer.get() + _curr, "%s", str);
-        _curr += strlen(str);
+        _buffer.appendToBuffer(str);
     }
 
     // Not thread safe !
     void _write_time() {
         time_t t = ::time(NULL);
         if (t == -1) throw FatalException("get time failed");
-        const char *str = ctime(&t); // will end by '\n'
-
-        ::sprintf(_buffer.get() + _curr, "[%s", str);
-        while(_buffer.get()[_curr] != '\n') _curr++;
-        ::sprintf((_buffer.get()) + _curr, "] ");
-        _curr += 2;
+        char *str = ctime(&t); // will end by '\n'
+        str[::strlen(str)-1] = '\0';
+        _buffer.appendToBuffer("[");
+        _buffer.appendToBuffer(str);
+        _buffer.appendToBuffer("] ");
     }
 
     void _write_tid() {
         std::stringstream ss;
-        long tid;
         ss << std::this_thread::get_id();
-        ss >> tid;
-
-        ::sprintf(_buffer.get() + _curr, "[TID %ld] ", tid);
-        while(_buffer.get()[_curr] != '\0') _curr++;
+        _buffer.appendToBuffer("[TID ");
+        _buffer.appendToBuffer(ss.str().c_str());
+        _buffer.appendToBuffer("] ");
     }
 
     void _write_debug() {
         _write_head();
-        if (_enable_time) _write_time();
-        if (_enable_tid) _write_tid();
+        _write_time();
+        _write_tid();
     }
 
     void _run() {
         while (true) {
-            {
-                unique_lock<recursive_mutex> lg(this->_m);
-                this->_thr_cv.wait(lg, [this]()->bool{ return this->_stop || this->_curr != 0; });
+            unique_lock<recursive_mutex> lg(this->_m);
+            this->_thr_cv.wait(lg, [this]()->bool
+                { return this->_stop || _buffer._offset != 0; });
 
-                ::write(this->_level, this->_buffer.get(), _curr);
-                if (this->_stop) {
-                    break;
-                }
-                _curr = 0;
-                ::memset(_buffer.get(), 0, sizeof(char)*_buffer_size);
-                assert(_flush);
-            }
+            _buffer.writeNioFromBuffer(this->_level);
+            if (this->_stop) { break; }
+            assert(_flush);
         }
     }
 
@@ -141,8 +118,8 @@ public:
         {
             unique_lock<recursive_mutex> lg(_m);
             _stop = true;
-            _thr_cv.notify_one();
         }
+        _thr_cv.notify_one();
         _thr_ptr->join();
     }
 };
