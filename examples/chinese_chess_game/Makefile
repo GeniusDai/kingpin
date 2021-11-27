@@ -9,7 +9,7 @@ CXXFLAGS = -O0 -Wall -std=c++11 -g -I ../../include
 
 LDFLAGS = -lpthread
 
-.PHONY: all build clean run-server run-client
+.PHONY: all build clean run-server run-client run-test
 
 all: build
 
