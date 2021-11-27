@@ -36,9 +36,7 @@ public:
 
     IOHandler(_ThreadSharedData *tsd_ptr) : _tsd_ptr(tsd_ptr) {}
 
-    void join() {
-        _t->join();
-    }
+    void join() { _t->join(); }
 
     void RegisterFd(int fd, uint32_t events) {
         if (_fd_num == MAX_SIZE) throw FatalException("too many connections!");
@@ -90,18 +88,9 @@ public:
     void _run() {
         INFO << "thread start" << END;
         while (true) {
+            onInit();
             int timeout = 10;
-
-            if (this->_tsd_ptr->_m.try_lock()) {
-                INFO << "thread get lock" << END;
-                onInit();
-                this->_tsd_ptr->_m.unlock();
-                INFO << "thread release lock" << END;
-                timeout = -1;
-            }
-
             int num = epoll_wait(this->_epfd, this->_evs, MAX_SIZE, timeout);
-
             for (int i = 0; i < num; ++i) {
                 int fd = this->_evs[i].data.fd;
                 uint32_t events = this->_evs[i].events;
@@ -117,9 +106,7 @@ public:
         }
     }
 
-    void run() {
-        this->_t = make_shared<thread>(&IOHandlerForClient::_run, this);
-    }
+    void run() { this->_t = make_shared<thread>(&IOHandlerForClient::_run, this); }
 
     virtual ~IOHandlerForClient() {}
 };
@@ -140,15 +127,12 @@ public:
         INFO << "thread start" << END;
         while (true) {
             int timeout = 5;
-
             if (this->_tsd_ptr->_listenfd_lock.try_lock()) {
                 timeout = -1;
                 INFO << "thread get lock" << END;
                 this->RegisterFd(this->_tsd_ptr->_listenfd, EPOLLIN);
             }
-
             int num = epoll_wait(this->_epfd, this->_evs, MAX_SIZE, timeout);
-
             for (int i = 0; i < num; ++i) {
                 int fd = this->_evs[i].data.fd;
                 uint32_t events = this->_evs[i].events;
@@ -177,9 +161,7 @@ public:
         }
     }
 
-    void run() {
-        this->_t = make_shared<thread>(&IOHandlerForServer::_run, this);
-    }
+    void run() { this->_t = make_shared<thread>(&IOHandlerForServer::_run, this); }
 
     virtual ~IOHandlerForServer() {}
 };
