@@ -13,12 +13,10 @@
 
 using namespace std;
 
-const int POOL_SIZE = 1000;
+const int POOL_SIZE = 100;
 
 class Data : public ThreadSharedDataClient {
 public:
-    bool _inited = false;
-    int _thr_num = 8;
     int _port = 8889;
     const char *_ip = "127.0.0.1";
 };
@@ -27,9 +25,11 @@ template <typename _Data>
 class ConcurrencyTestIOHandler : public IOHandlerForClient<_Data> {
 public:
     ConcurrencyTestIOHandler(_Data *tsd_ptr) : IOHandlerForClient<_Data>(tsd_ptr) {}
-
-    void _init_conn_pool() {
-        INFO << "intializing connection pool" << END;
+    bool _inited = false;
+    void onInit() {
+        if (_inited) return;
+        _inited = true;
+        INFO << "intializing thread" << END;
         struct sockaddr_in addr;
         memset(&addr, 0, sizeof(addr));
         addr.sin_family = AF_INET;
@@ -46,24 +46,10 @@ public:
             if (connect(sock, (struct sockaddr *)&addr, sizeof(addr)) < 0) {
                 fatalError("syscall connect error");
             }
-            this->_tsd_ptr->_connfds.insert(sock);
+            this->RegisterFd(sock, EPOLLIN | EPOLLRDHUP);
             INFO << "Initialized connection of fd " << sock << END;
         }
-        assert(POOL_SIZE == this->_tsd_ptr->_connfds.size());
-        INFO << "Finish initializing connection pool" << END;
-        this_thread::sleep_for(chrono::milliseconds(1));
-    }
-
-    void onInit() {
-        if (!this->_tsd_ptr->_inited) { _init_conn_pool(); this->_tsd_ptr->_inited = true; }
-
-        int batch = this->_tsd_ptr->_connfds.size() / this->_tsd_ptr->_thr_num + 1;
-
-        for (auto iter = this->_tsd_ptr->_connfds.begin(); iter != this->_tsd_ptr->_connfds.end() && batch--;) {
-            INFO << "Get connfd " << *iter << END;
-            this->RegisterFd(*iter, EPOLLIN | EPOLLRDHUP);
-            iter = this->_tsd_ptr->_connfds.erase(iter);
-        }
+        INFO << "Finish initializing thread" << END;
     }
 
     void onReadable(int conn, uint32_t events) {
