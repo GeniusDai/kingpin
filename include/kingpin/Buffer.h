@@ -30,6 +30,7 @@ public:
     ~Buffer() { delete _buffer; }
 
     void resize(int cap) {
+        if (_cap >= cap) return;
         while(_cap < cap) { _cap *= 2; }
         char *nbuffer = new char[_cap];
         ::memset(nbuffer, 0, _cap);
@@ -75,6 +76,13 @@ public:
         resize(_offset + str_len);
         for (int i = 0; i < str_len; ++i) { _buffer[_offset+i] = str[i]; }
         _offset += str_len;
+    }
+
+    void stripEnd(char end) {
+        for (int i = _offset-1; i >= 0; --i) {
+            if (_buffer[i] == end) { _buffer[i] = '\0'; _offset--; }
+            else break;
+        }
     }
 
 };
