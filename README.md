@@ -74,10 +74,6 @@ Guide to kingpin header files:
 
 * IOHandler.h: Virtual base class got a epoll fd, derived class shall implement run function for thread and handler functions for IO.
 
-* IOHandlerForServer.h: Virtual base class inherited from IOHandler, register read event for listening socket and wait for read/write IO.
-
-* IOHandlerForClient.h: Virtual base class inherited from IOHandler, compete for connection pool and wait for read/write IO.
-
 * ThreadSharedData.h: Data shared among threads.
 
 * EpollTP.h: Thread pool, initialized by multi-thread shared data.
