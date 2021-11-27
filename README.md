@@ -18,53 +18,53 @@
 
 ![image](https://github.com/GeniusDai/kingpin/raw/dev/pictures/kingpin.001.png)
 
-Procedure for the EpollTPServer:
+EpollTPServer:
 
-1. Trying to get mutex from thread shared data, if it's locked, it won't block.
+    1. Trying to get mutex from thread shared data, if it's locked, it won't block.
 
-2. If got the mutex, IO thread register EPOLLIN for the listening socket.
+    2. If got the mutex, IO thread register EPOLLIN for the listening socket.
 
-3. Wait for epoll events.
+    3. Wait for epoll events.
 
-4. Handle the connected sockets.
+    4. Handle the connected sockets.
 
-5. Using the accept syscall for the listening socket to get one connected socket.
+    5. Using the accept syscall for the listening socket to get one connected socket.
 
-6. Register the connected sockets.
+    6. Register the connected sockets.
 
-7. Release the mutex.
+    7. Release the mutex.
 
-Procedure for the EpollTPClient:
+EpollTPClient:
 
-1. Init the connected sockets using the connect syscall.
+    1. Init the connected sockets using the connect syscall.
 
-2. Register the connected sockets.
+    2. Register the connected sockets.
 
-3. Wait for the epoll events.
+    3. Wait for the epoll events.
 
-4. Handle the connected sockets.
+    4. Handle the connected sockets.
 
 ![image](https://github.com/GeniusDai/kingpin/raw/dev/pictures/kingpin.002.png)
 
-Procedure for the async logger:
+Async Logger:
 
-1. Get mutex for the log buffer, if it's locked, it will block.
+    1. Get mutex for the log buffer, if it's locked, it will block.
 
-2. Write log to the buffer.
+    2. Write log to the buffer.
 
-3. Release the mutex.
+    3. Release the mutex.
 
-4. Notify the corresponding backend thread.
+    4. Notify the corresponding backend thread.
 
-5. Backend thread being waked up by the condition variable.
+    5. Backend thread being waked up by the condition variable.
 
-6. Backend thread trying to get the mutex, if it's locked, it will sleep until next time being notified.
+    6. Backend thread trying to get the mutex, if it's locked, it will sleep until next time being notified.
 
-7. If get mutex, read from the buffer.
+    7. If get mutex, read from the buffer.
 
-8. Write buffer to the corresponding fd.
+    8. Write buffer to the corresponding fd.
 
-9. Release the mutex.
+    9. Release the mutex.
 
 # Repository Contents
 
