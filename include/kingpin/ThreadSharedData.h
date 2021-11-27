@@ -21,8 +21,6 @@ public:
 
 class ThreadSharedDataClient : public ThreadSharedData {
 public:
-    mutex _m;
-    unordered_set<int> _connfds;
     virtual ~ThreadSharedDataClient() {}
 };
 
