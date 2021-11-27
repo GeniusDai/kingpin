@@ -33,7 +33,6 @@ public:
 
     IOHandler(const IOHandler &) = delete;
     IOHandler &operator=(const IOHandler &) = delete;
-
     IOHandler(_ThreadSharedData *tsd_ptr) : _tsd_ptr(tsd_ptr) {}
 
     void join() { _t->join(); }
@@ -80,10 +79,7 @@ class IOHandlerForClient : public IOHandler<_ThreadSharedData> {
 public:
     IOHandlerForClient(const IOHandlerForClient &) = delete;
     IOHandlerForClient &operator=(const IOHandlerForClient &) = delete;
-
     IOHandlerForClient(_ThreadSharedData *tsd_ptr) : IOHandler<_ThreadSharedData>(tsd_ptr) {}
-
-    virtual void onInit() {}
 
     void _run() {
         INFO << "thread start" << END;
@@ -108,6 +104,8 @@ public:
 
     void run() { this->_t = make_shared<thread>(&IOHandlerForClient::_run, this); }
 
+    virtual void onInit() {}
+
     virtual ~IOHandlerForClient() {}
 };
 
@@ -118,10 +116,7 @@ class IOHandlerForServer : public IOHandler<_ThreadSharedData> {
 public:
     IOHandlerForServer(const IOHandlerForServer &) = delete;
     IOHandlerForServer &operator=(const IOHandlerForServer &) = delete;
-
     IOHandlerForServer(_ThreadSharedData *tsd_ptr) : IOHandler<_ThreadSharedData>(tsd_ptr) {}
-
-    virtual void onConnect(int conn) {}
 
     void _run() {
         INFO << "thread start" << END;
@@ -162,6 +157,8 @@ public:
     }
 
     void run() { this->_t = make_shared<thread>(&IOHandlerForServer::_run, this); }
+
+    virtual void onConnect(int conn) {}
 
     virtual ~IOHandlerForServer() {}
 };
