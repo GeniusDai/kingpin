@@ -24,9 +24,9 @@ public:
     int _delay = 1;
 
     Buffer() : Buffer(DEFAULT_CAP) {}
-
     Buffer(int cap) : _cap(cap) { _buffer = new char[_cap]; ::memset(_buffer, 0, _cap); }
-
+    Buffer &operator=(const Buffer &) = delete;
+    Buffer(const Buffer &) = delete;
     ~Buffer() { delete _buffer; }
 
     void resize(int cap) {
