@@ -10,6 +10,7 @@
 #include "kingpin/ThreadSharedData.h"
 #include "kingpin/Logger.h"
 #include "kingpin/Utils.h"
+#include "kingpin/Buffer.h"
 
 using namespace std;
 
@@ -53,23 +54,17 @@ public:
     }
 
     void onReadable(int conn, uint32_t events) {
-        char buffer[100];
-        memset(buffer, 0, 100);
-        while (::read(conn, buffer, 100) == 0) {
+        Buffer buffer;
+        buffer.readNioToBuffer(conn, 100);
+        ::write(conn, buffer._buffer, buffer._offset);
+        if (events & EPOLLRDHUP) {
+            onPassivelyClosed(conn);
+        }
+    }
 
-        }
-        int count = -1;
-        int size = -1;
-        int i = 0;
-        for (; i < 100 && buffer[i] != '\0'; ++i) {
-            if (buffer[i] == '\n') count = i;
-        }
-        size = i;
-        if (count != -1) buffer[count] = '\0';
-        INFO << "receive message " << buffer << END;
-        if (count != -1) buffer[count] = '\n';
-        ::write(conn, buffer, size - 3);
-        ::write(conn, buffer + size - 3, 3);
+    void onPassivelyClosed(int conn) {
+        ::close(conn);
+        INFO << "server closed socket " << conn << END;
     }
 };
 
