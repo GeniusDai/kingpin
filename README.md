@@ -2,13 +2,13 @@
 
 # Features
 
-* Per epoll per thread, one socket handled by one thread
+* Per epoll per thread and one connected socket handled only by one thread
 
 * Thread pool and IO multiplexing for both server's and client's concurrency
 
-* High performance server using multi-threads competing for mutex to register read event for listening socket
+* High performance server, multi-threads competing for mutex to register read event for listening socket and handle connected socket
 
-* High performance client using multi-threads competing for mutex to get file descriptor from connection pool
+* High performance client using multi-threads init and handle connected socket
 
 * High performance asynchronous logger using backend thread to print debug info with timestamp and tid
 
@@ -20,31 +20,29 @@
 
 Procedure for the EpollTPClient:
 
-1. Get mutex from thread shared data, if it's locked, it will block.
+1. Init the connected sockets using the connect syscall.
 
-2. Update the connection pool, could add or remove the connected sockets.
+2. Register the connected sockets.
 
-3. Release the mutex.
+3. Wait for the epoll events.
 
-4. Register EPOLLIN/EPOLLOUT for the connected sockets.
-
-5. Wait for epoll events.
-
-6. Handle the connected sockets.
+4. Handle the connected sockets.
 
 Procedure for the EpollTPServer:
 
 1. Trying to get mutex from thread shared data, if it's locked, it won't block.
 
-2. If got the mutex, IO thread register  EPOLLIN for the listening socket.
+2. If got the mutex, IO thread register EPOLLIN for the listening socket.
 
 3. Wait for epoll events.
 
 4. Handle the connected sockets.
 
-5. Accept syscall for the listening socket.
+5. Using the accept syscall for the listening socket to get one connected socket.
 
-6. Release the mutex.
+6. Register the connected sockets.
+
+7. Release the mutex.
 
 ![image](https://github.com/GeniusDai/kingpin/raw/dev/pictures/kingpin.002.png)
 
