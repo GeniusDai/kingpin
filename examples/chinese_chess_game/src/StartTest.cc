@@ -6,7 +6,7 @@
 #include <unistd.h>
 
 #include "kingpin/EpollTP.h"
-#include "kingpin/IOHandlerForClient.h"
+#include "kingpin/IOHandler.h"
 #include "kingpin/ThreadSharedData.h"
 #include "kingpin/Logger.h"
 #include "kingpin/Utils.h"

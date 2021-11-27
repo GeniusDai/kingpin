@@ -11,7 +11,7 @@
 #include <unordered_set>
 
 #include "kingpin/EpollTP.h"
-#include "kingpin/IOHandlerForServer.h"
+#include "kingpin/IOHandler.h"
 #include "kingpin/ThreadSharedData.h"
 #include "kingpin/Exception.h"
 #include "kingpin/Logger.h"
