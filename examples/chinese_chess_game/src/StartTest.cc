@@ -5,7 +5,7 @@
 #include <fcntl.h>
 #include <unistd.h>
 
-#include "kingpin/EpollTPClient.h"
+#include "kingpin/EpollTP.h"
 #include "kingpin/IOHandlerForClient.h"
 #include "kingpin/ThreadSharedData.h"
 #include "kingpin/Logger.h"

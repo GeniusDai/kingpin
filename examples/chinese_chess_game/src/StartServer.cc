@@ -10,7 +10,7 @@
 #include <unordered_map>
 #include <unordered_set>
 
-#include "kingpin/EpollTPServer.h"
+#include "kingpin/EpollTP.h"
 #include "kingpin/IOHandlerForServer.h"
 #include "kingpin/ThreadSharedData.h"
 #include "kingpin/Exception.h"
@@ -29,7 +29,7 @@ public:
 template <typename ChessGameShareData>
 class ChessGameIOHandler : public IOHandlerForServer<ChessGameShareData> {
     static const int _msgBufferSize = 100;
-    const char *initMsg = "0 0 0 0\n";
+    static constexpr const char *initMsg = "0 0 0 0\n";
 public:
     ChessGameIOHandler(ChessGameShareData *tsd_ptr) :
         IOHandlerForServer<ChessGameShareData>(tsd_ptr) {}
