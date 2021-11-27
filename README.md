@@ -58,7 +58,7 @@ Async Logger:
 
     5. Backend thread being waked up by the condition variable.
 
-    6. Backend thread trying to get the mutex, if it's locked, it will sleep until next time being notified.
+    6. Backend thread trying to get the mutex, if it's locked, sleep until next time being notified.
 
     7. If get mutex, read from the buffer.
 
