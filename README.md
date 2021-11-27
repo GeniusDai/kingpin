@@ -12,7 +12,7 @@
 
 * High performance asynchronous logger using backend thread to print debug info with timestamp and tid
 
-* Avoid excessive wrapper of classes and functions to get thing complecated
+* Avoid excessive wrapper of classes and functions to get things complecated
 
 # Design Overview
 
@@ -79,6 +79,8 @@ Guide to kingpin header files:
 * EpollTP.h: Thread pool, initialized by multi-thread shared data.
 
 * Logger.h: Multi-thread safe logger, using backend thread for asynchrous output, line buffered.
+
+* Buffer.h: Buffer preallocated on heap, NOT thread safe.
 
 * Utils.h: Some utility functions.
 
