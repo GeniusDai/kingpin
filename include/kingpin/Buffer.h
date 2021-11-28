@@ -53,7 +53,7 @@ public:
             }
             total += curr;
             _offset += curr;
-            if (curr == 0) { throw NonFatalException("oppo closed"); }
+            if (curr == 0) { throw NonFatalException("EOF encountered"); }
             if (total == len) { break; }
         }
 
@@ -79,7 +79,7 @@ public:
     }
 
     void writeNioFromBuffer(int fd) {
-        while (true) {
+        while (_start != _offset) {
             int curr = ::write(fd, _buffer + _start, _offset - _start);
             if (curr == -1) {
                 if (errno == EINTR) { continue; }
@@ -90,7 +90,6 @@ public:
             }
             assert (curr != 0);
             _start += curr;
-            if (_start == _offset) { break; }
         }
         ::memset(_buffer, 0, _cap);
         _start = 0;
