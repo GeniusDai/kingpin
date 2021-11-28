@@ -86,10 +86,4 @@ Examples that use kingpin framework:
 
 * [chinese_chess_game](https://github.com/GeniusDai/kingpin/tree/dev/examples/chinese_chess_game)
 
-# Todo List
-
-Demo:
-
-* Web crawler
-
-* Big file download server
+* [big_file_transfer](https://github.com/GeniusDai/kingpin/tree/dev/examples/big_file_transfer)
