@@ -16,6 +16,7 @@
 
 #include "kingpin/Logger.h"
 #include "kingpin/IOHandler.h"
+#include "kingpin/Utils.h"
 
 using namespace std;
 
@@ -73,26 +74,8 @@ public:
     shared_ptr<EpollTP<_IOHandler, _ThreadSharedData> > _tp;
 
     EpollTPServer(int thr_num, int port, _ThreadSharedData *tsd_ptr) {
-        tsd_ptr->_listenfd = _listen(port);
+        tsd_ptr->_listenfd = initListen(port, LISTEN_NUM);
         _tp = make_shared<EpollTP<_IOHandler, _ThreadSharedData> >(thr_num, tsd_ptr);
-    }
-
-    int _listen(int port) {
-        int sock = ::socket(AF_INET, SOCK_STREAM, 0);
-        if (sock < 0) {
-            throw FatalException("socket error");
-        }
-        struct sockaddr_in addr;
-        ::bzero(&addr, sizeof(addr));
-        addr.sin_family = AF_INET;
-        addr.sin_port = htons(port);
-        addr.sin_addr.s_addr = htonl(INADDR_ANY);
-        if (::bind(sock, (sockaddr *)&addr, sizeof(addr)) < 0) {
-            throw FatalException("bind error");
-        }
-        ::listen(sock, LISTEN_NUM);
-        INFO << "listening in port " << port << END;
-        return sock;
     }
 
     void run() {

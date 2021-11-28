@@ -14,21 +14,10 @@ class Client {
 public:
     static const int _port = 8890;
     static const int _step = 1024 * 10;
-    static constexpr char *const _ip = "127.0.0.1";
+    static const char *const _ip;
 
     void start() {
-        int sock = ::socket(AF_INET, SOCK_STREAM, 0);
-        if (sock == -1) {
-            throw "socket error";
-        }
-        struct sockaddr_in addr;
-        ::memset(&addr, 0, sizeof(addr));
-        addr.sin_port = htons(_port);
-        addr.sin_family = AF_INET;
-        inet_pton(AF_INET, _ip, &addr.sin_addr.s_addr);
-        if (::connect(sock, (struct sockaddr *)&addr, sizeof(addr)) < 0) {
-            throw "connect error";
-        }
+        int sock = initConnect(_ip, _port);
         const char *str = "/tmp";
         ::write(sock, str, strlen(str));
         sleep(10);
@@ -53,6 +42,8 @@ public:
         ::close(fd);
     }
 };
+
+const char *const Client::_ip = "127.0.0.1";
 
 int main() {
     Client client;
