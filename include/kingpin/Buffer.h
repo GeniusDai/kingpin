@@ -49,11 +49,11 @@ public:
             if (curr == -1) {
                 if (errno == EINTR) { continue; }
                 else if (errno == EAGAIN || errno == EWOULDBLOCK) { break; }
-                else fatalError("syscall read failed");
+                else fatalError("syscall read error");
             }
             total += curr;
             _offset += curr;
-            if (curr == 0) { throw NonFatalException("syscall read error due to oppo closed"); }
+            if (curr == 0) { throw NonFatalException("oppo closed"); }
             if (total == len) { break; }
         }
 
@@ -84,7 +84,7 @@ public:
             if (curr == -1) {
                 if (errno == EINTR) { continue; }
                 else if (errno == EPIPE || errno == ECONNRESET)
-                    { nonFatalError("syscall write failed due to oppo closed"); }
+                    { nonFatalError("syscall write error: oppo closed"); }
                 else if (errno == EAGAIN || errno == EWOULDBLOCK)
                     { this_thread::sleep_for(chrono::milliseconds(_delay)); }
             }
