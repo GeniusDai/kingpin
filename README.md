@@ -66,6 +66,18 @@ Async Logger:
 
     9. Release the mutex.
 
+# Prerequirement
+
+* Linux OS
+
+* make >= 3.82
+
+* g++ >= 4.8.5
+
+* c++11 or higher
+
+* link posix thread lib
+
 # Header Files
 
 * IOHandler.h: Virtual base class got a epoll fd, derived class shall implement run function for thread and handler functions for IO.
@@ -80,16 +92,8 @@ Async Logger:
 
 * Utils.h: Some utility functions.
 
-# Prerequirement
-
-    Linux OS
-
-    g++ >= 4.8.5
-
-    make >= 3.82
-
 # Examples
 
-* [chinese_chess_game](https://github.com/GeniusDai/kingpin/tree/dev/examples/chinese_chess_game)
+* [chinese_chess_game](https://github.com/GeniusDai/kingpin/tree/dev/examples/chinese_chess_game): Chess game server and client, also implement a high concurrency test client.
 
-* [big_file_transfer](https://github.com/GeniusDai/kingpin/tree/dev/examples/big_file_transfer)
+* [big_file_transfer](https://github.com/GeniusDai/kingpin/tree/dev/examples/big_file_transfer): Big file transfer server and client, IO and exceptions are both well handled.
