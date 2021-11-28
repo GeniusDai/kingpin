@@ -43,8 +43,8 @@ public:
     }
 };
 
-const int _port = 8890;
-const int _step = 1024 * 10;
+const int Client::_port = 8890;
+const int Client::_step = 1024 * 10;
 const char *const Client::_ip = "127.0.0.1";
 
 int main() {
