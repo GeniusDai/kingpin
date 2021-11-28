@@ -12,8 +12,8 @@ using namespace std;
 
 class Client {
 public:
-    static const int _port = 8890;
-    static const int _step = 1024 * 10;
+    static const int _port;
+    static const int _step;
     static const char *const _ip;
 
     void start() {
@@ -21,9 +21,9 @@ public:
         const char *str = "/tmp";
         ::write(sock, str, strlen(str));
         sleep(10);
-        str = "/bigfile\n";
+        str = "/bigfile.test\n";
         ::write(sock, str, strlen(str));
-        int fd = ::open("/tmp/bigfile.copy", O_WRONLY | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR);
+        int fd = ::open("/tmp/bigfile.test.copy", O_WRONLY | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR);
         if (fd < 0) {
             fatalError("syscall open failed");
         }
@@ -43,6 +43,8 @@ public:
     }
 };
 
+const int _port = 8890;
+const int _step = 1024 * 10;
 const char *const Client::_ip = "127.0.0.1";
 
 int main() {
