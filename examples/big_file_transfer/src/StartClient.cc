@@ -12,7 +12,7 @@ using namespace std;
 class Client {
 public:
     static const int _port = 8890;
-    static const int _step = 1024 * 1000;
+    static const int _step = 1024 * 10;
     static constexpr char *const _ip = "127.0.0.1";
 
     void start() {
@@ -28,17 +28,20 @@ public:
         if (::connect(sock, (struct sockaddr *)&addr, sizeof(addr)) < 0) {
             throw "connect error";
         }
-        const char *str = "/tmp/bigfile\n";
+        const char *str = "/tmp";
+        ::write(sock, str, strlen(str));
+        sleep(10);
+        str = "/bigfile\n";
         ::write(sock, str, strlen(str));
         int fd = ::open("/tmp/bigfile_copy", O_WRONLY | O_CREAT);
         if (fd < 0) {
             fatalError("syscall open failed");
         }
         Buffer buffer;
+        sleep(10);
         while(true) {
             int curr = buffer.readNioToBuffer(sock, _step);
             if (curr == 0) break;
-            // sleep(1);
             buffer.writeNioFromBuffer(fd);
         }
         ::close(fd);
