@@ -12,15 +12,11 @@
 #include "kingpin/Utils.h"
 #include "kingpin/Buffer.h"
 
+#include "Config.h"
+
 using namespace std;
 
 const int POOL_SIZE = 100;
-
-class Data : public ThreadSharedDataClient {
-public:
-    int _port = 8889;
-    const char *_ip = "127.0.0.1";
-};
 
 template <typename _Data>
 class ConcurrencyTestIOHandler : public IOHandlerForClient<_Data> {
@@ -34,8 +30,8 @@ public:
         struct sockaddr_in addr;
         memset(&addr, 0, sizeof(addr));
         addr.sin_family = AF_INET;
-        addr.sin_port = htons(this->_tsd_ptr->_port);
-        inet_pton(AF_INET, this->_tsd_ptr->_ip, &addr.sin_addr.s_addr);
+        addr.sin_port = htons(Config::_port);
+        inet_pton(AF_INET, Config::_ip, &addr.sin_addr.s_addr);
 
         for (int i = 0; i < POOL_SIZE; ++i) {
             int sock = socket(AF_INET, SOCK_STREAM, 0);
@@ -69,8 +65,9 @@ public:
 };
 
 int main() {
-    Data data;
-    EpollTPClient<ConcurrencyTestIOHandler, Data> testClient(8, &data);
+    ThreadSharedDataClient data;
+    EpollTPClient<ConcurrencyTestIOHandler, ThreadSharedDataClient>
+        testClient(8, &data);
     testClient.run();
     return 0;
 }

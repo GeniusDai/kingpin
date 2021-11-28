@@ -7,20 +7,19 @@
 #include <chrono>
 #include <iostream>
 
+#include "kingpin/Utils.h"
+#include "Config.h"
 #include "ChessGame.h"
 
 using namespace std;
 
 class Client {
 public:
-    const char *_initMsg = "0 0 0 0\n";
-    const int _port = 8889;
-    const char *_ip = "127.0.0.1";
     int _conn;
     char _player = 'U';
 
     void start() {
-        connectServer();
+        _conn = initConnect(Config::_ip, Config::_port);
         char buffer[100];
         int len = 100;
         memset(buffer, 0, 100*sizeof(char));
@@ -59,28 +58,11 @@ public:
 
     bool isInitMsg(const char *buffer, const int *len) {
         for (int i = 0; i < *len; ++i) {
-            if (buffer[i] != _initMsg[i]) {
+            if (buffer[i] != Config::_init_msg[i]) {
                 return false;
             }
         }
         return true;
-    }
-
-    void connectServer() {
-        int sock = socket(AF_INET, SOCK_STREAM, 0);
-        if (sock == -1) {
-            throw "socket error";
-        }
-        struct sockaddr_in addr;
-        memset(&addr, 0, sizeof(addr));
-        addr.sin_port = htons(_port);
-        addr.sin_family = AF_INET;
-        inet_pton(AF_INET, _ip, &addr.sin_addr.s_addr);
-        if (connect(sock, (struct sockaddr *)&addr, sizeof(addr)) < 0) {
-            throw "connect error";
-        }
-        cout << "connected to server" << endl;
-        this->_conn = sock;
     }
 
     int readConn(int conn, char *buffer, int *len) {

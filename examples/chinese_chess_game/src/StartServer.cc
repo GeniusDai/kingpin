@@ -16,6 +16,8 @@
 #include "kingpin/Exception.h"
 #include "kingpin/Logger.h"
 
+#include "Config.h"
+
 using namespace std;
 
 class ChessGameShareData : public ThreadSharedDataServer {
@@ -29,7 +31,6 @@ public:
 template <typename ChessGameShareData>
 class ChessGameIOHandler : public IOHandlerForServer<ChessGameShareData> {
     static const int _msgBufferSize = 100;
-    static constexpr const char *initMsg = "0 0 0 0\n";
 public:
     ChessGameIOHandler(ChessGameShareData *tsd_ptr) :
         IOHandlerForServer<ChessGameShareData>(tsd_ptr) {}
@@ -47,7 +48,7 @@ public:
             this->_tsd_ptr->single.erase(iter);
             this->_tsd_ptr->match[oppo] = conn;
             this->_tsd_ptr->match[conn] = oppo;
-            ::write(oppo, initMsg, strlen(initMsg));
+            ::write(oppo, Config::_init_msg, strlen(Config::_init_msg));
             INFO << "match client " << conn << " & " << oppo << END;
         }
         this->RegisterFd(conn, EPOLLIN | EPOLLRDHUP);
@@ -108,7 +109,8 @@ public:
 
 int main(int argc, char **argv) {
     ChessGameShareData data;
-    EpollTPServer<ChessGameIOHandler, ChessGameShareData> server(8, 8889, &data);
+    EpollTPServer<ChessGameIOHandler, ChessGameShareData>
+        server(8, Config::_port, &data);
     server.run();
     return 0;
 }
