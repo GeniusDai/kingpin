@@ -4,6 +4,7 @@
 #include <cstring>
 #include <ctime>
 
+#include "kingpin/Logger.h"
 #include "kingpin/Buffer.h"
 #include "kingpin/Utils.h"
 
@@ -33,16 +34,21 @@ public:
         sleep(10);
         str = "/bigfile\n";
         ::write(sock, str, strlen(str));
-        int fd = ::open("/tmp/bigfile_copy", O_WRONLY | O_CREAT);
+        int fd = ::open("/tmp/bigfile.copy", O_WRONLY | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR);
         if (fd < 0) {
             fatalError("syscall open failed");
         }
         Buffer buffer;
         sleep(10);
         while(true) {
-            int curr = buffer.readNioToBuffer(sock, _step);
-            if (curr == 0) break;
+            bool exception_caught = false;
+            try { buffer.readNioToBuffer(sock, _step); }
+            catch(NonFatalException &e) {
+                exception_caught = true;
+                INFO << e.what() << END;
+            }
             buffer.writeNioFromBuffer(fd);
+            if (exception_caught) { break; }
         }
         ::close(fd);
     }

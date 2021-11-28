@@ -38,16 +38,27 @@ public:
     void onWritable(int conn, uint32_t events) {
         Buffer *buffer = _hash[conn].second.get();
         int fd = _hash[conn].first;
-        int len = buffer->readNioToBuffer(fd, STEP);
-        INFO << "read from disk file " << STEP << " chars" << END;
-        if (len == 0) {
-            ::close(conn);
-            ::close(fd);
-            _hash.erase(conn);
-            return;
+        bool exception_caught = false;
+        try {
+            buffer->readNioToBuffer(fd, STEP);
+            INFO << "read from disk file " << STEP << " chars" << END;
+        } catch (NonFatalException &e) {
+            exception_caught = true;
+            INFO << e.what() << END;
         }
-        buffer->writeNioFromBuffer(conn);
-        INFO << "write finish" << END;
+        try {
+            buffer->writeNioFromBuffer(conn);
+            INFO << "write finish" << END;
+        } catch(NonFatalException &e) {
+            exception_caught = true;
+            INFO << e.what() << END;
+        }
+        if (exception_caught) {
+            ::close(fd);
+            this->RemoveFd(conn);
+            ::close(conn);
+            _hash.erase(conn);
+        }
     }
 };
 
