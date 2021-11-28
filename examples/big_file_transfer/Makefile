@@ -1,5 +1,7 @@
 BIN = bin
+SRC = src
 SERVER = StartServer
+CLIENT = StartClient
 
 CXX = g++
 CXXFLAGS = -O0 -Wall -std=c++11 -g -I ../../include
@@ -11,8 +13,10 @@ LDFLAGS = -lpthread
 all: build
 
 build: clean
+	rm -f /tmp/bigfile_copy
 	mkdir $(BIN)
-	$(CXX) $(CXXFLAGS) -o $(BIN)/$(SERVER) $(SERVER).cc $(LDFLAGS)
+	$(CXX) $(CXXFLAGS) -o $(BIN)/$(SERVER) $(SRC)/$(SERVER).cc $(LDFLAGS)
+	$(CXX) $(CXXFLAGS) -o $(BIN)/$(CLIENT) $(SRC)/$(CLIENT).cc $(LDFLAGS)
 
 clean:
 	rm -rf $(BIN)
