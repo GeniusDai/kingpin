@@ -28,17 +28,17 @@ EpollTPServer:
 
     4. Handle the connected sockets.
 
-    5. Using the accept syscall for the listening socket to get one connected socket.
+    5. Get a connected socket by accept syscall.
 
-    6. Register the connected sockets.
+    6. Register the connected socket to epoll.
 
     7. Release the mutex.
 
 EpollTPClient:
 
-    1. Init the connected sockets using the connect syscall.
+    1. Init the connected sockets by connect syscall.
 
-    2. Register the connected sockets.
+    2. Register the connected sockets to epoll.
 
     3. Wait for the epoll events.
 
@@ -66,9 +66,7 @@ Async Logger:
 
     9. Release the mutex.
 
-# Repository Contents
-
-Guide to kingpin header files:
+# Header Files
 
 * IOHandler.h: Virtual base class got a epoll fd, derived class shall implement run function for thread and handler functions for IO.
 
@@ -82,7 +80,15 @@ Guide to kingpin header files:
 
 * Utils.h: Some utility functions.
 
-Examples that use kingpin framework:
+# Prerequirement
+
+    Linux OS
+
+    g++ >= 4.8.5
+
+    make >= 3.82
+
+# Examples
 
 * [chinese_chess_game](https://github.com/GeniusDai/kingpin/tree/dev/examples/chinese_chess_game)
 
