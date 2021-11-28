@@ -22,3 +22,6 @@ clean:
 
 run-server:
 	$(BIN)/StartServer
+
+run-client:
+	$(BIN)/StartClient
