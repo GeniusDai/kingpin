@@ -47,13 +47,14 @@ public:
         while (true) {
             int curr = ::read(fd, _buffer + _offset, len - total);
             if (curr == -1) {
-                if (errno == EINTR) continue;
+                if (errno == EINTR) { continue; }
+                else if (errno == EAGAIN || errno == EWOULDBLOCK) { break; }
                 else fatalError("syscall read failed");
             }
             total += curr;
             _offset += curr;
-            if ((errno != EAGAIN && errno != EWOULDBLOCK) || total == len) { break; }
-            this_thread::sleep_for(chrono::milliseconds(_delay));
+            if (curr == 0) { throw NonFatalException("syscall read error due to oppo closed"); }
+            if (total == len) { break; }
         }
 
         return total;
@@ -61,24 +62,19 @@ public:
 
     int readNioToBufferTill(int fd, const char *end, int step) {
         assert(step > 0);
-        int origin_offset = _offset;
         int str_len = strlen(end);
         while(true) {
             int curr = readNioToBuffer(fd, step);
-            if (curr == step) { continue; }
-            else if (curr == 0) {
-                if (strcmp(end, "\0") == 0) { return origin_offset; }
-                else { throw NonFatalException("No end mark found"); }
-            }
-            for (int i = origin_offset; i < _offset; ++i) {
+            if (strcmp(end, "\0") == 0) { return _offset; }
+            if (curr == 0) { this_thread::sleep_for(chrono::milliseconds(_delay)); continue; }
+
+            for (int i = _offset-curr; i < _offset; ++i) {
                 bool found = true;
                 for (int k = str_len-1; k >= 0; --k) {
-                    if (i-k < 0 || _buffer[i-k] != end[str_len-k-1]) { found = false; break; }
+                    if (_buffer[i-k] != end[str_len-k-1]) { found = false; break; }
                 }
                 if (found) return i;
             }
-            origin_offset += curr;
-            this_thread::sleep_for(chrono::milliseconds(_delay));
         }
     }
 
@@ -87,13 +83,14 @@ public:
             int curr = ::write(fd, _buffer + _start, _offset - _start);
             if (curr == -1) {
                 if (errno == EINTR) { continue; }
-                else if (errno == EPIPE) { nonFatalError("syscall write failed due to oppo closed"); }
-                else { fatalError("syscall write failed"); }
+                else if (errno == EPIPE || errno == ECONNRESET)
+                    { nonFatalError("syscall write failed due to oppo closed"); }
+                else if (errno == EAGAIN || errno == EWOULDBLOCK)
+                    { this_thread::sleep_for(chrono::milliseconds(_delay)); }
             }
+            assert (curr != 0);
             _start += curr;
             if (_start == _offset) { break; }
-            if (errno != EAGAIN || errno != EWOULDBLOCK) { fatalError("syscall write failed"); }
-            this_thread::sleep_for(chrono::milliseconds(_delay));
         }
         ::memset(_buffer, 0, _cap);
         _start = 0;
