@@ -1,5 +1,5 @@
-#ifndef __LOGGER_H__
-#define __LOGGER_H__
+#ifndef __LOGGER_H_de3094e9a992_
+#define __LOGGER_H_de3094e9a992_
 
 #include <string>
 #include <mutex>

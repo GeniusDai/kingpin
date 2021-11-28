@@ -1,5 +1,5 @@
-#ifndef __IOHANDLER_H
-#define __IOHANDLER_H
+#ifndef __IOHANDLER_H_de3094e9a992
+#define __IOHANDLER_H_de3094e9a992
 
 #include <sys/epoll.h>
 #include <sys/socket.h>
@@ -133,9 +133,7 @@ public:
                 uint32_t events = this->_evs[i].events;
                 if (fd == this->_tsd_ptr->_listenfd) {
                     int conn = ::accept4(fd, NULL, NULL, SOCK_NONBLOCK);
-                    if (conn < 0) {
-                        fatalError("syscall accept4 error");
-                    }
+                    if (conn < 0) { fatalError("syscall accept4 error"); }
                     INFO << "new connection " << conn << " accepted" << END;
                     this->RemoveFd(fd);
                     this->_tsd_ptr->_listenfd_lock.unlock();
