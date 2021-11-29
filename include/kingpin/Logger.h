@@ -55,6 +55,10 @@ public:
         return *this;
     }
 
+    Logger &operator<<(const exception &e) {
+        return (*this << e.what());
+    }
+
     // Release lock and notify cv
     Logger &operator<<(const Logger &) {
         _buffer.appendToBuffer("\n");
