@@ -96,8 +96,8 @@ Async Logger:
 
 # Examples
 
-* [quick_start](https://github.com/GeniusDai/kingpin/tree/dev/examples/quick_start):
+* [Quick Start](https://github.com/GeniusDai/kingpin/tree/dev/examples/quick_start):
 
-* [chinese_chess_game](https://github.com/GeniusDai/kingpin/tree/dev/examples/chinese_chess_game): Chess game server and client, also implement a high concurrency test client.
+* [Chinese Chess Game](https://github.com/GeniusDai/kingpin/tree/dev/examples/chinese_chess_game): Chess game server and client, also implement a high concurrency test client.
 
-* [big_file_transfer](https://github.com/GeniusDai/kingpin/tree/dev/examples/big_file_transfer): Big file transfer server and client, IO and exceptions are both well handled.
+* [Big File Transfer](https://github.com/GeniusDai/kingpin/tree/dev/examples/big_file_transfer): Big file transfer server and client, IO and exceptions are both well handled.
