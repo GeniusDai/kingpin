@@ -21,21 +21,26 @@ class BigFileTransferIOHandler : public IOHandlerForServer<_Data> {
 public:
     BigFileTransferIOHandler(_Data *tsd_ptr) : IOHandlerForServer<_Data>(tsd_ptr) {}
     void onConnect(int conn) {
-        Buffer buffer;
-        buffer.appendToBuffer("/");
-        buffer.readNioToBufferTill(conn, "\n", STEP);
-        buffer.stripEnd('\n');
-        assert(buffer._buffer[0] == '/');
-        INFO << "client requests file [" << buffer._buffer << "]" << END;
-        this_thread::sleep_for(chrono::milliseconds(1));
-        int fd = open(buffer._buffer, O_RDONLY);
-        if (fd < 0) { fatalError("syscall open failed"); }
-        _hash[conn] = make_pair(
-            fd, unique_ptr<Buffer>(new Buffer()));
-        this->RegisterFd(conn, EPOLLOUT);
+        int fd;
+        try {
+            Buffer buffer;
+            buffer.readNioToBufferTill(conn, "\n", STEP);
+            buffer.stripEnd('\n');
+            INFO << "client requests file [" << buffer._buffer << "]" << END;
+            fd = open(buffer._buffer, O_RDONLY);
+            if (fd < 0) { fatalError("syscall open failed"); }
+            _hash[conn] = make_pair(fd, unique_ptr<Buffer>(new Buffer()));
+            this->RegisterFd(conn, EPOLLOUT | EPOLLRDHUP);
+        } catch(NonFatalException &e) {
+            INFO << e << END;
+        }
+        sleep(5);
     }
 
     void onWritable(int conn, uint32_t events) {
+        if (events & EPOLLRDHUP) {
+            INFO << "client has closed the socket" << END;
+        }
         Buffer *buffer = _hash[conn].second.get();
         int fd = _hash[conn].first;
         bool exception_caught = false;

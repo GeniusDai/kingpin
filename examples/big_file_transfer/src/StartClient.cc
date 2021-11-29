@@ -18,17 +18,20 @@ public:
 
     void start() {
         int sock = initConnect(_ip, _port);
-        const char *str = "/tmp";
+        const char *str;
+
+        str = "src/bigfile.test";
         ::write(sock, str, strlen(str));
-        sleep(10);
-        str = "/bigfile.test\n";
+        sleep(3);
+        str = "\n";
         ::write(sock, str, strlen(str));
-        int fd = ::open("/tmp/bigfile.test.copy", O_WRONLY | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR);
+
+        int fd = ::open("src/bigfile.test.copy", O_WRONLY | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR);
         if (fd < 0) {
             fatalError("syscall open failed");
         }
+        sleep(5);
         Buffer buffer;
-        sleep(10);
         while(true) {
             bool exception_caught = false;
             try { buffer.readNioToBuffer(sock, _step); }
