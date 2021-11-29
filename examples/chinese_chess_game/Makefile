@@ -1,13 +1,6 @@
-SRC = src
-BIN = bin
 SERVER = StartServer
 CLIENT = StartClient
 TEST = StartTest
-
-CXX = g++
-CXXFLAGS = -O0 -Wall -std=c++11 -g -I ../../include
-
-LDFLAGS = -lpthread
 
 .PHONY: all build clean run-server run-client run-test
 
