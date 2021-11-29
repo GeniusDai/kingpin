@@ -53,7 +53,7 @@ public:
             }
             total += curr;
             _offset += curr;
-            if (curr == 0) { throw NonFatalException("EOF encountered"); }
+            if (curr == 0) { throw NonFatalException("read: EOF encountered"); }
             if (total == len) { break; }
         }
 

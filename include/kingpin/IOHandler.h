@@ -67,8 +67,6 @@ public:
 
     virtual void onWritable(int conn, uint32_t events) {}
 
-    virtual void onPassivelyClosed(int conn) {}
-
     virtual ~IOHandler() {}
 };
 
