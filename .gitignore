@@ -33,3 +33,4 @@
 
 .vscode
 examples/**/bin/*
+examples/big_file_transfer/src/bigfile.test.copy
