@@ -28,11 +28,13 @@ EpollTPServer:
 
     4. Handle the connected sockets.
 
-    5. Get a connected socket by accept syscall.
+    5. Get a new connected socket by accept syscall.
 
-    6. Register the connected socket to epoll.
+    6. Remove EPOLLIN for the listening socket.
 
     7. Release the mutex.
+
+    8. Handle the new connected socket.
 
 EpollTPClient:
 
@@ -88,11 +90,13 @@ Async Logger:
 
 * Logger.h: Multi-thread safe logger, using backend thread for asynchrous output, line buffered.
 
-* Buffer.h: Buffer preallocated on heap, NOT thread safe.
+* Buffer.h: IO Buffer preallocated on heap, support nonblock socket and disk fd. NOT thread safe.
 
 * Utils.h: Some utility functions.
 
 # Examples
+
+* [quick_start](https://github.com/GeniusDai/kingpin/tree/dev/examples/quick_start):
 
 * [chinese_chess_game](https://github.com/GeniusDai/kingpin/tree/dev/examples/chinese_chess_game): Chess game server and client, also implement a high concurrency test client.
 
