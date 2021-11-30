@@ -1,3 +1,5 @@
+include ../Makefile.inc
+
 SERVER = StartServer
 CLIENT = StartClient
 TEST = StartTest
