@@ -22,18 +22,18 @@ const int MAX_SIZE = 1024;
 
 // IOHandler --> thread
 
-template <typename _ThreadSharedData>
+template <typename _TPSharedData>
 class IOHandler {
 public:
     int _epfd = ::epoll_create(1);
     struct epoll_event _evs[MAX_SIZE];
     shared_ptr<thread> _t;
-    _ThreadSharedData *_tsd_ptr;
+    _TPSharedData *_tsd_ptr;
     int _fd_num = 0;
 
     IOHandler(const IOHandler &) = delete;
     IOHandler &operator=(const IOHandler &) = delete;
-    IOHandler(_ThreadSharedData *tsd_ptr) : _tsd_ptr(tsd_ptr) {}
+    IOHandler(_TPSharedData *tsd_ptr) : _tsd_ptr(tsd_ptr) {}
 
     void join() { _t->join(); }
 
@@ -72,12 +72,12 @@ public:
 
 
 
-template <typename _ThreadSharedData>
-class IOHandlerForClient : public IOHandler<_ThreadSharedData> {
+template <typename _TPSharedData>
+class IOHandlerForClient : public IOHandler<_TPSharedData> {
 public:
     IOHandlerForClient(const IOHandlerForClient &) = delete;
     IOHandlerForClient &operator=(const IOHandlerForClient &) = delete;
-    IOHandlerForClient(_ThreadSharedData *tsd_ptr) : IOHandler<_ThreadSharedData>(tsd_ptr) {}
+    IOHandlerForClient(_TPSharedData *tsd_ptr) : IOHandler<_TPSharedData>(tsd_ptr) {}
 
     void _run() {
         INFO << "thread start" << END;
@@ -109,12 +109,12 @@ public:
 
 
 
-template <typename _ThreadSharedData>
-class IOHandlerForServer : public IOHandler<_ThreadSharedData> {
+template <typename _TPSharedData>
+class IOHandlerForServer : public IOHandler<_TPSharedData> {
 public:
     IOHandlerForServer(const IOHandlerForServer &) = delete;
     IOHandlerForServer &operator=(const IOHandlerForServer &) = delete;
-    IOHandlerForServer(_ThreadSharedData *tsd_ptr) : IOHandler<_ThreadSharedData>(tsd_ptr) {}
+    IOHandlerForServer(_TPSharedData *tsd_ptr) : IOHandler<_TPSharedData>(tsd_ptr) {}
 
     void _run() {
         INFO << "thread start" << END;

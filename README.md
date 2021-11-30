@@ -84,7 +84,7 @@ Async Logger:
 
 * IOHandler.h: Virtual base class got a epoll fd, derived class shall implement run function for thread and handler functions for IO.
 
-* ThreadSharedData.h: Data shared among threads.
+* TPSharedData.h: Data shared among threads.
 
 * EpollTP.h: Thread pool, initialized by multi-thread shared data.
 

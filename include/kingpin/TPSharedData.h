@@ -1,17 +1,17 @@
-#ifndef __ThreadSharedData_H_
-#define __ThreadSharedData_H_
+#ifndef __TPSharedData_H_
+#define __TPSharedData_H_
 
 #include <mutex>
 #include <unordered_set>
 
 using namespace std;
 
-class ThreadSharedData {
+class TPSharedData {
 public:
-    virtual ~ThreadSharedData() {}
+    virtual ~TPSharedData() {}
 };
 
-class ServerTPSharedData : public ThreadSharedData {
+class ServerTPSharedData : public TPSharedData {
 public:
     // DONOT use this lock again unless you know what you're doing
     mutex _listenfd_lock;
@@ -19,7 +19,7 @@ public:
     virtual ~ServerTPSharedData() {}
 };
 
-class ClientTPSharedData : public ThreadSharedData {
+class ClientTPSharedData : public TPSharedData {
 public:
     virtual ~ClientTPSharedData() {}
 };

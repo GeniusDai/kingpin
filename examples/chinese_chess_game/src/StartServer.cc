@@ -12,7 +12,7 @@
 
 #include "kingpin/EpollTP.h"
 #include "kingpin/IOHandler.h"
-#include "kingpin/ThreadSharedData.h"
+#include "kingpin/TPSharedData.h"
 #include "kingpin/Exception.h"
 #include "kingpin/Logger.h"
 

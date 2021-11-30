@@ -1,5 +1,5 @@
 #include "kingpin/IOHandler.h"
-#include "kingpin/ThreadSharedData.h"
+#include "kingpin/TPSharedData.h"
 #include "kingpin/EpollTP.h"
 
 #include <cstring>
