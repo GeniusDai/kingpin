@@ -18,7 +18,7 @@
 
 ![image](https://github.com/GeniusDai/kingpin/raw/dev/pictures/kingpin.001.png)
 
-EpollTPServer:
+### EpollTPServer:
 
     1. Trying to get mutex from thread shared data, if it's locked, it won't block.
 
@@ -36,7 +36,7 @@ EpollTPServer:
 
     8. Handle the new connected socket.
 
-EpollTPClient:
+### EpollTPClient:
 
     1. Init the connected sockets by connect syscall.
 
@@ -48,7 +48,7 @@ EpollTPClient:
 
 ![image](https://github.com/GeniusDai/kingpin/raw/dev/pictures/kingpin.002.png)
 
-Async Logger:
+### Async Logger:
 
     1. Get mutex for the log buffer, if it's locked, it will block.
 
@@ -86,15 +86,15 @@ Please refer to: [Quick Start](https://github.com/GeniusDai/kingpin/tree/dev/exa
 
 # Header Files
 
-* IOHandler.h: Virtual base class got a epoll fd, derived class shall implement run function for thread and handler functions for IO.
+* IOHandler.h: Virtual base class got a epoll fd, derived class shall implement handler functions for IO.
 
 * TPSharedData.h: Data shared among threads.
 
-* EpollTP.h: Thread pool, initialized by multi-thread shared data.
+* EpollTP.h: Thread pool, initialized by IOHandler and TPSharedData.
 
-* Logger.h: Multi-thread safe logger, using backend thread for asynchrous output, line buffered.
+* Logger.h: Multi-thread safe logger, using backend thread for asynchronous output, line buffered.
 
-* Buffer.h: IO Buffer preallocated on heap, support nonblock socket and disk fd. NOT thread safe.
+* Buffer.h: IO Buffer pre-allocated on heap, support nonblock socket and disk fd. NOT thread safe.
 
 * Utils.h: Some utility functions.
 
