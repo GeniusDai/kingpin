@@ -11,17 +11,17 @@ public:
     virtual ~ThreadSharedData() {}
 };
 
-class ThreadSharedDataServer : public ThreadSharedData {
+class ServerTPSharedData : public ThreadSharedData {
 public:
     // DONOT use this lock again unless you know what you're doing
     mutex _listenfd_lock;
     int _listenfd;
-    virtual ~ThreadSharedDataServer() {}
+    virtual ~ServerTPSharedData() {}
 };
 
-class ThreadSharedDataClient : public ThreadSharedData {
+class ClientTPSharedData : public ThreadSharedData {
 public:
-    virtual ~ThreadSharedDataClient() {}
+    virtual ~ClientTPSharedData() {}
 };
 
 #endif

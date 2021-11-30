@@ -20,7 +20,7 @@
 
 using namespace std;
 
-class ChessGameShareData : public ThreadSharedDataServer {
+class ChessGameShareData : public ServerTPSharedData {
 public:
     mutex _m;
     unordered_map<int, int> match;

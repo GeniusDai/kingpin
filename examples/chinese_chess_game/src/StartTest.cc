@@ -65,8 +65,8 @@ public:
 };
 
 int main() {
-    ThreadSharedDataClient data;
-    EpollTPClient<ConcurrencyTestIOHandler, ThreadSharedDataClient>
+    ClientTPSharedData data;
+    EpollTPClient<ConcurrencyTestIOHandler, ClientTPSharedData>
         testClient(8, &data);
     testClient.run();
     return 0;

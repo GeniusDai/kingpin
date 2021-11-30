@@ -68,8 +68,8 @@ public:
 };
 
 int main() {
-    ThreadSharedDataServer data;
-    EpollTPServer<BigFileTransferIOHandler, ThreadSharedDataServer>
+    ServerTPSharedData data;
+    EpollTPServer<BigFileTransferIOHandler, ServerTPSharedData>
         server(8, PORT, &data);
     server.run();
     return 0;
