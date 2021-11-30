@@ -4,15 +4,11 @@
 
 * Per epoll per thread and one connected socket handled only by one thread
 
-* Thread pool and IO multiplexing for both server's and client's concurrency
-
-* High performance server, multi-threads competing for mutex to register read event for listening socket and handle connected socket
-
-* High performance client using multi-threads init and handle connected socket
+* Thread pool and IO multiplexing for both server's and client's concurrency, server use thread shared mutex to avoid parallel accept syscall.
 
 * High performance asynchronous logger using backend thread to print debug info with timestamp and tid
 
-* Avoid excessive wrapper of classes and functions to get things complecated
+* Avoid excessive wrapper of classes and functions to get things complicated
 
 # Design Overview
 
@@ -20,7 +16,7 @@
 
 ### EpollTPServer:
 
-    1. Trying to get mutex from thread shared data, if it's locked, it won't block.
+    1. Trying to get mutex from TPSharedData, if it's locked, thread won't block.
 
     2. If got the mutex, IO thread register EPOLLIN for the listening socket.
 
@@ -50,7 +46,7 @@
 
 ### Async Logger:
 
-    1. Get mutex for the log buffer, if it's locked, it will block.
+    1. Get mutex for the log buffer, if it's locked, thread will block.
 
     2. Write log to the buffer.
 
