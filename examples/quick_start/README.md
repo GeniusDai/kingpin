@@ -25,7 +25,7 @@ Here the template _Data refers to the data shared between threads. This template
 
 ### Step 2. Define you own TPSharedData
 
-Next we define the data shared between threads. Since we didn't got any EXTRA DATA(except the listening socket and mutex) to shared in this simple demo, we just derive from the base class.
+Next we define the data shared between threads. Since on EXTRA DATA(except the listening socket and mutex) to be shared in this simple demo, we just derive from the base class.
 
 ```
 class SharedData : public ServerTPSharedData {
