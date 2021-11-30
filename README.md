@@ -68,9 +68,13 @@ Async Logger:
 
     9. Release the mutex.
 
+# Quick Start
+
+Please refer to: [Quick Start](https://github.com/GeniusDai/kingpin/tree/dev/examples/quick_start)
+
 # Prerequirement
 
-* Linux OS
+* Linux >= 3.10.0
 
 * make >= 3.82
 
@@ -95,8 +99,6 @@ Async Logger:
 * Utils.h: Some utility functions.
 
 # Examples
-
-* [Quick Start](https://github.com/GeniusDai/kingpin/tree/dev/examples/quick_start):
 
 * [Chinese Chess Game](https://github.com/GeniusDai/kingpin/tree/dev/examples/chinese_chess_game): Chess game server and client, also implement a high concurrency test client.
 
