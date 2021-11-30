@@ -2,7 +2,7 @@
 
 **Build a Simple Server**
 
-In this guide, we will build a server that echo "Hello, kingpin!" to the client and then close the connection. Just several codes we could implement a multi-thread+IO-multiplexing server.
+In this guide, we will build a server that echo "Hello, kingpin!" to the client and then close the connection. Just several codes.
 
 ### Step 1. Define your own IOHandler
 
