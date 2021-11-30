@@ -15,9 +15,13 @@ public:
     }
 };
 
+class SharedData : public ServerTPSharedData {
+
+};
+
 int main() {
-    ServerTPSharedData data;
-    EpollTPServer<SimpleHandler, ServerTPSharedData> server(8, 8888, &data);
+    SharedData data;
+    EpollTPServer<SimpleHandler, SharedData> server(8, 8888, &data);
     server.run();
     return 0;
 }
