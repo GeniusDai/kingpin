@@ -30,11 +30,7 @@ Screenshot
 
 ![image](https://github.com/GeniusDai/kingpin/raw/dev/pictures/PlayChess.png)
 
-TODO
-----
+For example, if player red want to move chess "KING", shall enter:
 
-Low Priority:
-
-* Validity of chess be accessed
-
-* TCP/IP be encrypted by SSL/TLS
+    -> From : 0 4
+    ->  To  : 1 4

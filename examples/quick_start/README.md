@@ -6,7 +6,7 @@ In this guide, we will build a server that echo "Hello, kingpin!" to the client 
 
 ### Step 1. Define your own IOHandler
 
-First we will implement a IOHandler, this could tell the thread what to do when handling a connection.
+Implement a IOHandler, this could tell the thread what to do when handling a connection.
 
 ```
 template<typename _Data>
@@ -21,11 +21,11 @@ public:
 };
 ```
 
-Here the template _Data refers to the data shared between threads. This template is essential for the IOHandler.
+The template _Data refers to the data shared between threads. This template is essential for the IOHandler.
 
 ### Step 2. Define you own TPSharedData
 
-Next we define the data shared between threads. Since on EXTRA DATA(except the listening socket and mutex) to be shared in this simple demo, we just derive from the base class.
+Define the data shared between threads. Since on EXTRA DATA(except the listening socket and mutex) to be shared in this simple demo, we just derive from the base class.
 
 ```
 class SharedData : public ServerTPSharedData {
@@ -35,7 +35,7 @@ class SharedData : public ServerTPSharedData {
 
 ### Step 3. Init the data and run the server
 
-Here we use 8 threads to handle the connnections, and listen in 8888 port.
+Use 8 threads to handle the connnections, and listen in 8888 port.
 
 ```
 int main() {
@@ -46,9 +46,9 @@ int main() {
 }
 ```
 
-Since as long as the server alives, the thread pool alives, so the data shared between TP shall have the same life cycle as the server. Usually we place both of them in the main's stack.
+Since as long as the server alives, the thread pool alives, so the data shared between TP shall have the same life cycle as the server. Usually we place them in the main function's stack.
 
-### Step 4. Test by client
+### Step 4. Connect to server
 
 Use netcat to connect.
 
