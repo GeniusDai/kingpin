@@ -16,7 +16,7 @@
 
 using namespace std;
 
-const int POOL_SIZE = 100;
+const int POOL_SIZE = 10;
 
 template <typename _Data>
 class ConcurrencyTestIOHandler : public IOHandlerForClient<_Data> {
@@ -38,29 +38,28 @@ public:
             if (sock < 0) {
                 fatalError("syscall socket error");
             }
-            int flags = fcntl(sock, F_GETFL, 0);
-            fcntl(sock, F_SETFD, flags | O_NONBLOCK);
             if (connect(sock, (struct sockaddr *)&addr, sizeof(addr)) < 0) {
                 fatalError("syscall connect error");
+            }
+            int flags = fcntl(sock, F_GETFL);
+            if (flags < 0) { fatalError("syscall fcntl error"); }
+            if (fcntl(sock, F_SETFL, flags | O_NONBLOCK) < 0) {
+                fatalError("syscall fcntl error");
             }
             this->RegisterFd(sock, EPOLLIN | EPOLLRDHUP);
             INFO << "Initialized connection of fd " << sock << END;
         }
-        INFO << "Finish initializing thread" << END;
+        INFO << "Finish initializing hread" << END;
     }
 
     void onReadable(int conn, uint32_t events) {
         Buffer buffer;
-        buffer.readNioToBuffer(conn, 100);
-        ::write(conn, buffer._buffer, buffer._offset);
+        buffer.readNioToBufferTill(conn, "\n", 100);
+        buffer.writeNioFromBuffer(conn);
         if (events & EPOLLRDHUP) {
-            onPassivelyClosed(conn);
+            ::close(conn);
+            INFO << "server closed socket " << conn << END;
         }
-    }
-
-    void onPassivelyClosed(int conn) {
-        ::close(conn);
-        INFO << "server closed socket " << conn << END;
     }
 };
 

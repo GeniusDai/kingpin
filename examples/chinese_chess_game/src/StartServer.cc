@@ -15,6 +15,7 @@
 #include "kingpin/TPSharedData.h"
 #include "kingpin/Exception.h"
 #include "kingpin/Logger.h"
+#include "kingpin/Buffer.h"
 
 #include "Config.h"
 
@@ -23,86 +24,62 @@ using namespace std;
 class ChessGameShareData : public ServerTPSharedData {
 public:
     mutex _m;
-    unordered_map<int, int> match;
-    unordered_set<int> single;
-    unordered_map<int, pair<unique_ptr<char>, int> > message;
+    unordered_map<int, int> _match;
+    unordered_set<int> _single;
+    unordered_map<int, unique_ptr<Buffer> > _message;
 };
 
 template <typename ChessGameShareData>
 class ChessGameIOHandler : public IOHandlerForServer<ChessGameShareData> {
-    static const int _msgBufferSize = 100;
 public:
     ChessGameIOHandler(ChessGameShareData *tsd_ptr) :
         IOHandlerForServer<ChessGameShareData>(tsd_ptr) {}
 
     void onConnect(int conn) {
         unique_lock<mutex> lg(this->_tsd_ptr->_m);
-        this->_tsd_ptr->message[conn] = make_pair(
-            unique_ptr<char>(new char[_msgBufferSize]), 0);
-        if (this->_tsd_ptr->single.empty()) {
-            this->_tsd_ptr->single.insert(conn);
-            INFO << "single client " << conn << END;
+        this->_tsd_ptr->_message[conn] = std::move(unique_ptr<Buffer>(new Buffer));
+        if (this->_tsd_ptr->_single.empty()) {
+            this->_tsd_ptr->_single.insert(conn);
+            INFO << "single client " << conn << " arrived"<< END;
         } else {
-            auto iter = this->_tsd_ptr->single.begin();
-            int oppo = *iter;
-            this->_tsd_ptr->single.erase(iter);
-            this->_tsd_ptr->match[oppo] = conn;
-            this->_tsd_ptr->match[conn] = oppo;
-            ::write(oppo, Config::_init_msg, strlen(Config::_init_msg));
-            INFO << "match client " << conn << " & " << oppo << END;
+            auto iter = this->_tsd_ptr->_single.begin();
+            this->_tsd_ptr->_match[*iter] = conn;
+            this->_tsd_ptr->_match[conn] = *iter;
+            ::write(*iter, Config::_init_msg, strlen(Config::_init_msg));
+            INFO << "match client " << conn << " & " << *iter << END;
+            this->_tsd_ptr->_single.erase(*iter);
         }
-        this->RegisterFd(conn, EPOLLIN | EPOLLRDHUP);
+        this->RegisterFd(conn, EPOLLIN);
     }
 
     void onPassivelyClosed(int conn) {
         INFO << "client closed the socket, will close " << conn << END;
-        this->RemoveFd(conn);
         ::close(conn);
-        this->_tsd_ptr->message.erase(conn);
-        if (this->_tsd_ptr->match.find(conn) != this->_tsd_ptr->match.cend()) {
-            INFO << "find oppo, will close socket " << this->_tsd_ptr->match[conn] << END;
-            this->RemoveFd(this->_tsd_ptr->match[conn]);
-            ::close(this->_tsd_ptr->match[conn]);
-            this->_tsd_ptr->message.erase(this->_tsd_ptr->match[conn]);
-            this->_tsd_ptr->match.erase(this->_tsd_ptr->match[conn]);
+        this->_tsd_ptr->_message.erase(conn);
+        if (this->_tsd_ptr->_match.find(conn) != this->_tsd_ptr->_match.cend()) {
+            INFO << "find oppo, will close socket " << this->_tsd_ptr->_match[conn] << END;
+            ::close(this->_tsd_ptr->_match[conn]);
+            this->_tsd_ptr->_message.erase(this->_tsd_ptr->_match[conn]);
+            this->_tsd_ptr->_match.erase(this->_tsd_ptr->_match[conn]);
         } else {
-            this->_tsd_ptr->single.erase(conn);
+            this->_tsd_ptr->_single.erase(conn);
         }
-        this->_tsd_ptr->match.erase(conn);
+        this->_tsd_ptr->_match.erase(conn);
     }
 
     void onReadable(int conn, uint32_t events) {
         unique_lock<mutex> lg(this->_tsd_ptr->_m);
-        char buf[100];
-        ::memset(buf, 0, 100);
-        int len = read(conn, buf, 100);
-        INFO << "read from " << conn << " " << buf << END;
-        if (len != 0) {
-            appendOrSendMessage(conn, buf, len);
-        }
-
-        if (events & EPOLLRDHUP) {
+        Buffer *p_buf = this->_tsd_ptr->_message[conn].get();
+        try {
+            p_buf->readNioToBuffer(conn, 100);
+            if (p_buf->endsWith("\n")) {
+                INFO << "receive full message from " << conn << END;
+                p_buf->writeNioFromBuffer(this->_tsd_ptr->_match[conn]);
+            }
+        } catch (NonFatalException &e) {
+            INFO << e << END;
             onPassivelyClosed(conn);
-        }
-    }
-
-    void appendOrSendMessage(int conn, char *buf, int len) {
-        int curr = this->_tsd_ptr->message[conn].second;
-        if (len + curr >= _msgBufferSize) {
-            throw FatalException("buffer overflow error");
-        }
-        for (int i = 0; i < len; ++i) {
-            this->_tsd_ptr->message[conn].first.get()[curr+i] = buf[i];
-        }
-        this->_tsd_ptr->message[conn].second = curr + len;
-        if (this->_tsd_ptr->message[conn].first.get()[curr+len-1] == '\n') {
-            INFO << "receive message from " << conn << END;
-            ::write(this->_tsd_ptr->match[conn],
-                this->_tsd_ptr->message[conn].first.get(),
-                this->_tsd_ptr->message[conn].second);
-            this->_tsd_ptr->message[conn].second = 0;
-        } else {
-            INFO << "receive partial message from " << conn << END;
+            return;
         }
     }
 };
