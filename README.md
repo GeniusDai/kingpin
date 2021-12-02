@@ -2,13 +2,11 @@
 
 # Features
 
-* Per epoll per thread and one connected socket handled only by one thread
+* Per epoll per thread and one connected socket handled only by one thread.
 
 * Thread pool and IO multiplexing for both server's and client's concurrency, server use thread shared mutex to avoid parallel accept syscall.
 
-* High performance asynchronous logger using backend thread to print debug info with timestamp and tid
-
-* Avoid excessive wrapper of classes and functions to get things complicated
+* Avoid excessive wrapper of classes and functions to get things complicated.
 
 # Design Overview
 
@@ -86,7 +84,7 @@ Please refer to: [Quick Start](https://github.com/GeniusDai/kingpin/tree/dev/exa
 
 * EpollTP.h: Thread pool, initialized by IOHandler and TPSharedData.
 
-* Logger.h: Multi-thread safe logger, using backend thread for asynchronous output, line buffered.
+* Logger.h: Thread safe logger, using backend thread for asynchronous output, line buffered.
 
 * Buffer.h: IO Buffer pre-allocated on heap, support nonblock socket and disk fd. NOT thread safe.
 
