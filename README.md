@@ -78,8 +78,6 @@ Please refer to: [Quick Start](https://github.com/GeniusDai/kingpin/tree/dev/exa
 
 * c++11 or higher
 
-* link posix thread lib
-
 # Header Files
 
 * IOHandler.h: Virtual base class got a epoll fd, derived class shall implement handler functions for IO.
