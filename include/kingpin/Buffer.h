@@ -65,7 +65,7 @@ public:
         int str_len = strlen(end);
         while(true) {
             int curr = readNioToBuffer(fd, step);
-            if (strcmp(end, "\0") == 0) { return _offset; }
+            if (::strcmp(end, "\0") == 0) { return _offset; }
             if (curr == 0) { this_thread::sleep_for(chrono::milliseconds(_delay)); continue; }
 
             for (int i = _offset-curr; i < _offset; ++i) {
@@ -106,8 +106,12 @@ public:
     void stripEnd(char end) {
         for (int i = _offset-1; i >= 0; --i) {
             if (_buffer[i] == end) { _buffer[i] = '\0'; _offset--; }
-            else break;
+            else { break; }
         }
+    }
+
+    bool endsWith(const char *str) const {
+        return _offset > 0 && ::strcmp(str, _buffer + _offset - ::strlen(str)) == 0;
     }
 
 };
