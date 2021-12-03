@@ -6,6 +6,7 @@ all: build
 
 build: clean
 	mkdir $(BIN)
+	$(CXX) $(CXXFLAGS) -o $(BIN)/test_context $(SRC)/test_context.cc $(LDFLAGS)
 	$(CXX) $(CXXFLAGS) -o $(BIN)/test_logger $(SRC)/test_logger.cc $(LDFLAGS)
 	$(CXX) $(CXXFLAGS) -o $(BIN)/test_server $(SRC)/test_server.cc $(LDFLAGS)
 	$(CXX) $(CXXFLAGS) -o $(BIN)/test_buffer $(SRC)/test_buffer.cc $(LDFLAGS)
