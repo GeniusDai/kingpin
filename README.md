@@ -90,4 +90,4 @@ Please refer to: [Quick Start](https://github.com/GeniusDai/kingpin/tree/dev/exa
 
 * [Chinese Chess Game](https://github.com/GeniusDai/kingpin/tree/dev/examples/chinese_chess_game): Chess game server and client, also implement a high concurrency test client.
 
-* [Big File Transfer](https://github.com/GeniusDai/kingpin/tree/dev/examples/big_file_transfer): Big file transfer server and client, IO and exceptions are both well handled.
+* [File Transfer](https://github.com/GeniusDai/kingpin/tree/dev/examples/file_transfer): File transfer server and client, IO and exceptions are both well handled.
