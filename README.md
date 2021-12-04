@@ -70,11 +70,7 @@ Please refer to: [Quick Start](https://github.com/GeniusDai/kingpin/tree/dev/exa
 
 * Linux >= 3.10.0
 
-* make >= 3.82
-
 * g++ >= 4.8.5
-
-* c++11 or higher
 
 # Header Files
 
