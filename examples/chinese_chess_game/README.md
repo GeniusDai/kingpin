@@ -1,23 +1,7 @@
 # Chinese Chess Game
 
-Build and Run
--------------
-
-To build the project:
-
-    % make build
-
-To start the Server:
-
-    % make run-server
-
-To start the High Concurrency Test:
-
-    % make run-test
-
-To start the Client:
-
-    % make run-client
+About
+-----
 
 Default:
 
