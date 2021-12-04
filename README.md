@@ -1,4 +1,4 @@
-**Kingpin is a C++ network library based on TCP/IP + epoll + pthread, aims to be used for the high concurrent servers and clients. Inspired by *nginx* / *muduo*.**
+**Kingpin is a C++ network library based on TCP/IP + epoll + pthread for the high concurrent servers and clients. Inspired by *nginx* / *muduo*.**
 
 # Features
 
