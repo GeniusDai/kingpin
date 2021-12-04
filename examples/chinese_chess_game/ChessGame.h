@@ -8,18 +8,11 @@
 
 using namespace std;
 
-#ifdef _DEBUG
-#undef _DEBUG
-#endif
-
-#define _DEBUG
-
 #ifndef _ChessGame_
 #define _ChessGame_
 
 class ChessGame {
 public:
-
     enum class Player{
         RED = 1,
         BLACK,
@@ -116,49 +109,33 @@ public:
             cout << i << " ";
             for (int j = 0; j < COLUMNS; ++j) {
                 _chess_ptr tmpChess(board_[i][j]);
-                if (tmpChess == nullptr) {
-                    cout << " " << " " << " ";
-                } else {
-                    cout << playerHash[tmpChess->p_]<< chessHash[*tmpChess];
+                if (tmpChess == nullptr) { cout << " " << " " << " "; }
+                else {
+                    cout << playerHash[tmpChess->p_] << chessHash[*tmpChess];
                     cout << "\033[0m" << " ";
                 }
             }
             cout << endl;
         }
         cout << "  ";
-        for (int i = 0; i < COLUMNS; ++i) {
-            cout << i << " " << " ";
-        }
+        for (int i = 0; i < COLUMNS; ++i) { cout << i << " " << " "; }
         cout << endl;
     }
 
     void moveChess(int fx, int fy, int tx, int ty) {
         if (fx == tx && fy == ty) return;
         board_[tx][ty] = board_[fx][fy];
-        board_[fx][fy] = _chess_ptr(nullptr);
-    }
-
-    void moveChess(vector<int> &ans) {
-        moveChess(ans[0], ans[1], ans[2], ans[3]);
+        board_[fx][fy] = nullptr;
     }
 
     void moveChess(string move) {
         char sep = ' ';
-        move += sep;
-        int begin = -1;
         vector<int> ans;
-        for (size_t i = 0; i < move.size(); ++i) {
-            if (move[i] != sep) {
-                if (begin < 0) begin = i;
-            } else {
-                if (begin >= 0) {
-                    ans.push_back(stoi(move.substr(begin, i - begin)));
-                    begin = -1;
-                }
-            }
+        for (size_t i = 0; i < move.size() - 1; ++i) {
+            if (move[i] != sep) { ans.push_back(move[i]-'0'); }
         }
         assert(ans.size() == 4);
-        moveChess(ans);
+        moveChess(ans[0], ans[1], ans[2], ans[3]);
     }
 
     string askMove() {
@@ -171,7 +148,8 @@ public:
         string data;
         for (size_t i = 0; i < ans.size(); ++i) {
             data += to_string(ans[i]);
-            if (i != ans.size() - 1) data += " ";
+            if (i != ans.size() - 1) { data += " "; }
+            else { data += "\n"; }
         }
         return data;
     }

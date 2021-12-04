@@ -45,8 +45,9 @@ public:
             auto iter = this->_tsd_ptr->_single.begin();
             this->_tsd_ptr->_match[*iter] = conn;
             this->_tsd_ptr->_match[conn] = *iter;
-            ::write(*iter, Config::_init_msg, strlen(Config::_init_msg));
             INFO << "match client " << conn << " & " << *iter << END;
+            ::write(*iter, Config::_init_msg_red, strlen(Config::_init_msg_red));
+            ::write(conn, Config::_init_msg_black, strlen(Config::_init_msg_black));
             this->_tsd_ptr->_single.erase(*iter);
         }
         this->RegisterFd(conn, EPOLLIN);
@@ -73,7 +74,7 @@ public:
         try {
             p_buf->readNioToBuffer(conn, 100);
             if (p_buf->endsWith("\n")) {
-                INFO << "receive full message from " << conn << END;
+                INFO << "receive full message " << p_buf->_buffer << " from " << conn << END;
                 p_buf->writeNioFromBuffer(this->_tsd_ptr->_match[conn]);
             }
         } catch (NonFatalException &e) {
@@ -84,7 +85,7 @@ public:
     }
 };
 
-int main(int argc, char **argv) {
+int main() {
     ChessGameShareData data;
     EpollTPServer<ChessGameIOHandler, ChessGameShareData>
         server(8, Config::_port, &data);
