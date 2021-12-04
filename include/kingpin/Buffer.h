@@ -41,6 +41,12 @@ public:
         _buffer = nbuffer;
     }
 
+    void clear() {
+        ::memset(_buffer, 0, _cap);
+        _start = 0;
+        _offset = 0;
+    }
+
     int readNioToBuffer(int fd, int len) {
         resize(_offset + len);
         int total = 0;
