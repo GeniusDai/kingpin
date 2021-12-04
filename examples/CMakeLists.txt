@@ -9,5 +9,5 @@ set(
 include_directories("../include")
 
 add_subdirectory(quick_start)
-add_subdirectory(big_file_transfer)
+add_subdirectory(file_transfer)
 add_subdirectory(chinese_chess_game)
