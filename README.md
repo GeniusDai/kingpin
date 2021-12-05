@@ -90,6 +90,13 @@ Please refer to: [Quick Start](https://github.com/GeniusDai/kingpin/tree/dev/exa
 
 # Examples
 
+A wealth of cases:
+
 * [Chinese Chess Game](https://github.com/GeniusDai/kingpin/tree/dev/examples/chinese_chess_game): Chess game server and client, also implement a high concurrency test client.
 
 * [File Transfer](https://github.com/GeniusDai/kingpin/tree/dev/examples/file_transfer): File transfer server and client, IO and exceptions are both well handled.
+
+Build and run:
+
+    $ mkdir examples/build && cd examples/build
+    $ cmake .. && make
