@@ -45,8 +45,8 @@ public:
     static const string BLACK_COLOR;
     static const int COLUMNS = 9;
     static const int ROWS = 10;
-    static unordered_map<Player, string, EnumHash> playerHash;
-    static unordered_map<Chess, string, Chess::ChessHash> chessHash;
+    static const unordered_map<Player, string, EnumHash> playerHash;
+    static const unordered_map<Chess, string, Chess::ChessHash> chessHash;
 
     vector<vector<_chess_ptr> > _board;
 
@@ -80,15 +80,14 @@ public:
         }
     }
 
-    void showGameBoard() {
+    void showGameBoard() const {
         ::system("clear");
         for (int i = 0; i < ROWS; ++i) {
             cout << i << " ";
             for (int j = 0; j < COLUMNS; ++j) {
-                _chess_ptr tmpChess(_board[i][j]);
-                if (tmpChess == nullptr) { cout << " " << " " << " "; }
+                if (_board[i][j] == nullptr) { cout << " " << " " << " "; }
                 else {
-                    cout << playerHash[tmpChess->_p] << chessHash[*tmpChess];
+                    cout << playerHash.at(_board[i][j]->_p) << chessHash.at(*_board[i][j]);
                     cout << "\033[0m" << " ";
                 }
             }
@@ -135,13 +134,13 @@ public:
 const string ChessGame::RED_COLOR = "\033[47;31m";
 const string ChessGame::BLACK_COLOR = "\033[47;30m";
 
-unordered_map<ChessGame::Player, string, ChessGame::EnumHash>
+const unordered_map<ChessGame::Player, string, ChessGame::EnumHash>
 ChessGame::playerHash = {
     { ChessGame::Player::RED, ChessGame::RED_COLOR},
     { ChessGame::Player::BLACK, ChessGame::BLACK_COLOR}
 };
 
-unordered_map<ChessGame::Chess, string, ChessGame::Chess::ChessHash>
+const unordered_map<ChessGame::Chess, string, ChessGame::Chess::ChessHash>
 ChessGame::chessHash = {
     {{ChessGame::ChessType::ROOK, ChessGame::Player::RED}, "车"},
     {{ChessGame::ChessType::KNIGHT, ChessGame::Player::RED}, "马"},
