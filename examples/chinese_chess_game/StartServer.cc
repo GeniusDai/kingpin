@@ -55,7 +55,9 @@ public:
 
     void onReadable(int conn, uint32_t events) {
         unique_lock<mutex> lg(this->_tsd_ptr->_m);
-        Buffer *p_buf = this->_tsd_ptr->_message[conn].get();
+        unordered_map<int, unique_ptr<Buffer> > &message = this->_tsd_ptr->_message;
+        if (message.find(conn) == message.end()) { return; }
+        Buffer *p_buf = message[conn].get();
         try {
             p_buf->readNioToBufferTillBlock(conn, 100);
             if (p_buf->endsWith("\n")) {
