@@ -3,7 +3,6 @@
 
 #include <thread>
 #include <chrono>
-
 #include <cassert>
 #include <cstring>
 #include <cerrno>
