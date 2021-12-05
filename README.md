@@ -84,6 +84,8 @@ Please refer to: [Quick Start](https://github.com/GeniusDai/kingpin/tree/dev/exa
 
 * Buffer.h: IO Buffer pre-allocated on heap, support nonblock socket and disk fd. NOT thread safe.
 
+* Context.h: Function call timeout wrapper.
+
 * Utils.h: Some utility functions.
 
 # Examples
