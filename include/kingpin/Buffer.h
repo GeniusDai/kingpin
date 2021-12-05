@@ -31,6 +31,7 @@ public:
     Buffer(const Buffer &) = delete;
     ~Buffer() { delete _buffer; }
 
+    // resize to at least cap
     void resize(int cap) {
         if (_cap >= cap) return;
         while(_cap < cap) { _cap *= 2; }
@@ -47,7 +48,10 @@ public:
         _offset = 0;
     }
 
-    int readNioToBuffer(int fd, int len) {
+    // Read from fd
+    // If EOF encountered, will throw exception
+    // If no data, will return the bytes that have been read
+    int readNioToBufferTillBlock(int fd, int len) {
         resize(_offset + len);
         int total = 0;
         while (true) {
@@ -59,18 +63,20 @@ public:
             }
             total += curr;
             _offset += curr;
-            if (curr == 0) { throw NonFatalException("read: EOF encountered"); }
+            if (curr == 0) { throw EOFException(); }
             if (total == len) { break; }
         }
 
         return total;
     }
 
+    // Read from fd until end encountered
+    // If EOF encountered, will throw exception
     int readNioToBufferTill(int fd, const char *end, int step) {
         assert(step > 0);
         int str_len = strlen(end);
         while(true) {
-            int curr = readNioToBuffer(fd, step);
+            int curr = readNioToBufferTillBlock(fd, step);
             if (::strcmp(end, "\0") == 0) { return _offset; }
             if (curr == 0) { this_thread::sleep_for(chrono::milliseconds(_delay)); continue; }
 
@@ -84,45 +90,36 @@ public:
         }
     }
 
-    void readNioToBufferTillBlock(int fd) {
-        while(true) {
-            int step = _cap - _offset;
-            if (step == 0) { step = _cap; }
-            int curr = readNioToBuffer(fd, step);
-            if (curr < step) { break; }
+    // Write to fd
+    // If fd is closed, will throw exception
+    // If fd's write buffer is full, will return the bytes that have been write
+    int writeNioFromBufferTillBlock(int fd) {
+        int total = 0;
+        while (_start != _offset) {
+            int curr = ::write(fd, _buffer + _start, _offset - _start);
+            if (curr == -1) {
+                if (errno == EINTR) { continue; }
+                else if (errno == EPIPE || errno == ECONNRESET)
+                    { throw FdClosedException(); }
+                else if (errno == EAGAIN || errno == EWOULDBLOCK) { break; }
+                else fatalError("syscall write error");
+            }
+            assert (curr != 0);
+            _start += curr;
+            total += curr;
         }
+        return total;
     }
 
+    // Write to fd
+    // If fd closed, will throw exception
+    // If fd's write buffer is full, will try again
     void writeNioFromBuffer(int fd) {
         while (_start != _offset) {
-            int curr = ::write(fd, _buffer + _start, _offset - _start);
-            if (curr == -1) {
-                if (errno == EINTR) { continue; }
-                else if (errno == EPIPE || errno == ECONNRESET)
-                    { nonFatalError("syscall write error: oppo closed"); }
-                else if (errno == EAGAIN || errno == EWOULDBLOCK)
-                    { this_thread::sleep_for(chrono::milliseconds(_delay)); }
-            }
-            assert (curr != 0);
-            _start += curr;
+            int curr = writeNioFromBufferTillBlock(fd);
+            if (curr == 0) { this_thread::sleep_for(chrono::milliseconds(_delay)); }
         }
-        ::memset(_buffer, 0, _cap);
-        _start = 0;
-        _offset = 0;
-    }
-
-    void writeNioFromBufferTillBlock(int fd) {
-        while (_start != _offset) {
-            int curr = ::write(fd, _buffer + _start, _offset - _start);
-            if (curr == -1) {
-                if (errno == EINTR) { continue; }
-                else if (errno == EPIPE || errno == ECONNRESET)
-                    { nonFatalError("syscall write error: oppo closed"); }
-                else if (errno == EAGAIN || errno == EWOULDBLOCK) { break; }
-            }
-            assert (curr != 0);
-            _start += curr;
-        }
+        clear();
     }
 
     void appendToBuffer(const char *str) {

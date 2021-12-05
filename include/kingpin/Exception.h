@@ -11,8 +11,9 @@ class FatalException : public exception {
 public:
     FatalException(const char *what_arg) : _what_arg(what_arg){}
     FatalException(const string &what_arg) : FatalException(what_arg.c_str()) {}
+    virtual ~FatalException() {}
 
-    const char *what() const noexcept { return  _what_arg; }
+    virtual const char *what() const noexcept { return  _what_arg; }
 };
 
 class NonFatalException : public exception {
@@ -20,8 +21,19 @@ class NonFatalException : public exception {
 public:
     NonFatalException(const char *what_arg) : _what_arg(what_arg) {}
     NonFatalException(const string &what_arg) : NonFatalException(what_arg.c_str()) {}
+    virtual ~NonFatalException() {}
 
-    const char *what() const noexcept { return _what_arg; }
+    virtual const char *what() const noexcept { return _what_arg; }
+};
+
+class EOFException : public NonFatalException {
+public:
+    EOFException() : NonFatalException("EOF encountered") {}
+};
+
+class FdClosedException : public NonFatalException {
+public:
+    FdClosedException() : NonFatalException("fd closed") {}
 };
 
 #endif

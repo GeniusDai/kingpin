@@ -34,7 +34,7 @@ public:
         Buffer buffer;
         while(true) {
             bool exception_caught = false;
-            try { buffer.readNioToBuffer(sock, _step); }
+            try { buffer.readNioToBufferTillBlock(sock, _step); }
             catch(NonFatalException &e) {
                 exception_caught = true;
                 INFO << e.what() << END;

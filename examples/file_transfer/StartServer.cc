@@ -45,7 +45,7 @@ public:
         int fd = _hash[conn].first;
         bool exception_caught = false;
         try {
-            buffer->readNioToBuffer(fd, STEP);
+            buffer->readNioToBufferTillBlock(fd, STEP);
             INFO << "read from disk file " << STEP << " chars" << END;
         } catch (NonFatalException &e) {
             exception_caught = true;
