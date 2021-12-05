@@ -20,7 +20,7 @@
 
 using namespace std;
 
-const int LISTEN_NUM = 1024;
+static const int LISTEN_NUM = 1024;
 
 template <
     template<typename _TPSharedData> class _IOHandler,
