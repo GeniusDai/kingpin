@@ -12,8 +12,6 @@
 
 using namespace std;
 
-static const int DEFAULT_CAP = 64;
-
 // NOT thread safe
 class Buffer final {
 public:
@@ -21,10 +19,11 @@ public:
     int _offset = 0;    // data size total
     int _start = 0;     // data size that have been consumed
     char *_buffer;
+    static const int _default_cap;
 
     int _delay = 1;
 
-    Buffer() : Buffer(DEFAULT_CAP) {}
+    Buffer() : Buffer(_default_cap) {}
     Buffer(int cap) : _cap(cap) { _buffer = new char[_cap]; ::memset(_buffer, 0, _cap); }
     Buffer &operator=(const Buffer &) = delete;
     Buffer(const Buffer &) = delete;
@@ -140,5 +139,7 @@ public:
     }
 
 };
+
+const int Buffer::_default_cap = 64;
 
 #endif
