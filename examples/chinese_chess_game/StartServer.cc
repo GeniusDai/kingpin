@@ -53,7 +53,22 @@ public:
         this->RegisterFd(conn, EPOLLIN);
     }
 
-    void onPassivelyClosed(int conn) {
+    void onReadable(int conn, uint32_t events) {
+        unique_lock<mutex> lg(this->_tsd_ptr->_m);
+        Buffer *p_buf = this->_tsd_ptr->_message[conn].get();
+        try {
+            p_buf->readNioToBufferTillBlock(conn, 100);
+            if (p_buf->endsWith("\n")) {
+                INFO << "receive full message " << p_buf->_buffer << " from " << conn << END;
+                p_buf->writeNioFromBuffer(this->_tsd_ptr->_match[conn]);
+            }
+        } catch (NonFatalException &e) {
+            INFO << e << END;
+            _clean_data(conn);
+        }
+    }
+
+    void _clean_data(int conn) {
         INFO << "client closed the socket, will close " << conn << END;
         ::close(conn);
         this->_tsd_ptr->_message.erase(conn);
@@ -66,22 +81,6 @@ public:
             this->_tsd_ptr->_single.erase(conn);
         }
         this->_tsd_ptr->_match.erase(conn);
-    }
-
-    void onReadable(int conn, uint32_t events) {
-        unique_lock<mutex> lg(this->_tsd_ptr->_m);
-        Buffer *p_buf = this->_tsd_ptr->_message[conn].get();
-        try {
-            p_buf->readNioToBufferTillBlock(conn, 100);
-            if (p_buf->endsWith("\n")) {
-                INFO << "receive full message " << p_buf->_buffer << " from " << conn << END;
-                p_buf->writeNioFromBuffer(this->_tsd_ptr->_match[conn]);
-            }
-        } catch (NonFatalException &e) {
-            INFO << e << END;
-            onPassivelyClosed(conn);
-            return;
-        }
     }
 };
 
