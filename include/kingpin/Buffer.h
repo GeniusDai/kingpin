@@ -6,6 +6,7 @@
 #include <cassert>
 #include <cstring>
 #include <cerrno>
+#include <cstdio>
 
 #include "unistd.h"
 #include "kingpin/Utils.h"
@@ -57,7 +58,11 @@ public:
             if (curr == -1) {
                 if (errno == EINTR) { continue; }
                 else if (errno == EAGAIN || errno == EWOULDBLOCK) { break; }
-                else fatalError("syscall read error");
+                else if (errno == ECONNRESET) {
+                    perror("syscall read error");
+                    throw FdClosedException();
+                }
+                else { fatalError("syscall read error"); }
             }
             total += curr;
             _offset += curr;
@@ -97,10 +102,11 @@ public:
             int curr = ::write(fd, _buffer + _start, _offset - _start);
             if (curr == -1) {
                 if (errno == EINTR) { continue; }
-                else if (errno == EPIPE || errno == ECONNRESET)
-                    { throw FdClosedException(); }
                 else if (errno == EAGAIN || errno == EWOULDBLOCK) { break; }
-                else fatalError("syscall write error");
+                else if (errno == EPIPE || errno == ECONNRESET) {
+                    perror("syscall write error");
+                    throw FdClosedException();
+                } else { fatalError("syscall write error"); }
             }
             assert (curr != 0);
             _start += curr;
