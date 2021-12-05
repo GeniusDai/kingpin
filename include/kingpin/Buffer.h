@@ -84,6 +84,15 @@ public:
         }
     }
 
+    void readNioToBufferTillBlock(int fd) {
+        while(true) {
+            int step = _cap - _offset;
+            if (step == 0) { step = _cap; }
+            int curr = readNioToBuffer(fd, step);
+            if (curr < step) { break; }
+        }
+    }
+
     void writeNioFromBuffer(int fd) {
         while (_start != _offset) {
             int curr = ::write(fd, _buffer + _start, _offset - _start);
@@ -100,6 +109,20 @@ public:
         ::memset(_buffer, 0, _cap);
         _start = 0;
         _offset = 0;
+    }
+
+    void writeNioFromBufferTillBlock(int fd) {
+        while (_start != _offset) {
+            int curr = ::write(fd, _buffer + _start, _offset - _start);
+            if (curr == -1) {
+                if (errno == EINTR) { continue; }
+                else if (errno == EPIPE || errno == ECONNRESET)
+                    { nonFatalError("syscall write error: oppo closed"); }
+                else if (errno == EAGAIN || errno == EWOULDBLOCK) { break; }
+            }
+            assert (curr != 0);
+            _start += curr;
+        }
     }
 
     void appendToBuffer(const char *str) {
