@@ -68,17 +68,16 @@ public:
 
     void onPassivelyClosed(int conn) {
         unique_lock<mutex>(this->_tsd_ptr->_m);
-        INFO << "client closed the socket, will close " << conn << END;
+        int oppo = -1;
+        INFO << "client " << conn << " closed the socket" << END;
         ::close(conn);
         if (this->_tsd_ptr->_match.find(conn) != this->_tsd_ptr->_match.cend()) {
-            int oppo = this->_tsd_ptr->_match[conn];
-            INFO << "find oppo, will close socket " << oppo << END;
-            ::close(oppo);
-            this->_tsd_ptr->_match.erase(oppo);
+            oppo = this->_tsd_ptr->_match[conn];
+            this->_tsd_ptr->_match.erase(conn);
+            ::write(oppo, Config::_end_msg, strlen(Config::_end_msg));
         } else {
             this->_tsd_ptr->_single.erase(conn);
         }
-        this->_tsd_ptr->_match.erase(conn);
     }
 };
 

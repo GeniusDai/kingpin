@@ -6,6 +6,7 @@
 #include <thread>
 #include <chrono>
 #include <iostream>
+#include <cstdlib>
 
 #include "kingpin/Utils.h"
 #include "kingpin/Buffer.h"
@@ -32,13 +33,14 @@ public:
                 break;
             }
             if (_player == 'U') {
-                if (0 == ::strcmp(buffer._buffer, Config::_init_msg_red)) { _player = 'R'; }
+                if (!::strcmp(buffer._buffer, Config::_init_msg_red)) { _player = 'R'; }
                 else { _player = 'B'; }
             }
+            if (!::strcmp(buffer._buffer, Config::_end_msg)) { ::close(conn); exit(0); }
             game.moveChess(buffer._buffer);
             game.showGameBoard();
             cout << "You are player: " << ((_player == 'R') ? "red" : "black") << endl;
-            if (0 == ::strcmp(buffer._buffer, Config::_init_msg_black)) { continue; }
+            if (!::strcmp(buffer._buffer, Config::_init_msg_black)) { continue; }
             string move = game.askMove();
             game.moveChess(move);
             game.showGameBoard();
