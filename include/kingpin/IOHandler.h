@@ -89,7 +89,7 @@ public:
     void writeToBuffer(int conn) {
         Buffer *wb;
         try {
-            wb = this->_tsd_ptr->_wbh[conn].get()
+            wb = this->_tsd_ptr->_wbh[conn].get();
             wb->writeNioFromBufferTillBlock(conn);
             if (wb->writeComplete() ) {
                 wb->clear();
