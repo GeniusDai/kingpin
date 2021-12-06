@@ -1,5 +1,5 @@
-#ifndef _UTILS_H__de3094e9a992_
-#define _UTILS_H__de3094e9a992_
+#ifndef __UTILS_H_de3094e9a992_
+#define __UTILS_H_de3094e9a992_
 
 #include <sys/socket.h>
 #include <arpa/inet.h>

@@ -1,5 +1,5 @@
-#ifndef __EPOLL_TP_H_
-#define __EPOLL_TP_H_
+#ifndef __EPOLLTP_H_f2b87e623d0d_
+#define __EPOLLTP_H_f2b87e623d0d_
 
 #include <mutex>
 #include <memory>
