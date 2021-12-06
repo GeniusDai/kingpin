@@ -31,10 +31,15 @@ public:
             fatalError("syscall open failed");
         }
         Buffer buffer;
-        while(true) {
-            int len = buffer.readNioToBufferTillBlock(sock, _step);
-            buffer.writeNioFromBuffer(fd);
-            if (!len) { break; }
+        bool end = false;
+        while(!end) {
+            try {
+                buffer.readNioToBuffer(sock, _step);
+            } catch(const EOFException& e) {
+                INFO << e << END;
+                end = true;
+            }
+            buffer.writeNioFromBufferTillEnd(fd);
         }
         ::close(fd);
     }

@@ -24,12 +24,13 @@ public:
         try {
             rb = this->_tsd_ptr->_rbh[conn].get();
             wb = this->_tsd_ptr->_wbh[conn].get();
+            rb->stripEnd('\n');
             INFO << "client requests file [" << rb->_buffer << "]" << END;
             fd = open(rb->_buffer, O_RDONLY);
             if (fd < 0) { fatalError("syscall open failed"); }
-            wb->readNioToBufferAll(fd);
+            wb->readNioToBufferTillBlock(fd);
             INFO << "load file completed" << END;
-        } catch(const FdClosedException &e) {
+        } catch(const EOFException &e) {
             INFO << e << END;
         }
         this->writeToBuffer(conn);
