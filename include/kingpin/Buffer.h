@@ -49,6 +49,10 @@ public:
         _offset = 0;
     }
 
+    // Read "len" bytes from NIO to buffer:
+    // If no data for conn or read complete, return "length"
+    // If read until EOF(conn closed or fd end), throw "EOFException"
+    // If oppo collapses, throw "fdClosedException"
     int readNioToBuffer(int fd, int len) {
         resize(_offset + len);
         int total = 0;
@@ -70,6 +74,7 @@ public:
         return total;
     }
 
+    // Read all data available
     int readNioToBufferTillBlock(int fd) {
         int total = 0;
         while(true) {
@@ -80,6 +85,7 @@ public:
         return total;
     }
 
+    // Read until end, if no data available, will sleep
     int readNioToBufferTillEnd(int fd, const char *end, int step = _default_step) {
         assert(step > 0);
         int str_len = strlen(end);
@@ -96,6 +102,9 @@ public:
         }
     }
 
+    // Write "len" bytes to NIO from buffer:
+    // If NIO's buffer is full or write complete, return "length"
+    // If oppo collapses, throw "fdClosedException"
     int writeNioFromBuffer(int fd, int len) {
         assert((len <=  _offset - _start ) && (len > 0));
         int total = 0;
@@ -117,6 +126,7 @@ public:
         return total;
     }
 
+    // Write until NIO's buffer is full or no more to write
     int writeNioFromBufferTillBlock(int fd) {
         int total = 0;
         int step = _default_step;
@@ -129,6 +139,7 @@ public:
         return total;
     }
 
+    // Write all data to buffer, if NIO's buffer is full, will sleep
     void writeNioFromBufferTillEnd(int fd, int step = _default_step) {
         while (_start != _offset) {
             if (step > _offset - _start) { step = _offset - _start; }
