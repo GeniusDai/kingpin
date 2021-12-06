@@ -50,7 +50,7 @@ public:
     // Read from fd
     // If EOF encountered, will throw exception
     // If no data, will return the bytes that have been read
-    int readNioToBufferTillBlock(int fd, int len) {
+    int readNioToBufferTillBlock(int fd, int len = 1024) {
         resize(_offset + len);
         int total = 0;
         while (true) {
@@ -139,6 +139,8 @@ public:
             else { break; }
         }
     }
+
+    bool writeComplete() { return _start == _offset; }
 
     bool endsWith(const char *str) const {
         return _offset > 0 && ::strcmp(str, _buffer + _offset - ::strlen(str)) == 0;

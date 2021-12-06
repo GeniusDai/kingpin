@@ -2,12 +2,19 @@
 #define __TPSharedData_H_
 
 #include <mutex>
-#include <unordered_set>
+#include <unordered_map>
+#include <memory>
+
+#include "kingpin/Buffer.h"
 
 using namespace std;
 
 class TPSharedData {
 public:
+    unordered_map<int, shared_ptr<Buffer> > _rbh;
+    unordered_map<int, shared_ptr<Buffer> > _wbh;
+    mutex _rbm;
+    mutex _wbm;
     virtual ~TPSharedData() {}
 };
 

@@ -34,10 +34,17 @@ public:
     IOHandler(const IOHandler &) = delete;
     IOHandler &operator=(const IOHandler &) = delete;
     IOHandler(_TPSharedData *tsd_ptr) : _tsd_ptr(tsd_ptr) {}
+    virtual ~IOHandler() {}
+
+    virtual void onMessage(int conn) {}
+    virtual void onWriteComplete(int conn) {}
+    virtual void onPassivelyClosed(int conn) {}
+
+    virtual void run() = 0;
 
     void join() { _t->join(); }
 
-    void RegisterFd(int fd, uint32_t events) {
+    void registerFd(int fd, uint32_t events) {
         if (_fd_num == MAX_SIZE) throw FatalException("too many connections!");
         _fd_num++;
         INFO << "register fd " << fd << END;
@@ -51,7 +58,7 @@ public:
         }
     }
 
-    void RemoveFd(int fd) {
+    void removeFd(int fd) {
         _fd_num--;
         INFO << "remove fd " << fd << END;
         if (::epoll_ctl(_epfd, EPOLL_CTL_DEL, fd, NULL) == -1) {
@@ -61,13 +68,77 @@ public:
         }
     }
 
-    virtual void run() = 0;
+    void createBuffer(int conn) {
+        unique_lock<mutex>(this->_tsd_ptr->_rbm);
+        unique_lock<mutex>(this->_tsd_ptr->_wbm);
+        this->_tsd_ptr->_rbh[conn] = shared_ptr<Buffer>(new Buffer());
+        this->_tsd_ptr->_wbh[conn] = shared_ptr<Buffer>(new Buffer());
+    }
 
-    virtual void onReadable(int conn, uint32_t events) {}
+    void destoryBuffer(int conn) {
+        unique_lock<mutex>(this->_tsd_ptr->_rbm);
+        unique_lock<mutex>(this->_tsd_ptr->_wbm);
+        this->_tsd_ptr->_rbh.erase(conn);
+        this->_tsd_ptr->_wbh.erase(conn);
+    }
 
-    virtual void onWritable(int conn, uint32_t events) {}
+    // This function would be executed by one thread parallelly
+    // with onMessage, so NO worry about write buffer's parallel
+    // write. And conn be registered EPOLLIN while write is not
+    // completed.
+    void writeToBuffer(int conn) {
+        Buffer *wb;
+        try {
+            wb = this->_tsd_ptr->_wbh[conn].get()
+            wb->writeNioFromBufferTillBlock(conn);
+            if (wb->writeComplete() ) {
+                wb->clear();
+                onWriteComplete(conn); }
+            else {
+                removeFd(conn);
+                registerFd(conn, EPOLLOUT);
+            }
+        } catch(const FdClosedException &e) {
+            INFO << e << END;
+            onPassivelyClosed(conn);
+            destoryBuffer(conn);
+            ::close(conn);
+        }
+    }
 
-    virtual ~IOHandler() {}
+    void onWritable(int conn) {
+        Buffer *wb;
+        try {
+            wb = this->_tsd_ptr->_wbh[conn].get();
+            wb->writeNioFromBufferTillBlock(conn);
+            if (wb->writeComplete() ) {
+                wb->clear();
+                onWriteComplete(conn);
+                registerFd(conn, EPOLLIN);
+            }
+        } catch(const FdClosedException &e) {
+            INFO << e << END;
+            onPassivelyClosed(conn);
+            destoryBuffer(conn);
+            ::close(conn);
+        }
+
+    }
+
+    void onReadable(int conn) {
+        Buffer *rb;
+        try {
+            rb = this->_tsd_ptr->_rbh[conn].get();
+            rb->readNioToBufferTillBlock(conn);
+            onMessage(conn);
+        } catch(const NonFatalException &e) {
+            // opposite end may collapse or close the conn
+            INFO << e << END;
+            onPassivelyClosed(conn);
+            destoryBuffer(conn);
+            ::close(conn);
+        }
+    }
 };
 
 
@@ -78,6 +149,11 @@ public:
     IOHandlerForClient(const IOHandlerForClient &) = delete;
     IOHandlerForClient &operator=(const IOHandlerForClient &) = delete;
     IOHandlerForClient(_TPSharedData *tsd_ptr) : IOHandler<_TPSharedData>(tsd_ptr) {}
+    virtual ~IOHandlerForClient() {}
+
+    virtual void onInit() {}    // No lock hold
+
+    void run() { this->_t = make_shared<thread>(&IOHandlerForClient::_run, this); }
 
     void _run() {
         INFO << "thread start" << END;
@@ -90,21 +166,15 @@ public:
                 uint32_t events = this->_evs[i].events;
                 if (events & EPOLLIN) {
                     INFO << "conn " << fd << " readable" << END;
-                    this->onReadable(fd, events);
+                    this->onReadable(fd);
                 }
                 if (events & EPOLLOUT) {
                     INFO << "conn " << fd << " writable" << END;
-                    this->onWritable(fd, events);
+                    this->onWritable(fd);
                 }
             }
         }
     }
-
-    void run() { this->_t = make_shared<thread>(&IOHandlerForClient::_run, this); }
-
-    virtual void onInit() {}
-
-    virtual ~IOHandlerForClient() {}
 };
 
 
@@ -115,6 +185,11 @@ public:
     IOHandlerForServer(const IOHandlerForServer &) = delete;
     IOHandlerForServer &operator=(const IOHandlerForServer &) = delete;
     IOHandlerForServer(_TPSharedData *tsd_ptr) : IOHandler<_TPSharedData>(tsd_ptr) {}
+    virtual ~IOHandlerForServer() {}
+
+    virtual void onConnect(int conn) {}     // No lock hold
+
+    void run() { this->_t = make_shared<thread>(&IOHandlerForServer::_run, this); }
 
     void _run() {
         INFO << "thread start" << END;
@@ -123,7 +198,7 @@ public:
             if (this->_tsd_ptr->_listenfd_lock.try_lock()) {
                 timeout = -1;
                 INFO << "thread get lock" << END;
-                this->RegisterFd(this->_tsd_ptr->_listenfd, EPOLLIN);
+                this->registerFd(this->_tsd_ptr->_listenfd, EPOLLIN);
             }
             int num = epoll_wait(this->_epfd, this->_evs, MAX_SIZE, timeout);
             for (int i = 0; i < num; ++i) {
@@ -133,30 +208,27 @@ public:
                     int conn = ::accept4(fd, NULL, NULL, SOCK_NONBLOCK);
                     if (conn < 0) { fatalError("syscall accept4 error"); }
                     INFO << "new connection " << conn << " accepted" << END;
-                    this->RemoveFd(fd);
+                    this->removeFd(fd);
                     this->_tsd_ptr->_listenfd_lock.unlock();
                     INFO << "thread release lock" << END;
+                    this->createBuffer(conn);
                     this->onConnect(conn);
+                    this->registerFd(conn, EPOLLIN);
                     this_thread::sleep_for(chrono::milliseconds(1));
                 } else {
                     if (events & EPOLLIN) {
                         INFO << "conn " << fd << " readable" << END;
-                        this->onReadable(fd, events);
+                        this->onReadable(fd);
                     }
                     if (events & EPOLLOUT) {
                         INFO << "conn " << fd << " writable" << END;
-                        this->onWritable(fd, events);
+                        this->onWritable(fd);
                     }
                 }
             }
         }
     }
-
-    void run() { this->_t = make_shared<thread>(&IOHandlerForServer::_run, this); }
-
-    virtual void onConnect(int conn) {}
-
-    virtual ~IOHandlerForServer() {}
 };
+
 
 #endif
