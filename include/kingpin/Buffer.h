@@ -20,9 +20,11 @@ public:
     int _offset = 0;    // data size total
     int _start = 0;     // data size that have been consumed
     char *_buffer;
-    static const int _default_cap;
 
     int _delay = 1;
+
+    static const int _default_cap;
+    static const int _default_step;
 
     Buffer() : Buffer(_default_cap) {}
     Buffer(int cap) : _cap(cap) { _buffer = new char[_cap]; ::memset(_buffer, 0, _cap); }
@@ -48,9 +50,8 @@ public:
     }
 
     // Read from fd
-    // If EOF encountered, will throw exception
-    // If no data, will return the bytes that have been read
-    int readNioToBufferTillBlock(int fd, int len = 1024) {
+    // If no data(EOF or socket buffer empty), return the bytes that have been read
+    int readNioToBufferTillBlock(int fd, int len = _default_step) {
         resize(_offset + len);
         int total = 0;
         while (true) {
@@ -66,7 +67,7 @@ public:
             }
             total += curr;
             _offset += curr;
-            if (curr == 0) { throw EOFException(); }
+            if (curr == 0) { break; }
             if (total == len) { break; }
         }
         return total;
@@ -87,6 +88,13 @@ public:
                 }
                 if (found) return i;
             }
+        }
+    }
+
+    void readNioToBufferAll(int fd) {
+        while(true) {
+            int curr = readNioToBufferTillBlock(fd);
+            if (curr == 0) break;
         }
     }
 
@@ -146,5 +154,5 @@ public:
 };
 
 const int Buffer::_default_cap = 64;
-
+const int Buffer::_default_step = 1024;
 #endif

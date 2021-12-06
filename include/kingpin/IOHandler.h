@@ -129,7 +129,7 @@ public:
         Buffer *rb;
         try {
             rb = this->_tsd_ptr->_rbh[conn].get();
-            rb->readNioToBufferTillBlock(conn);
+            rb->readNioToBufferAll(conn);
             onMessage(conn);
         } catch(const NonFatalException &e) {
             // opposite end may collapse or close the conn
