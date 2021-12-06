@@ -18,6 +18,11 @@ void nonFatalError(const char *str) {
     throw NonFatalException(str);
 }
 
+void fdClosedError(const char *str) {
+    ::perror(str);
+    throw FdClosedException(str);
+}
+
 int initConnect(const char *ip, int port) {
     int sock;
     if ((sock = ::socket(AF_INET, SOCK_STREAM, 0))== -1)

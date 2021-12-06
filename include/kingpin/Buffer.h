@@ -60,10 +60,8 @@ public:
                 if (errno == EINTR) { continue; }
                 else if (errno == EAGAIN || errno == EWOULDBLOCK) { break; }
                 else if (errno == ECONNRESET) {
-                    perror("syscall read error");
-                    throw FdClosedException();
-                }
-                else { fatalError("syscall read error"); }
+                    fdClosedError("syscall read error");
+                } else { fatalError("syscall read error"); }
             }
             total += curr;
             _offset += curr;
@@ -109,8 +107,7 @@ public:
                 if (errno == EINTR) { continue; }
                 else if (errno == EAGAIN || errno == EWOULDBLOCK) { break; }
                 else if (errno == EPIPE || errno == ECONNRESET) {
-                    perror("syscall write error");
-                    throw FdClosedException();
+                    fdClosedError("syscall write error");
                 } else { fatalError("syscall write error"); }
             }
             assert (curr != 0);
