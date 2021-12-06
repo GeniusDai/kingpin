@@ -97,7 +97,7 @@ public:
     }
 
     int writeNioFromBuffer(int fd, int len) {
-        assert(len <=  _offset - _start);
+        assert(len <=  _offset - _start && len > 0);
         int total = 0;
         const char *str = "syscall write error";
         while (_start != _offset) {
@@ -118,8 +118,9 @@ public:
 
     int writeNioFromBufferTillBlock(int fd) {
         int total = 0;
+        int step = min(_offset - _start, _default_step);
         while (_start != _offset) {
-            int curr = writeNioFromBuffer(fd, _default_step);
+            int curr = writeNioFromBuffer(fd, step);
             total += curr;
             if (curr == 0) { break; }
         }
@@ -127,6 +128,7 @@ public:
     }
 
     void writeNioFromBufferTillEnd(int fd, int step = _default_step) {
+        step = min(_offset - _start, step);
         while (_start != _offset) {
             int curr = writeNioFromBuffer(fd, step);
             if (curr == 0) { this_thread::sleep_for(chrono::milliseconds(_delay)); }
