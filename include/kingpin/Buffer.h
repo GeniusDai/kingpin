@@ -51,7 +51,7 @@ public:
 
     // Read from fd
     // If no data(EOF or socket buffer empty), return the bytes that have been read
-    int readNioToBufferTillBlock(int fd, int len = _default_step) {
+    int readNioToBufferTillBlock(int fd, int len) {
         resize(_offset + len);
         int total = 0;
         while (true) {
@@ -91,7 +91,7 @@ public:
 
     void readNioToBufferAll(int fd) {
         while(true) {
-            int curr = readNioToBufferTillBlock(fd);
+            int curr = readNioToBufferTillBlock(fd, _default_step);
             if (curr == 0) break;
         }
     }

@@ -20,7 +20,7 @@ void nonFatalError(const char *str) {
 
 void fdClosedError(const char *str) {
     ::perror(str);
-    throw FdClosedException(str);
+    throw FdClosedException();
 }
 
 int initConnect(const char *ip, int port) {
