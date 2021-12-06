@@ -20,13 +20,13 @@ public:
         int sock = initConnect(_ip, _port);
         const char *str;
 
-        str = "src/bigfile.test";
+        str = "/tmp/file.test";
         ::write(sock, str, strlen(str));
-        sleep(3);
+        sleep(1);
         str = "\n";
         ::write(sock, str, strlen(str));
 
-        int fd = ::open("src/bigfile.test.copy", O_WRONLY | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR);
+        int fd = ::open("/tmp/file.test.copy", O_WRONLY | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR);
         if (fd < 0) {
             fatalError("syscall open failed");
         }

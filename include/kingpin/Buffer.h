@@ -69,7 +69,6 @@ public:
             if (curr == 0) { throw EOFException(); }
             if (total == len) { break; }
         }
-
         return total;
     }
 
@@ -80,9 +79,7 @@ public:
         int str_len = strlen(end);
         while(true) {
             int curr = readNioToBufferTillBlock(fd, step);
-            if (::strcmp(end, "\0") == 0) { return _offset; }
             if (curr == 0) { this_thread::sleep_for(chrono::milliseconds(_delay)); continue; }
-
             for (int i = _offset-curr; i < _offset; ++i) {
                 bool found = true;
                 for (int k = str_len-1; k >= 0; --k) {

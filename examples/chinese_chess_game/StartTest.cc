@@ -46,20 +46,17 @@ public:
             if (fcntl(sock, F_SETFL, flags | O_NONBLOCK) < 0) {
                 fatalError("syscall fcntl error");
             }
-            this->RegisterFd(sock, EPOLLIN | EPOLLRDHUP);
+            this->registerFd(sock, EPOLLIN);
+            this->createBuffer(sock);
             INFO << "Initialized connection of fd " << sock << END;
         }
-        INFO << "Finish initializing hread" << END;
+        INFO << "Finish initializing thread" << END;
     }
 
-    void onReadable(int conn, uint32_t events) {
-        Buffer buffer;
-        buffer.readNioToBufferTill(conn, "\n", 100);
-        buffer.writeNioFromBuffer(conn);
-        if (events & EPOLLRDHUP) {
-            ::close(conn);
-            INFO << "server closed socket " << conn << END;
-        }
+    void onMessage(int conn) {
+        Buffer *rb = this->_tsd_ptr->_rbh[conn].get();
+        INFO << "Receive message " << rb->_buffer << " from " << conn << END;
+        rb->writeNioFromBuffer(conn);
     }
 };
 

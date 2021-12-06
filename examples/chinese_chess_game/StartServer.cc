@@ -9,6 +9,8 @@
 #include <tuple>
 #include <unordered_map>
 #include <unordered_set>
+#include <ctime>
+#include <mutex>
 
 #include "kingpin/EpollTP.h"
 #include "kingpin/IOHandler.h"
@@ -26,7 +28,6 @@ public:
     mutex _m;
     unordered_map<int, int> _match;
     unordered_set<int> _single;
-    unordered_map<int, unique_ptr<Buffer> > _message;
 };
 
 template <typename ChessGameShareData>
@@ -36,8 +37,7 @@ public:
         IOHandlerForServer<ChessGameShareData>(tsd_ptr) {}
 
     void onConnect(int conn) {
-        unique_lock<mutex> lg(this->_tsd_ptr->_m);
-        this->_tsd_ptr->_message[conn] = std::move(unique_ptr<Buffer>(new Buffer));
+        unique_lock<mutex>(this->_tsd_ptr->_m);
         if (this->_tsd_ptr->_single.empty()) {
             this->_tsd_ptr->_single.insert(conn);
             INFO << "single client " << conn << " arrived"<< END;
@@ -46,39 +46,35 @@ public:
             this->_tsd_ptr->_match[*iter] = conn;
             this->_tsd_ptr->_match[conn] = *iter;
             INFO << "match client " << conn << " & " << *iter << END;
-            ::write(*iter, Config::_init_msg_red, strlen(Config::_init_msg_red));
             ::write(conn, Config::_init_msg_black, strlen(Config::_init_msg_black));
+            ::write(*iter, Config::_init_msg_red, strlen(Config::_init_msg_red));
             this->_tsd_ptr->_single.erase(*iter);
         }
-        this->RegisterFd(conn, EPOLLIN);
     }
 
-    void onReadable(int conn, uint32_t events) {
-        unique_lock<mutex> lg(this->_tsd_ptr->_m);
-        unordered_map<int, unique_ptr<Buffer> > &message = this->_tsd_ptr->_message;
-        if (message.find(conn) == message.end()) { return; }
-        Buffer *p_buf = message[conn].get();
-        try {
-            p_buf->readNioToBufferTillBlock(conn, 100);
-            if (p_buf->endsWith("\n")) {
-                INFO << "receive full message " << p_buf->_buffer << " from " << conn << END;
-                p_buf->writeNioFromBuffer(this->_tsd_ptr->_match[conn]);
-            }
-        } catch (NonFatalException &e) {
-            INFO << e << END;
-            _clean_data(conn);
-        }
+    void onMessage(int conn) {
+        unique_lock<mutex>(this->_tsd_ptr->_m);
+        if (this->_tsd_ptr->_match.find(conn) == this->_tsd_ptr->_match.end()) { return; }
+        int oppo = this->_tsd_ptr->_match[conn];
+        Buffer *rb = this->_tsd_ptr->_rbh[conn].get();
+        if (!rb->endsWith("\n")) { return; }
+        INFO << "receive full message " << rb->_buffer << " from " << conn << END;
+        Buffer *wb = this->_tsd_ptr->_wbh[oppo].get();
+        wb->appendToBuffer(rb->_buffer);
+        rb->clear();
+        this->writeToBuffer(oppo);
+        assert(rb->writeComplete() && wb->writeComplete());
     }
 
-    void _clean_data(int conn) {
+    void onPassivelyClosed(int conn) {
+        unique_lock<mutex>(this->_tsd_ptr->_m);
         INFO << "client closed the socket, will close " << conn << END;
         ::close(conn);
-        this->_tsd_ptr->_message.erase(conn);
         if (this->_tsd_ptr->_match.find(conn) != this->_tsd_ptr->_match.cend()) {
-            INFO << "find oppo, will close socket " << this->_tsd_ptr->_match[conn] << END;
-            ::close(this->_tsd_ptr->_match[conn]);
-            this->_tsd_ptr->_message.erase(this->_tsd_ptr->_match[conn]);
-            this->_tsd_ptr->_match.erase(this->_tsd_ptr->_match[conn]);
+            int oppo = this->_tsd_ptr->_match[conn];
+            INFO << "find oppo, will close socket " << oppo << END;
+            ::close(oppo);
+            this->_tsd_ptr->_match.erase(oppo);
         } else {
             this->_tsd_ptr->_single.erase(conn);
         }
