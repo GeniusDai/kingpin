@@ -30,17 +30,11 @@ public:
         if (fd < 0) {
             fatalError("syscall open failed");
         }
-        sleep(5);
         Buffer buffer;
         while(true) {
-            bool exception_caught = false;
-            try { buffer.readNioToBufferTillBlock(sock, _step); }
-            catch(NonFatalException &e) {
-                exception_caught = true;
-                INFO << e.what() << END;
-            }
+            int len = buffer.readNioToBufferTillBlock(sock, _step);
             buffer.writeNioFromBuffer(fd);
-            if (exception_caught) { break; }
+            if (!len) { break; }
         }
         ::close(fd);
     }

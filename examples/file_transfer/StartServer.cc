@@ -13,7 +13,6 @@
 using namespace std;
 
 static const int PORT = 8890;
-static const int STEP = 1024 * 100;
 
 template <typename _Data>
 class BigFileTransferIOHandler : public IOHandlerForServer<_Data> {
@@ -28,14 +27,16 @@ public:
             INFO << "client requests file [" << rb->_buffer << "]" << END;
             fd = open(rb->_buffer, O_RDONLY);
             if (fd < 0) { fatalError("syscall open failed"); }
-            wb->readNioToBufferTillBlock(fd);
-        } catch(const EOFException &e) {
+            wb->readNioToBufferAll(fd);
+            INFO << "load file completed" << END;
+        } catch(const FdClosedException &e) {
             INFO << e << END;
         }
         this->writeToBuffer(conn);
     }
 
     void onWriteComplete(int conn) {
+        INFO << "write complete, will close socket" << END;
         ::close(conn);
     }
 };
