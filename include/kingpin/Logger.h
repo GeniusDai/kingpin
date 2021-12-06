@@ -111,7 +111,7 @@ public:
             this->_thr_cv.wait(lg, [this]()->bool
                 { return this->_stop || _buffer._offset != 0; });
 
-            _buffer.writeNioFromBuffer(this->_level);
+            _buffer.writeNioFromBufferTillEnd(this->_level);
             if (this->_stop) { break; }
             assert(_flush);
         }

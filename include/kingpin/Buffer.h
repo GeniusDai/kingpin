@@ -49,35 +49,42 @@ public:
         _offset = 0;
     }
 
-    // Read from fd
-    // If no data(EOF or socket buffer empty), return the bytes that have been read
-    int readNioToBufferTillBlock(int fd, int len) {
+    int readNioToBuffer(int fd, int len) {
         resize(_offset + len);
         int total = 0;
+        const char *str = "syscall read error";
         while (true) {
             int curr = ::read(fd, _buffer + _offset, len - total);
             if (curr == -1) {
                 if (errno == EINTR) { continue; }
                 else if (errno == EAGAIN || errno == EWOULDBLOCK) { break; }
                 else if (errno == ECONNRESET) {
-                    fdClosedError("syscall read error");
-                } else { fatalError("syscall read error"); }
+                    fdClosedError(str);
+                } else { fatalError(str); }
             }
             total += curr;
             _offset += curr;
-            if (curr == 0) { break; }
+            if (curr == 0) { throw EOFException(); }
             if (total == len) { break; }
         }
         return total;
     }
 
-    // Read from fd until end encountered
-    // If EOF encountered, will throw exception
-    int readNioToBufferTill(int fd, const char *end, int step) {
+    int readNioToBufferTillBlock(int fd) {
+        int total = 0;
+        while(true) {
+            int curr = readNioToBuffer(fd, _default_step);
+            total += curr;
+            if (curr == 0) break;
+        }
+        return total;
+    }
+
+    int readNioToBufferTillEnd(int fd, const char *end, int step = _default_step) {
         assert(step > 0);
         int str_len = strlen(end);
         while(true) {
-            int curr = readNioToBufferTillBlock(fd, step);
+            int curr = readNioToBuffer(fd, step);
             if (curr == 0) { this_thread::sleep_for(chrono::milliseconds(_delay)); continue; }
             for (int i = _offset-curr; i < _offset; ++i) {
                 bool found = true;
@@ -89,26 +96,18 @@ public:
         }
     }
 
-    void readNioToBufferAll(int fd) {
-        while(true) {
-            int curr = readNioToBufferTillBlock(fd, _default_step);
-            if (curr == 0) break;
-        }
-    }
-
-    // Write to fd
-    // If fd is closed, will throw exception
-    // If fd's write buffer is full, will return the bytes that have been write
-    int writeNioFromBufferTillBlock(int fd) {
+    int writeNioFromBuffer(int fd, int len) {
+        assert(len <=  _offset - _start);
         int total = 0;
+        const char *str = "syscall write error";
         while (_start != _offset) {
-            int curr = ::write(fd, _buffer + _start, _offset - _start);
+            int curr = ::write(fd, _buffer + _start, len);
             if (curr == -1) {
                 if (errno == EINTR) { continue; }
                 else if (errno == EAGAIN || errno == EWOULDBLOCK) { break; }
                 else if (errno == EPIPE || errno == ECONNRESET) {
-                    fdClosedError("syscall write error");
-                } else { fatalError("syscall write error"); }
+                    fdClosedError(str);
+                } else { fatalError(str); }
             }
             assert (curr != 0);
             _start += curr;
@@ -117,12 +116,19 @@ public:
         return total;
     }
 
-    // Write to fd
-    // If fd closed, will throw exception
-    // If fd's write buffer is full, will try again
-    void writeNioFromBuffer(int fd) {
+    int writeNioFromBufferTillBlock(int fd) {
+        int total = 0;
         while (_start != _offset) {
-            int curr = writeNioFromBufferTillBlock(fd);
+            int curr = writeNioFromBuffer(fd, _default_step);
+            total += curr;
+            if (curr == 0) { break; }
+        }
+        return total;
+    }
+
+    void writeNioFromBufferTillEnd(int fd, int step = _default_step) {
+        while (_start != _offset) {
+            int curr = writeNioFromBuffer(fd, step);
             if (curr == 0) { this_thread::sleep_for(chrono::milliseconds(_delay)); }
         }
         clear();
