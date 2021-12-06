@@ -56,7 +56,7 @@ public:
     void onMessage(int conn) {
         Buffer *rb = this->_tsd_ptr->_rbh[conn].get();
         INFO << "Receive message " << rb->_buffer << " from " << conn << END;
-        rb->writeNioFromBuffer(conn);
+        rb->writeNioFromBufferTillEnd(conn);
     }
 };
 

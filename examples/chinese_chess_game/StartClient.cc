@@ -26,7 +26,7 @@ public:
         while (true) {
             buffer.clear();
             try {
-                buffer.readNioToBufferTill(conn, "\n", 1);
+                buffer.readNioToBufferTillEnd(conn, "\n", 1);
             } catch(NonFatalException &e) {
                 cout << e.what() << endl;
                 break;
