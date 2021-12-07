@@ -40,6 +40,10 @@ int initConnect(const char *ip, int port) {
 int initListen(int port, int listen_num) {
     int sock = ::socket(AF_INET, SOCK_STREAM, 0);
     if (sock < 0) { fatalError("syscall socket error"); }
+    int optval = 1;
+    if (::setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(optval)) == -1) {
+        fatalError("syscall setsockopt error");
+    }
     struct sockaddr_in addr;
     ::bzero(&addr, sizeof(addr));
     addr.sin_family = AF_INET;
