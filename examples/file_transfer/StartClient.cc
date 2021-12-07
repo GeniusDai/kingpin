@@ -17,7 +17,7 @@ public:
     static const char *const _ip;
 
     void start() {
-        int sock = initConnect(_ip, _port);
+        int sock = connectIp(_ip, _port, 15);
         const char *str;
 
         str = "/tmp/file.test";

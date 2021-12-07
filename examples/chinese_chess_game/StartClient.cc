@@ -20,7 +20,7 @@ public:
     char _player = 'U';
 
     void start() {
-        int conn = initConnect(Config::_ip, Config::_port);
+        int conn = connectIp(Config::_ip, Config::_port, 15);
         Buffer buffer;
         cout << "Welcome! Now waiting for another player to join..." << endl;
         ChessGame game;
