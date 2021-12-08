@@ -5,6 +5,7 @@
 #include <netdb.h>
 #include <unistd.h>
 #include <string>
+#include <cerrno>
 
 #include "kingpin/Exception.h"
 
@@ -30,11 +31,14 @@ int connectAddr(struct sockaddr *addr_ptr, size_t size, int timeout) {
     if ((sock = ::socket(AF_INET, SOCK_STREAM, 0))== -1) {
         fatalError("syscall socket error");
     }
-    if (::setsockopt(sock, SOL_SOCKET, SO_SNDTIMEO, &timeout, sizeof(timeout)) == -1) {
+    struct timeval tos{0, 1};
+    if (::setsockopt(sock, SOL_SOCKET, SO_SNDTIMEO, &tos, sizeof(tos)) == -1) {
         fatalError("syscall setsockopt error");
     }
     if (::connect(sock, (struct sockaddr *)addr_ptr, size) < 0) {
-        fatalError("syscall connect error");
+        const char *err_msg = "syscall connect error";
+        if (errno == EINPROGRESS) { nonFatalError(err_msg); }
+        else { FatalException(err_msg) }
     }
     return sock;
 }
