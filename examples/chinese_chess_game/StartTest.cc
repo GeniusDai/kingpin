@@ -35,13 +35,7 @@ public:
         inet_pton(AF_INET, Config::_ip, &addr.sin_addr.s_addr);
 
         for (int i = 0; i < POOL_SIZE; ++i) {
-            int sock = socket(AF_INET, SOCK_STREAM, 0);
-            if (sock < 0) {
-                fatalError("syscall socket error");
-            }
-            if (connect(sock, (struct sockaddr *)&addr, sizeof(addr)) < 0) {
-                fatalError("syscall connect error");
-            }
+            int sock = connectAddr((struct sockaddr *)&addr, sizeof(addr), 10);
             int flags = fcntl(sock, F_GETFL);
             if (flags < 0) { fatalError("syscall fcntl error"); }
             if (fcntl(sock, F_SETFL, flags | O_NONBLOCK) < 0) {

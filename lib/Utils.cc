@@ -37,7 +37,7 @@ int connectAddr(struct sockaddr *addr_ptr, size_t size, int timeout) {
     if (::setsockopt(sock, SOL_SOCKET, SO_SNDTIMEO, &tos, sizeof(tos)) == -1) {
         fatalError("syscall setsockopt error");
     }
-    if (::connect(sock, (struct sockaddr *)addr_ptr, size) < 0) {
+    if (::connect(sock, addr_ptr, size) < 0) {
         const char *err_msg = "syscall connect error";
         if (errno == EINPROGRESS) { nonFatalError(err_msg); }
         else { fatalError(err_msg); }
@@ -57,7 +57,7 @@ int connectHost(const char *host, int port, int timeout) {
     if (::getaddrinfo(host, to_string(port).c_str(), &addr, &addr_ptr) < 0) {
         fatalError("syscall getaddrinfo error");
     }
-    int sock = connectAddr((sockaddr *)addr_ptr[0].ai_addr, sizeof(struct sockaddr), timeout);
+    int sock = connectAddr(addr_ptr[0].ai_addr, sizeof(struct sockaddr), timeout);
     ::freeaddrinfo(addr_ptr);
     return sock;
 }
@@ -68,7 +68,7 @@ int connectIp(const char *ip, int port, int timeout) {
     addr.sin_family = AF_INET;
     addr.sin_port = ::htons(port);
     ::inet_pton(AF_INET, ip, &addr.sin_addr.s_addr);
-    return connectAddr((sockaddr *)&addr, sizeof(addr), timeout);
+    return connectAddr((struct sockaddr *)&addr, sizeof(addr), timeout);
 }
 
 int initListen(int port, int listen_num) {
