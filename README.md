@@ -42,7 +42,7 @@
 
 ![image](https://github.com/GeniusDai/kingpin/raw/dev/pictures/kingpin.002.png)
 
-### Async Logger:
+### Async AsyncLogger:
 
     1. Get mutex for the log buffer, if it's locked, thread will block.
 
@@ -80,7 +80,7 @@ Please refer to: [Quick Start](https://github.com/GeniusDai/kingpin/tree/dev/exa
 
 * EpollTP.h: Thread pool, initialized by IOHandler and TPSharedData.
 
-* Logger.h: Thread safe logger, using backend thread for asynchronous output, line buffered.
+* AsyncLogger.h: Thread safe logger, using backend thread for asynchronous output, line buffered.
 
 * Buffer.h: IO Buffer pre-allocated on heap, support nonblock socket and disk fd. NOT thread safe.
 

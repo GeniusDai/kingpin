@@ -11,9 +11,10 @@
 #include <thread>
 #include <sstream>
 #include <chrono>
+#include <unistd.h>
 
 #include "kingpin/Exception.h"
-#include "kingpin/Logger.h"
+#include "kingpin/AsyncLogger.h"
 #include "kingpin/Utils.h"
 
 using namespace std;

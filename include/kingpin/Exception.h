@@ -28,12 +28,12 @@ public:
     virtual const char *what() const noexcept { return _what_arg; }
 };
 
-class EOFException : public NonFatalException {
+class EOFException final : public NonFatalException {
 public:
     EOFException() : NonFatalException("EOF encountered") {}
 };
 
-class FdClosedException : public NonFatalException {
+class FdClosedException final : public NonFatalException {
 public:
     FdClosedException() : NonFatalException("fd closed") {}
 };

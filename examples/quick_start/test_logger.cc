@@ -6,7 +6,7 @@
 #include <thread>
 #include <ctime>
 
-#include "kingpin/Logger.h"
+#include "kingpin/AsyncLogger.h"
 
 using namespace std;
 using namespace kingpin;
@@ -15,7 +15,7 @@ void log() {
     int n = 2;
     while (n--) {
         /*
-         * We DONOT recommend using the Logger this way -- insert some code
+         * We DONOT recommend using the AsyncLogger this way -- insert some code
          * between "INFO <<" and "<< END". You should always do this together
          * since thread will hold the lock in "INFO <<" and release lock
          * in "<< END", this will cause other threads block. You could use

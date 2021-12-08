@@ -8,7 +8,7 @@
 #include "kingpin/EpollTP.h"
 #include "kingpin/IOHandler.h"
 #include "kingpin/TPSharedData.h"
-#include "kingpin/Logger.h"
+#include "kingpin/AsyncLogger.h"
 #include "kingpin/Utils.h"
 #include "kingpin/Buffer.h"
 

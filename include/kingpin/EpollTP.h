@@ -14,7 +14,7 @@
 #include <iostream>
 #include <memory>
 
-#include "kingpin/Logger.h"
+#include "kingpin/AsyncLogger.h"
 #include "kingpin/IOHandler.h"
 #include "kingpin/Utils.h"
 

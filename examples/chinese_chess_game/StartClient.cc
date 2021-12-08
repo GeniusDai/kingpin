@@ -8,6 +8,7 @@
 #include <iostream>
 #include <cstdlib>
 
+#include "kingpin/Exception.h"
 #include "kingpin/Utils.h"
 #include "kingpin/Buffer.h"
 #include "Config.h"
@@ -29,7 +30,7 @@ public:
             buffer.clear();
             try {
                 buffer.readNioToBufferTillEnd(conn, "\n", 1);
-            } catch(NonFatalException &e) {
+            } catch(const NonFatalException &e) {
                 cout << e.what() << endl;
                 break;
             }

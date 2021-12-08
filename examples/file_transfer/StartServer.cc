@@ -2,6 +2,7 @@
 #include <memory>
 #include <thread>
 #include <chrono>
+#include <unistd.h>
 
 #include <fcntl.h>
 
@@ -9,6 +10,7 @@
 #include "kingpin/EpollTP.h"
 #include "kingpin/IOHandler.h"
 #include "kingpin/Buffer.h"
+#include "kingpin/Exception.h"
 
 using namespace std;
 using namespace kingpin;

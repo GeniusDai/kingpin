@@ -3,10 +3,12 @@
 #include <fcntl.h>
 #include <cstring>
 #include <ctime>
+#include <unistd.h>
 
-#include "kingpin/Logger.h"
+#include "kingpin/AsyncLogger.h"
 #include "kingpin/Buffer.h"
 #include "kingpin/Utils.h"
+#include "kingpin/Exception.h"
 
 using namespace std;
 using namespace kingpin;
@@ -36,7 +38,7 @@ public:
         while(!end) {
             try {
                 buffer.readNioToBuffer(sock, _step);
-            } catch(const EOFException& e) {
+            } catch(const EOFException &e) {
                 INFO << e << END;
                 end = true;
             }

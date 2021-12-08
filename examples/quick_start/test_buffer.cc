@@ -6,7 +6,7 @@
 #include <thread>
 #include <ctime>
 
-#include "kingpin/Logger.h"
+#include "kingpin/AsyncLogger.h"
 
 using namespace std;
 using namespace kingpin;
