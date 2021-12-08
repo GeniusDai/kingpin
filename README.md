@@ -42,7 +42,7 @@
 
 ![image](https://github.com/GeniusDai/kingpin/raw/dev/pictures/kingpin.002.png)
 
-### Async AsyncLogger:
+### AsyncLogger:
 
     1. Get mutex for the log buffer, if it's locked, thread will block.
 
@@ -98,5 +98,5 @@ A wealth of cases:
 
 Build and run:
 
-    $ mkdir examples/build && cd examples/build
+    $ mkdir build && cd build
     $ cmake .. && make
