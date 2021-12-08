@@ -215,8 +215,8 @@ public:
                     this->_tsd_ptr->_listenfd_lock.unlock();
                     INFO << "thread release lock" << END;
                     this->createBuffer(conn);
-                    this->onConnect(conn);
                     this->registerFd(conn, EPOLLIN);
+                    this->onConnect(conn);
                     this_thread::sleep_for(chrono::milliseconds(1));
                 } else {
                     if (events & EPOLLIN) {
