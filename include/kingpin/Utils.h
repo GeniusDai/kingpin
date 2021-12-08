@@ -1,6 +1,8 @@
 #ifndef __UTILS_H_de3094e9a992_
 #define __UTILS_H_de3094e9a992_
 
+#include <cstddef>
+
 namespace kingpin {
 
 void fatalError(const char *str);
