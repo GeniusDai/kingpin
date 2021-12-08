@@ -11,6 +11,7 @@
 #include "kingpin/Buffer.h"
 
 using namespace std;
+using namespace kingpin;
 
 static const int PORT = 8890;
 

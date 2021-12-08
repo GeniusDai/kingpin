@@ -9,6 +9,7 @@
 #include "kingpin/Logger.h"
 
 using namespace std;
+using namespace kingpin;
 
 void log() {
     int n = 2;

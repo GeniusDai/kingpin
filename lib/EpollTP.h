@@ -20,8 +20,6 @@
 
 using namespace std;
 
-namespace kingpin {
-
 static const int LISTEN_NUM = 1024;
 
 template <
@@ -73,7 +71,5 @@ public:
 
     void run() { _tp->run(); }
 };
-
-}
 
 #endif

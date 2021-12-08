@@ -11,8 +11,6 @@
 
 #include "kingpin/Exception.h"
 
-namespace kingpin {
-
 void fatalError(const char *str) {
     ::perror(str);
     throw FatalException(str);
@@ -85,8 +83,6 @@ int initListen(int port, int listen_num) {
     }
     ::listen(sock, listen_num);
     return sock;
-}
-
 }
 
 #endif

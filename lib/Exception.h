@@ -6,8 +6,6 @@
 
 using namespace std;
 
-namespace kingpin {
-
 class FatalException : public exception {
     const char *_what_arg;
 public:
@@ -37,7 +35,5 @@ class FdClosedException : public NonFatalException {
 public:
     FdClosedException() : NonFatalException("fd closed") {}
 };
-
-}
 
 #endif

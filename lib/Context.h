@@ -7,8 +7,6 @@
 
 #include "kingpin/Utils.h"
 
-namespace kingpin {
-
 class Context {
 public:
     Context(int timeout) : _timeout(timeout) {
@@ -75,7 +73,5 @@ public:
         return NULL;
     }
 };
-
-}
 
 #endif

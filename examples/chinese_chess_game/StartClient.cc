@@ -14,6 +14,7 @@
 #include "ChessGame.h"
 
 using namespace std;
+using namespace kingpin;
 
 class Client {
 public:

@@ -9,8 +9,6 @@
 
 using namespace std;
 
-namespace kingpin {
-
 class TPSharedData {
 public:
     unordered_map<int, shared_ptr<Buffer> > _rbh;
@@ -32,7 +30,5 @@ class ClientTPSharedData : public TPSharedData {
 public:
     virtual ~ClientTPSharedData() {}
 };
-
-}
 
 #endif

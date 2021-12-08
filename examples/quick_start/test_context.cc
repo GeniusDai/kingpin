@@ -4,6 +4,9 @@
 #include <unistd.h>
 #include <thread>
 
+using namespace std;
+using namespace kingpin;
+
 struct SimpleArgs {
     int a;
     int b;

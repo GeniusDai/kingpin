@@ -17,8 +17,6 @@
 
 using namespace std;
 
-namespace kingpin {
-
 class Logger final {
     int _level;
 
@@ -133,7 +131,5 @@ public:
 Logger INFO(1);
 Logger ERROR(2);
 const Logger END(-1);
-
-}
 
 #endif

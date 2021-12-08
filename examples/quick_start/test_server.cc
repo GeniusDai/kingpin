@@ -4,6 +4,9 @@
 
 #include <cstring>
 
+using namespace std;
+using namespace kingpin;
+
 template<typename _Data>
 class SimpleHandler : public IOHandlerForServer<_Data> {
 public:

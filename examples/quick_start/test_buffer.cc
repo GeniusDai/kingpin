@@ -9,6 +9,7 @@
 #include "kingpin/Logger.h"
 
 using namespace std;
+using namespace kingpin;
 
 int main() {
     Buffer buffer;

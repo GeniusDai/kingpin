@@ -15,6 +15,7 @@
 #include "Config.h"
 
 using namespace std;
+using namespace kingpin;
 
 const int POOL_SIZE = 10;
 

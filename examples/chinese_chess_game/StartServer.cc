@@ -22,6 +22,7 @@
 #include "Config.h"
 
 using namespace std;
+using namespace kingpin;
 
 class ChessGameShareData : public ServerTPSharedData {
 public:

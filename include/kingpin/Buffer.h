@@ -13,6 +13,8 @@
 
 using namespace std;
 
+namespace kingpin {
+
 // NOT thread safe
 class Buffer final {
 public:
@@ -173,4 +175,6 @@ public:
 
 const int Buffer::_default_cap = 64;
 const int Buffer::_default_step = 1024;
+
+}
 #endif

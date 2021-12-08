@@ -18,8 +18,6 @@
 
 using namespace std;
 
-namespace kingpin {
-
 const int MAX_SIZE = 1024;
 
 // IOHandler --> thread
@@ -232,6 +230,5 @@ public:
     }
 };
 
-}
 
 #endif
