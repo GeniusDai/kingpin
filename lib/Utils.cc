@@ -6,6 +6,7 @@
 #include <unistd.h>
 #include <string>
 #include <cerrno>
+#include <cassert>
 
 #include "kingpin/Exception.h"
 
@@ -27,18 +28,19 @@ void fdClosedError(const char *str) {
 }
 
 int connectAddr(struct sockaddr *addr_ptr, size_t size, int timeout) {
+    assert(timeout > 0);
     int sock;
     if ((sock = ::socket(AF_INET, SOCK_STREAM, 0))== -1) {
         fatalError("syscall socket error");
     }
-    struct timeval tos{0, 1};
+    struct timeval tos{timeout, 0};
     if (::setsockopt(sock, SOL_SOCKET, SO_SNDTIMEO, &tos, sizeof(tos)) == -1) {
         fatalError("syscall setsockopt error");
     }
     if (::connect(sock, (struct sockaddr *)addr_ptr, size) < 0) {
         const char *err_msg = "syscall connect error";
         if (errno == EINPROGRESS) { nonFatalError(err_msg); }
-        else { FatalException(err_msg) }
+        else { fatalError(err_msg); }
     }
     return sock;
 }
