@@ -186,6 +186,8 @@ public:
 template <typename _TPSharedData>
 class IOHandlerForServer : public IOHandler<_TPSharedData> {
 public:
+    static const int _conn_delay;
+
     IOHandlerForServer(const IOHandlerForServer &) = delete;
     IOHandlerForServer &operator=(const IOHandlerForServer &) = delete;
     IOHandlerForServer(_TPSharedData *tsd_ptr) : IOHandler<_TPSharedData>(tsd_ptr) {}
@@ -219,7 +221,7 @@ public:
                     this->createBuffer(conn);
                     this->registerFd(conn, EPOLLIN);
                     this->onConnect(conn);
-                    this_thread::sleep_for(chrono::milliseconds(1));
+                    this_thread::sleep_for(chrono::microseconds(_conn_delay));
                 } else {
                     if (events & EPOLLIN) {
                         INFO << "conn " << fd << " readable" << END;
@@ -240,6 +242,9 @@ const int IOHandler<_TPSharedData>::_default_epoll_timeout = 1;    // millisecon
 
 template <typename _TPSharedData>
 const int IOHandler<_TPSharedData>::_max_client_per_thr = 2048;
+
+template <typename _TPSharedData>
+const int IOHandlerForServer<_TPSharedData>::_conn_delay = 100;     // microseconds
 
 }
 
