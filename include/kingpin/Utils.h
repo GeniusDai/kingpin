@@ -18,6 +18,8 @@ void timeoutError(const char *str);
 
 void setTcpSockaddr(struct sockaddr_in *addr_ptr, const char *ip, int port);
 
+void setNonBlock(int fd);
+
 int connectAddr(struct sockaddr_in *addr_ptr, int timeout);
 
 int connectHost(const char *host, int port, int timeout);

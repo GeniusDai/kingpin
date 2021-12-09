@@ -7,6 +7,7 @@
 #include <string>
 #include <cerrno>
 #include <cassert>
+#include <fcntl.h>
 
 #include "kingpin/Exception.h"
 
@@ -37,6 +38,15 @@ void setTcpSockaddr(struct sockaddr_in *addr_ptr, const char *ip, int port) {
     addr_ptr->sin_family = AF_INET;
     addr_ptr->sin_port = htons(port);
     ::inet_pton(AF_INET, ip, (void *)(static_cast<long>(addr_ptr->sin_addr.s_addr)));
+}
+
+void setNonBlock(int fd) {
+    const char *str = "syscall fcntl error";
+    int flags = fcntl(fd, F_GETFL);
+    if (flags < 0) { fatalError(str); }
+    if (fcntl(fd, F_SETFL, flags | O_NONBLOCK) < 0) {
+        fatalError(str);
+    }
 }
 
 int connectAddr(struct sockaddr_in *addr_ptr, int timeout) {
