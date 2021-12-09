@@ -20,7 +20,6 @@ void func() {
     }
     cout << "connect complete" << endl;
     const char *str = "hello, kingpin";
-    char buf[1];
     if (::write(sock, str, ::strlen(str)) < 0) {
         ::perror("syscall write error");
     }
@@ -28,11 +27,11 @@ void func() {
 
 int main() {
     vector<thread> vt;
-    for (int i = 0; i < 100; ++i) {
+    for (uint i = 0; i < 100; ++i) {
         cout << "round " << i << endl;
         vt.emplace_back(func);
     }
-    for (int i = 0; i < vt.size(); ++i) {
+    for (uint i = 0; i < vt.size(); ++i) {
         vt[i].join();
     }
     return 0;

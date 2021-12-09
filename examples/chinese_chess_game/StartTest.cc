@@ -29,13 +29,9 @@ public:
         _inited = true;
         INFO << "intializing thread" << END;
         struct sockaddr_in addr;
-        memset(&addr, 0, sizeof(addr));
-        addr.sin_family = AF_INET;
-        addr.sin_port = htons(Config::_port);
-        inet_pton(AF_INET, Config::_ip, &addr.sin_addr.s_addr);
-
+        setTcpSockaddr(&addr, Config::_ip, Config::_port);
         for (int i = 0; i < POOL_SIZE; ++i) {
-            int sock = connectAddr((struct sockaddr *)&addr, sizeof(addr), 10);
+            int sock = connectAddr(&addr, 10);
             int flags = fcntl(sock, F_GETFL);
             if (flags < 0) { fatalError("syscall fcntl error"); }
             if (fcntl(sock, F_SETFL, flags | O_NONBLOCK) < 0) {

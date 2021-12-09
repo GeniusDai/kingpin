@@ -2,6 +2,9 @@
 #define __UTILS_H_de3094e9a992_
 
 #include <cstddef>
+#include <netinet/in.h>
+
+static_assert(sizeof(sockaddr) == sizeof(sockaddr_in));
 
 namespace kingpin {
 
@@ -11,7 +14,9 @@ void nonFatalError(const char *str);
 
 void fdClosedError(const char *str);
 
-int connectAddr(struct sockaddr *addr_ptr, size_t size, int timeout);
+void setTcpSockaddr(struct sockaddr_in *addr_ptr, const char *ip, int port);
+
+int connectAddr(struct sockaddr_in *addr_ptr, int timeout);
 
 int connectHost(const char *host, int port, int timeout);
 

@@ -32,7 +32,14 @@ void timeoutError(const char *str) {
     throw TimeoutException();
 }
 
-int connectAddr(struct sockaddr *addr_ptr, size_t size, int timeout) {
+void setTcpSockaddr(struct sockaddr_in *addr_ptr, const char *ip, int port) {
+    memset(addr_ptr, 0, sizeof(struct sockaddr));
+    addr_ptr->sin_family = AF_INET;
+    addr_ptr->sin_port = htons(port);
+    inet_pton(AF_INET, ip, (void *)(static_cast<long>(addr_ptr->sin_addr.s_addr)));
+}
+
+int connectAddr(struct sockaddr_in *addr_ptr, int timeout) {
     assert(timeout > 0);
     int sock;
     if ((sock = ::socket(AF_INET, SOCK_STREAM, 0))== -1) {
@@ -42,7 +49,7 @@ int connectAddr(struct sockaddr *addr_ptr, size_t size, int timeout) {
     if (::setsockopt(sock, SOL_SOCKET, SO_SNDTIMEO, &tos, sizeof(tos)) == -1) {
         fatalError("syscall setsockopt error");
     }
-    if (::connect(sock, addr_ptr, size) < 0) {
+    if (::connect(sock, (struct sockaddr *)addr_ptr, sizeof(struct sockaddr)) < 0) {
         const char *err_msg = "syscall connect error";
         if (errno == EINPROGRESS) { timeoutError(err_msg); }
         else { fatalError(err_msg); }
@@ -62,7 +69,7 @@ int connectHost(const char *host, int port, int timeout) {
     if (::getaddrinfo(host, to_string(port).c_str(), &addr, &addr_ptr) < 0) {
         fatalError("syscall getaddrinfo error");
     }
-    int sock = connectAddr(addr_ptr[0].ai_addr, sizeof(struct sockaddr), timeout);
+    int sock = connectAddr((struct sockaddr_in *)(addr_ptr[0].ai_addr), timeout);
     ::freeaddrinfo(addr_ptr);
     return sock;
 }
@@ -73,7 +80,7 @@ int connectIp(const char *ip, int port, int timeout) {
     addr.sin_family = AF_INET;
     addr.sin_port = ::htons(port);
     ::inet_pton(AF_INET, ip, &addr.sin_addr.s_addr);
-    return connectAddr((struct sockaddr *)&addr, sizeof(addr), timeout);
+    return connectAddr(&addr, timeout);
 }
 
 int initListen(int port, int listen_num) {
@@ -88,7 +95,7 @@ int initListen(int port, int listen_num) {
     addr.sin_family = AF_INET;
     addr.sin_port = ::htons(port);
     addr.sin_addr.s_addr = ::htonl(INADDR_ANY);
-    if (::bind(sock, (sockaddr *)&addr, sizeof(addr)) < 0) {
+    if (::bind(sock, (struct sockaddr *)&addr, sizeof(addr)) < 0) {
         fatalError("syscall bind error");
     }
     ::listen(sock, listen_num);
