@@ -21,15 +21,16 @@ using namespace std;
 
 namespace kingpin {
 
-const int MAX_SIZE = 1024;
-
 // IOHandler --> thread
 
 template <typename _TPSharedData>
 class IOHandler {
 public:
+    static const int _default_epoll_timeout;
+    static const int _max_client_per_thr;
+
     int _epfd = ::epoll_create(1);
-    struct epoll_event _evs[MAX_SIZE];
+    struct epoll_event _evs[_max_client_per_thr];
     shared_ptr<thread> _t;
     _TPSharedData *_tsd_ptr;
     int _fd_num = 0;
@@ -48,7 +49,7 @@ public:
     void join() { _t->join(); }
 
     void registerFd(int fd, uint32_t events) {
-        if (_fd_num == MAX_SIZE) throw FatalException("too many connections!");
+        if (_fd_num == _max_client_per_thr) throw FatalException("too many connections!");
         _fd_num++;
         INFO << "register fd " << fd << END;
         struct epoll_event ev;
@@ -162,8 +163,8 @@ public:
         INFO << "thread start" << END;
         while (true) {
             onInit();
-            int timeout = 10;
-            int num = epoll_wait(this->_epfd, this->_evs, MAX_SIZE, timeout);
+            int num = epoll_wait(this->_epfd, this->_evs,
+                this->_max_client_per_thr, this->_default_epoll_timeout);
             for (int i = 0; i < num; ++i) {
                 int fd = this->_evs[i].data.fd;
                 uint32_t events = this->_evs[i].events;
@@ -197,13 +198,14 @@ public:
     void _run() {
         INFO << "thread start" << END;
         while (true) {
-            int timeout = 5;
+            int timeout = this->_default_epoll_timeout;
             if (this->_tsd_ptr->_listenfd_lock.try_lock()) {
                 timeout = -1;
                 INFO << "thread get lock" << END;
                 this->registerFd(this->_tsd_ptr->_listenfd, EPOLLIN);
             }
-            int num = epoll_wait(this->_epfd, this->_evs, MAX_SIZE, timeout);
+            int num = epoll_wait(this->_epfd, this->_evs,
+                this->_max_client_per_thr, timeout);
             for (int i = 0; i < num; ++i) {
                 int fd = this->_evs[i].data.fd;
                 uint32_t events = this->_evs[i].events;
@@ -232,6 +234,12 @@ public:
         }
     }
 };
+
+template <typename _TPSharedData>
+const int IOHandler<_TPSharedData>::_default_epoll_timeout = 1;    // milliseconds
+
+template <typename _TPSharedData>
+const int IOHandler<_TPSharedData>::_max_client_per_thr = 2048;
 
 }
 

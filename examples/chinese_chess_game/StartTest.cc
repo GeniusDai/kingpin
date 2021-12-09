@@ -32,11 +32,7 @@ public:
         setTcpSockaddr(&addr, Config::_ip, Config::_port);
         for (int i = 0; i < POOL_SIZE; ++i) {
             int sock = connectAddr(&addr, 10);
-            int flags = fcntl(sock, F_GETFL);
-            if (flags < 0) { fatalError("syscall fcntl error"); }
-            if (fcntl(sock, F_SETFL, flags | O_NONBLOCK) < 0) {
-                fatalError("syscall fcntl error");
-            }
+            setNonBlock(sock);
             this->registerFd(sock, EPOLLIN);
             this->createBuffer(sock);
             INFO << "Initialized connection of fd " << sock << END;
