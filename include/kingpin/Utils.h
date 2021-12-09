@@ -14,6 +14,8 @@ void nonFatalError(const char *str);
 
 void fdClosedError(const char *str);
 
+void timeoutError(const char *str);
+
 void setTcpSockaddr(struct sockaddr_in *addr_ptr, const char *ip, int port);
 
 int connectAddr(struct sockaddr_in *addr_ptr, int timeout);
