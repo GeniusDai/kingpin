@@ -76,10 +76,7 @@ int connectHost(const char *host, int port, int timeout) {
 
 int connectIp(const char *ip, int port, int timeout) {
     struct sockaddr_in addr;
-    ::memset(&addr, 0, sizeof(addr));
-    addr.sin_family = AF_INET;
-    addr.sin_port = ::htons(port);
-    ::inet_pton(AF_INET, ip, &addr.sin_addr.s_addr);
+    setTcpSockaddr(&addr, ip, port);
     return connectAddr(&addr, timeout);
 }
 

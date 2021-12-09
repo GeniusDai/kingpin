@@ -10,10 +10,11 @@
 using namespace std;
 using namespace kingpin;
 
-void func() {
+void func(int n) {
     int sock;
     try {
-        sock = connectHost("localhost", 9000, 10);
+        if (n % 2) { sock = connectHost("localhost", 9000, 10); }
+        else { sock = connectIp("localhost", 9000, 10); }
     } catch (const TimeoutException &e) {
         cout << e.what() << endl;
         return;
@@ -29,7 +30,7 @@ int main() {
     vector<thread> vt;
     for (uint i = 0; i < 100; ++i) {
         cout << "round " << i << endl;
-        vt.emplace_back(func);
+        vt.emplace_back(func, i);
     }
     for (uint i = 0; i < vt.size(); ++i) {
         vt[i].join();
