@@ -27,6 +27,11 @@ void fdClosedError(const char *str) {
     throw FdClosedException();
 }
 
+void timeoutError(const char *str) {
+    ::perror(str);
+    throw TimeoutException();
+}
+
 int connectAddr(struct sockaddr *addr_ptr, size_t size, int timeout) {
     assert(timeout > 0);
     int sock;
@@ -39,7 +44,7 @@ int connectAddr(struct sockaddr *addr_ptr, size_t size, int timeout) {
     }
     if (::connect(sock, addr_ptr, size) < 0) {
         const char *err_msg = "syscall connect error";
-        if (errno == EINPROGRESS) { nonFatalError(err_msg); }
+        if (errno == EINPROGRESS) { timeoutError(err_msg); }
         else { fatalError(err_msg); }
     }
     return sock;

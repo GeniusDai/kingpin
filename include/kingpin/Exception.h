@@ -38,6 +38,11 @@ public:
     FdClosedException() : NonFatalException("fd closed") {}
 };
 
+class TimeoutException final : public NonFatalException {
+public:
+    TimeoutException() : NonFatalException("operation timeout") {}
+};
+
 }
 
 #endif
