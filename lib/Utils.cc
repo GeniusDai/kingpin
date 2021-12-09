@@ -33,10 +33,10 @@ void timeoutError(const char *str) {
 }
 
 void setTcpSockaddr(struct sockaddr_in *addr_ptr, const char *ip, int port) {
-    memset(addr_ptr, 0, sizeof(struct sockaddr));
+    ::memset(addr_ptr, 0, sizeof(struct sockaddr));
     addr_ptr->sin_family = AF_INET;
     addr_ptr->sin_port = htons(port);
-    inet_pton(AF_INET, ip, (void *)(static_cast<long>(addr_ptr->sin_addr.s_addr)));
+    ::inet_pton(AF_INET, ip, (void *)(static_cast<long>(addr_ptr->sin_addr.s_addr)));
 }
 
 int connectAddr(struct sockaddr_in *addr_ptr, int timeout) {
