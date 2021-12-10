@@ -86,7 +86,7 @@ public:
         this->_tsd_ptr->_wbh.erase(conn);
     }
 
-    // This function would be executed by one thread parallelly
+    // This function would be executed by one thread serially
     // with onMessage, so NO worry about write buffer's parallel
     // write. And conn be registered EPOLLIN while write is not
     // completed.
