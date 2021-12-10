@@ -86,6 +86,14 @@ public:
         this->_tsd_ptr->_wbh.erase(conn);
     }
 
+    Buffer *getReadBuffer(int conn) { return _tsd_ptr->_rbh[conn].get(); }
+
+    Buffer *getWriteBuffer(int conn) { return _tsd_ptr->_wbh[conn].get(); }
+
+    mutex &getRBMutex() { return _tsd_ptr->_rbm; }
+
+    mutex &getWBMutex() { return _tsd_ptr->_wbm; }
+
     // This function would be executed by one thread serially
     // with onMessage, so NO worry about write buffer's parallel
     // write. And conn be registered EPOLLIN while write is not

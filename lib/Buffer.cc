@@ -28,7 +28,7 @@ void Buffer::resize(int cap) {
     while(_cap < cap) { _cap *= 2; }
     char *nbuffer = new char[_cap];
     ::memset(nbuffer, 0, _cap);
-    for (int i = 0; i < _offset; ++i) { nbuffer[i] = _buffer[i]; }
+    for (int i = _start; i < _offset; ++i) { nbuffer[i] = _buffer[i]; }
     delete _buffer;
     _buffer = nbuffer;
 }
