@@ -24,10 +24,8 @@ namespace kingpin {
 
 static const int LISTEN_NUM = 1024;
 
-template <
-    template<typename _TPSharedData> class _IOHandler,
-    typename _TPSharedData
->
+template <template<typename _TPSharedData> class _IOHandler,
+    typename _TPSharedData>
 class EpollTP final {
     vector<shared_ptr<_IOHandler<_TPSharedData> > > _handlers;
     int _thr_num;
@@ -44,10 +42,8 @@ public:
     }
 };
 
-template <
-    template<typename _TPSharedData> class _IOHandler,
-    typename _TPSharedData
->
+template <template<typename _TPSharedData> class _IOHandler,
+    typename _TPSharedData>
 class EpollTPClient final {
 public:
     shared_ptr<EpollTP<_IOHandler, _TPSharedData> > _tp;
@@ -58,10 +54,8 @@ public:
     void run() { _tp->run(); }
 };
 
-template<
-    template<typename _TPSharedData> class _IOHandler,
-    typename _TPSharedData
->
+template<template<typename _TPSharedData> class _IOHandler,
+    typename _TPSharedData>
 class EpollTPServer final {
 public:
     shared_ptr<EpollTP<_IOHandler, _TPSharedData> > _tp;
