@@ -24,6 +24,7 @@ bool Context::wait() {
     }
     int n = ::epoll_wait(epfd, &ev, 1, _timeout);
     ::close(_pfd[0]);
+    ::close(_pfd[1]);
     ::close(epfd);
     if (n == -1) { fatalError("syscall epoll_wait error"); }
     return n == 1;
