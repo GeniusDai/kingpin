@@ -16,8 +16,8 @@ public:
     static const int _default_cap;
     static const int _default_step;
 
-    Buffer();
-    Buffer(int cap);
+    explicit Buffer();
+    explicit Buffer(int cap);
     Buffer &operator=(const Buffer &) = delete;
     Buffer(const Buffer &) = delete;
     ~Buffer();

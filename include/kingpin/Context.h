@@ -3,9 +3,9 @@
 
 namespace kingpin {
 
-class Context {
+class Context final {
 public:
-    Context(int timeout);
+    explicit Context(int timeout);
     void done();
     bool wait();
 private:

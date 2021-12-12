@@ -22,7 +22,7 @@ class AsyncLogger final {
     bool _flush = true;
 
 public:
-    AsyncLogger(int level);
+    explicit AsyncLogger(int level);
     ~AsyncLogger();
 
     AsyncLogger &operator<<(const long num);

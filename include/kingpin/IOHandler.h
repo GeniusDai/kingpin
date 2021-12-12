@@ -35,9 +35,9 @@ public:
     _TPSharedData *_tsd_ptr;
     int _fd_num = 0;
 
+    explicit IOHandler(_TPSharedData *tsd_ptr) : _tsd_ptr(tsd_ptr) {}
     IOHandler(const IOHandler &) = delete;
     IOHandler &operator=(const IOHandler &) = delete;
-    IOHandler(_TPSharedData *tsd_ptr) : _tsd_ptr(tsd_ptr) {}
     virtual ~IOHandler() {}
 
     virtual void onMessage(int conn) {}
