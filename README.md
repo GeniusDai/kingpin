@@ -6,7 +6,7 @@
 
 * Thread pool and IO multiplexing for both server's and client's concurrency.
 
-* Server use mutex to avoid parallelly accept, client use mutex and condition_variable to complete for connection pool.
+* Server IO threads compete for listening socket, client IO threads compete for connection pool.
 
 * Avoid excessive wrapper of classes and functions to get things complicated.
 
