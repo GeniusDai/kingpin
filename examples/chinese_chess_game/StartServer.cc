@@ -29,6 +29,7 @@ public:
     mutex _m;
     unordered_map<int, int> _match;
     unordered_set<int> _single;
+    unordered_map<int, string> _message;
 };
 
 template <typename ChessGameShareData>
@@ -57,14 +58,34 @@ public:
         unique_lock<mutex>(this->_tsd_ptr->_m);
         if (this->_tsd_ptr->_match.find(conn) == this->_tsd_ptr->_match.end()) { return; }
         int oppo = this->_tsd_ptr->_match[conn];
-        Buffer *rb = this->_tsd_ptr->_rbh[conn].get();
+        Buffer *rb = this->_rbh[conn].get();
         if (!rb->endsWith("\n")) { return; }
         INFO << "receive full message " << rb->_buffer << " from " << conn << END;
-        Buffer *wb = this->_tsd_ptr->_wbh[oppo].get();
-        wb->appendToBuffer(rb->_buffer);
+        this->_tsd_ptr->_message[oppo] = rb->_buffer;
         rb->clear();
-        this->writeToBuffer(oppo);
-        assert(rb->writeComplete() && wb->writeComplete());
+        assert(rb->writeComplete());
+    }
+
+    void onEpollLoop() {
+        unique_lock<mutex>(this->_tsd_ptr->_m);
+        unordered_map<int, string> &message = this->_tsd_ptr->_message;
+        for (auto iter = message.begin(); iter != message.end(); ) {
+            INFO << "Debugging " << iter->first << END;
+            if (this->_wbh.find(iter->first) != this->_wbh.cend()) {
+                INFO << "find message for " << iter->first << END;
+                this->_wbh[iter->first]->appendToBuffer(message[iter->first].c_str());
+                this->writeToBuffer(iter->first);
+                iter = message.erase(iter);
+            } else {
+                ++iter;
+            }
+        }
+    }
+
+    void onWriteComplete(int conn) {
+        unique_lock<mutex>(this->_tsd_ptr->_m);
+        INFO << "write to " << conn << " complete" << END;
+        assert(this->_wbh[conn]->writeComplete());
     }
 
     void onPassivelyClosed(int conn) {

@@ -28,6 +28,10 @@ int connectIp(const char *ip, int port, int timeout);
 
 int initListen(int port, int listen_num);
 
+void epollRegister(int epfd, int fd, uint32_t events);
+
+void epollRemove(int epfd, int fd);
+
 }
 
 #endif

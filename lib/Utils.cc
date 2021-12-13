@@ -8,6 +8,8 @@
 #include <cerrno>
 #include <cassert>
 #include <fcntl.h>
+#include <sys/epoll.h>
+#include <sstream>
 
 #include "kingpin/Exception.h"
 
@@ -37,7 +39,7 @@ void setTcpSockaddr(struct sockaddr_in *addr_ptr, const char *ip, int port) {
     ::memset(addr_ptr, 0, sizeof(struct sockaddr));
     addr_ptr->sin_family = AF_INET;
     addr_ptr->sin_port = htons(port);
-    ::inet_pton(AF_INET, ip, (void *)(static_cast<long>(addr_ptr->sin_addr.s_addr)));
+    ::inet_pton(AF_INET, ip, (void *)&(addr_ptr->sin_addr.s_addr));
 }
 
 void setNonBlock(int fd) {
@@ -50,19 +52,21 @@ void setNonBlock(int fd) {
 }
 
 int connectAddr(struct sockaddr_in *addr_ptr, int timeout) {
-    assert(timeout > 0);
     int sock;
     if ((sock = ::socket(AF_INET, SOCK_STREAM, 0))== -1) {
         fatalError("syscall socket error");
     }
-    struct timeval tos{timeout, 0};
-    if (::setsockopt(sock, SOL_SOCKET, SO_SNDTIMEO, &tos, sizeof(tos)) == -1) {
-        fatalError("syscall setsockopt error");
+    if (0 == timeout) { setNonBlock(sock); }
+    else if (timeout > 0) {
+        struct timeval tos{timeout, 0};
+        if (::setsockopt(sock, SOL_SOCKET, SO_SNDTIMEO, &tos, sizeof(tos)) == -1) {
+            fatalError("syscall setsockopt error");
+        }
     }
-    if (::connect(sock, (struct sockaddr *)addr_ptr, sizeof(struct sockaddr)) < 0) {
+    if (::connect(sock, (sockaddr *)addr_ptr, sizeof(sockaddr)) < 0) {
         const char *err_msg = "syscall connect error";
-        if (errno == EINPROGRESS) { timeoutError(err_msg); }
-        else { fatalError(err_msg); }
+        if (errno != EINPROGRESS) { nonFatalError(err_msg); }
+        else if (0 != timeout) { timeoutError(err_msg); }
     }
     return sock;
 }
@@ -107,6 +111,25 @@ int initListen(int port, int listen_num) {
     }
     ::listen(sock, listen_num);
     return sock;
+}
+
+void epollRegister(int epfd, int fd, uint32_t events) {
+    struct epoll_event ev;
+    ev.data.fd = fd;
+    ev.events = events;
+    if (::epoll_ctl(epfd, EPOLL_CTL_ADD, fd, &ev) == -1) {
+        stringstream ss;
+        ss << "register fd " << fd << " error";
+        fatalError(ss.str().c_str());
+    }
+}
+
+void epollRemove(int epfd, int fd) {
+    if (::epoll_ctl(epfd, EPOLL_CTL_DEL, fd, NULL) == -1) {
+        stringstream ss;
+        ss << "remove fd " << fd << " error";
+        fatalError(ss.str().c_str());
+    }
 }
 
 }
