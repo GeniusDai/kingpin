@@ -25,8 +25,8 @@ public:
         int fd;
         Buffer *rb, *wb;
         try {
-            rb = this->_tsd_ptr->_rbh[conn].get();
-            wb = this->_tsd_ptr->_wbh[conn].get();
+            rb = this->_rbh[conn].get();
+            wb = this->_wbh[conn].get();
             rb->stripEnd('\n');
             INFO << "client requests file [" << rb->_buffer << "]" << END;
             fd = open(rb->_buffer, O_RDONLY);
