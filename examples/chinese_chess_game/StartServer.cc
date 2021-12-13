@@ -69,15 +69,13 @@ public:
     void onEpollLoop() {
         unique_lock<mutex>(this->_tsd_ptr->_m);
         unordered_map<int, string> &message = this->_tsd_ptr->_message;
-        for (auto iter = message.begin(); iter != message.end(); ) {
-            INFO << "Debugging " << iter->first << END;
+        for (auto iter = message.begin(); iter != message.end(); ++iter) {
             if (this->_wbh.find(iter->first) != this->_wbh.cend()) {
                 INFO << "find message for " << iter->first << END;
                 this->_wbh[iter->first]->appendToBuffer(message[iter->first].c_str());
                 this->writeToBuffer(iter->first);
-                iter = message.erase(iter);
-            } else {
-                ++iter;
+                // erase will cause iter loses efficacy ?
+                message[iter->first] = "";
             }
         }
     }
