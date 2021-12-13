@@ -2,65 +2,13 @@
 
 # Features
 
-* Per epoll per thread and one connected socket handled only by one thread.
+* One connected socket handled only by one thread.
 
-* Thread pool and IO multiplexing for both server's and client's concurrency, server use thread shared mutex to avoid parallel accept syscall.
+* Thread pool and IO multiplexing for both server's and client's concurrency.
+
+* Server use mutex to avoid parallelly accept, client use mutex and condition_variable to complete for connection pool.
 
 * Avoid excessive wrapper of classes and functions to get things complicated.
-
-# Design Overview
-
-![image](https://github.com/GeniusDai/kingpin/raw/dev/pictures/kingpin.001.png)
-
-### EpollTPServer:
-
-    1. Trying to get mutex from TPSharedData, if it's locked, thread won't block.
-
-    2. If got the mutex, IO thread register EPOLLIN for the listening socket.
-
-    3. Wait for epoll events.
-
-    4. Handle the connected sockets.
-
-    5. Get a new connected socket by accept syscall.
-
-    6. Remove EPOLLIN for the listening socket.
-
-    7. Release the mutex.
-
-    8. Handle the new connected socket.
-
-### EpollTPClient:
-
-    1. Init the connected sockets by connect syscall.
-
-    2. Register the connected sockets to epoll.
-
-    3. Wait for the epoll events.
-
-    4. Handle the connected sockets.
-
-![image](https://github.com/GeniusDai/kingpin/raw/dev/pictures/kingpin.002.png)
-
-### AsyncLogger:
-
-    1. Get mutex for the log buffer, if it's locked, thread will block.
-
-    2. Write log to the buffer.
-
-    3. Release the mutex.
-
-    4. Notify the corresponding backend thread.
-
-    5. Backend thread being waked up by the condition variable.
-
-    6. Backend thread trying to get the mutex, if it's locked, sleep until next time being notified.
-
-    7. If get mutex, read from the buffer.
-
-    8. Write buffer to the corresponding fd.
-
-    9. Release the mutex.
 
 # Quick Start
 

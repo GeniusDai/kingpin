@@ -58,3 +58,31 @@ Hello, kingpin!
 
 Ncat: Broken pipe.
 ```
+
+# Tutorial
+
+**Override 5 functions for IOHandlerForServer:**
+
+* void onEpollLoop() : Epoll loop starts
+
+* void onConnect(int conn) : Socket accepted
+
+* void onMessage(int conn) : Message arrives, has been read automatically to read buffer
+
+* void onWriteComplete(int conn) : Async write finished
+
+* void onPassivelyClosed(int conn) : Oppo closed socket or crash
+
+**Override 6 functions for IOHandlerForClient:**
+
+* void onEpollLoop() : Epoll loop starts
+
+* void onConnect(int conn) : Connection established
+
+* void onConnectFailed(int conn) : Connect to host failed
+
+* void onMessage(int conn) : Message arrives, has been read automatically to read buffer
+
+* void onWriteComplete(int conn) : Async write finished
+
+* void onPassivelyClosed(int conn) : Oppo closed socket or crash
