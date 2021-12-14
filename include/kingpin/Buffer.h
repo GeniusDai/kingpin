@@ -29,7 +29,7 @@ public:
     int readNioToBufferTillEnd(int fd, const char *end, int step = _default_step);
     int writeNioFromBuffer(int fd, int len);
     int writeNioFromBufferTillBlock(int fd);
-    void writeNioFromBufferTillEnd(int fd, int step = _default_step);
+    int writeNioFromBufferTillEnd(int fd, int step = _default_step);
     void appendToBuffer(const char *str);
     void stripEnd(char end);
     bool writeComplete();

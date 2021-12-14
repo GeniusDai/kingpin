@@ -130,13 +130,16 @@ int Buffer::writeNioFromBufferTillBlock(int fd) {
 }
 
 // Write all data to buffer, if NIO's buffer is full, will sleep
-void Buffer::writeNioFromBufferTillEnd(int fd, int step) {
+int Buffer::writeNioFromBufferTillEnd(int fd, int step) {
+    int total = 0;
     while (_start != _offset) {
         if (step > _offset - _start) { step = _offset - _start; }
         int curr = writeNioFromBuffer(fd, step);
+        total += curr;
         if (curr == 0) { this_thread::sleep_for(chrono::milliseconds(_delay)); }
     }
     clear();
+    return total;
 }
 
 void Buffer::appendToBuffer(const char *str) {
