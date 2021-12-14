@@ -1,5 +1,4 @@
 #include <mutex>
-
 #include <sys/socket.h>
 #include <arpa/inet.h>
 #include <fcntl.h>
@@ -17,12 +16,10 @@
 using namespace std;
 using namespace kingpin;
 
-const int POOL_SIZE = 10;
-
 template <typename _Data>
 class ConcurrencyTestIOHandler : public IOHandlerForClient<_Data> {
 public:
-    ConcurrencyTestIOHandler(_Data *tsd_ptr) : IOHandlerForClient<_Data>(tsd_ptr) {}
+    ConcurrencyTestIOHandler(_Data *tsd) : IOHandlerForClient<_Data>(tsd) {}
 
     void onMessage(int conn) {
         Buffer *rb = this->_rbh[conn].get();
@@ -34,11 +31,8 @@ public:
 
 int main() {
     ClientTPSharedData data;
-    for (int i = 0; i < 100; ++i) {
-        data._pool.insert({pair<string, int>(Config::_ip, Config::_port), ""});
-    }
-    EpollTPClient<ConcurrencyTestIOHandler, ClientTPSharedData>
-        testClient(8, &data);
-    testClient.run();
+    for (int i = 0; i < 800; ++i) { data.raw_add(Config::_ip, Config::_port, ""); }
+    EpollTPClient<ConcurrencyTestIOHandler, ClientTPSharedData> concurrency(16, &data);
+    concurrency.run();
     return 0;
 }

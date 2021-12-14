@@ -33,13 +33,14 @@ public:
     int _epfd = ::epoll_create(1);
     struct epoll_event _evs[_max_client_per_thr];
     shared_ptr<thread> _t;
-    _TPSharedData *_tsd_ptr;
+    _TPSharedData *_tsd;
     int _fd_num = 0;
+    int _epoll_timeout = _default_epoll_timeout;
 
     unordered_map<int, shared_ptr<Buffer> > _rbh;
     unordered_map<int, shared_ptr<Buffer> > _wbh;
 
-    explicit IOHandler(_TPSharedData *tsd_ptr) : _tsd_ptr(tsd_ptr) {}
+    explicit IOHandler(_TPSharedData *tsd) : _tsd(tsd) {}
     IOHandler(const IOHandler &) = delete;
     IOHandler &operator=(const IOHandler &) = delete;
     virtual ~IOHandler() {}
@@ -153,12 +154,14 @@ template <typename _TPSharedData>
 class IOHandlerForClient : public IOHandler<_TPSharedData> {
 public:
     int _epfd_conn = ::epoll_create(1);     // for nonblock connect
+    int _epoll_timeout_conn = this->_default_epoll_timeout;
+
     unordered_map<int, string> _conn_init_message;
     unordered_map<int, pair<string, int> > _conn_info;
 
     IOHandlerForClient(const IOHandlerForClient &) = delete;
     IOHandlerForClient &operator=(const IOHandlerForClient &) = delete;
-    IOHandlerForClient(_TPSharedData *tsd_ptr) : IOHandler<_TPSharedData>(tsd_ptr) {}
+    IOHandlerForClient(_TPSharedData *tsd) : IOHandler<_TPSharedData>(tsd) {}
     virtual ~IOHandlerForClient() {}
 
     virtual void onConnectFailed(int conn) {}   // only client
@@ -166,21 +169,21 @@ public:
     void run() { this->_t = make_shared<thread>(&IOHandlerForClient::_run, this); }
 
     void _get_from_pool() {
-        assert(this->_tsd_ptr->_pool.size() > 0);
+        assert(this->_tsd->_pool.size() > 0);
         ++(this->_fd_num);
-        auto iter = this->_tsd_ptr->_pool.begin();
+        auto iter = this->_tsd->_pool.begin();
         int sock = connectIp(iter->first.first.c_str(), iter->first.second, 0);
         INFO << "connecting to " << iter->first.first.c_str()
             << ":" <<  iter->first.second << END;
         epollRegister(_epfd_conn, sock, EPOLLOUT);
         _conn_init_message[sock] = iter->second;
         _conn_info[sock] = iter->first;
-        this->_tsd_ptr->_pool.erase(iter);
+        this->_tsd->_pool.erase(iter);
     }
 
     void _check_connect() {
         int num = ::epoll_wait(_epfd_conn, this->_evs,
-            this->_max_client_per_thr, this->_default_epoll_timeout);
+            this->_max_client_per_thr, _epoll_timeout_conn);
         for (int i = 0; i < num; ++i) {
             uint32_t events = this->_evs[i].events;
             int fd = this->_evs[i].data.fd;
@@ -211,21 +214,21 @@ public:
         while (true) {
             this->onEpollLoop();
             if (0 == this->_fd_num) {
-                unique_lock<mutex> m(this->_tsd_ptr->_pool_lock);
-                this->_tsd_ptr->_cv.wait(m, [this]()->bool{
-                    return this->_tsd_ptr->_pool.size() != 0; });
+                unique_lock<mutex> m(this->_tsd->_pool_lock);
+                this->_tsd->_cv.wait(m, [this]()->bool{
+                    return this->_tsd->_pool.size() != 0; });
                 INFO << "thread get lock" << END;
                 _get_from_pool();
-            } else if (this->_tsd_ptr->_pool.size() != 0 &&
-                    this->_tsd_ptr->_pool_lock.try_lock()) {
+            } else if (this->_tsd->_pool.size() != 0 &&
+                    this->_tsd->_pool_lock.try_lock()) {
                 INFO << "thread get lock" << END;
                 _get_from_pool();
-                this->_tsd_ptr->_pool_lock.unlock();
+                this->_tsd->_pool_lock.unlock();
             }
             assert(this->_fd_num > 0);
             _check_connect();
             int num = ::epoll_wait(this->_epfd, this->_evs,
-                this->_max_client_per_thr, this->_default_epoll_timeout);
+                this->_max_client_per_thr, this->_epoll_timeout);
             for (int i = 0; i < num; ++i) { this->processEvent(this->_evs[i]); }
         }
     }
@@ -240,7 +243,7 @@ public:
 
     IOHandlerForServer(const IOHandlerForServer &) = delete;
     IOHandlerForServer &operator=(const IOHandlerForServer &) = delete;
-    IOHandlerForServer(_TPSharedData *tsd_ptr) : IOHandler<_TPSharedData>(tsd_ptr) {}
+    IOHandlerForServer(_TPSharedData *tsd) : IOHandler<_TPSharedData>(tsd) {}
     virtual ~IOHandlerForServer() {}
 
     void run() { this->_t = make_shared<thread>(&IOHandlerForServer::_run, this); }
@@ -251,30 +254,30 @@ public:
             this->onEpollLoop();
             bool hold_listen_lock = false;
             if (0 == this->_fd_num) {
-                this->_tsd_ptr->_listenfd_lock.lock();
+                this->_tsd->_listenfd_lock.lock();
                 hold_listen_lock = true;
             }
-            else if (this->_tsd_ptr->_listenfd_lock.try_lock()) {
+            else if (this->_tsd->_listenfd_lock.try_lock()) {
                 hold_listen_lock = true;
             }
             if (hold_listen_lock) {
                 INFO << "thread get lock" << END;
                 ++(this->_fd_num);
-                this->registerFd(this->_tsd_ptr->_listenfd, EPOLLIN);
+                this->registerFd(this->_tsd->_listenfd, EPOLLIN);
             }
             assert(this->_fd_num > 0);
             int num = epoll_wait(this->_epfd, this->_evs,
-                this->_max_client_per_thr, this->_default_epoll_timeout);
+                this->_max_client_per_thr, this->_epoll_timeout);
             for (int i = 0; i < num; ++i) {
                 int fd = this->_evs[i].data.fd;
-                if (fd != this->_tsd_ptr->_listenfd) {
+                if (fd != this->_tsd->_listenfd) {
                     this->processEvent(this->_evs[i]);
                 } else {
                     int conn = ::accept4(fd, NULL, NULL, SOCK_NONBLOCK);
                     if (conn < 0) { fatalError("syscall accept4 error"); }
                     INFO << "new connection " << conn << " accepted" << END;
                     this->removeFd(fd);
-                    this->_tsd_ptr->_listenfd_lock.unlock();
+                    this->_tsd->_listenfd_lock.unlock();
                     INFO << "thread release lock" << END;
                     this->createBuffer(conn);
                     this->registerFd(conn, EPOLLIN);

@@ -20,7 +20,7 @@ static const int PORT = 8890;
 template <typename _Data>
 class BigFileTransferIOHandler : public IOHandlerForServer<_Data> {
 public:
-    BigFileTransferIOHandler(_Data *tsd_ptr) : IOHandlerForServer<_Data>(tsd_ptr) {}
+    BigFileTransferIOHandler(_Data *tsd) : IOHandlerForServer<_Data>(tsd) {}
     void onMessage(int conn) {
         int fd;
         Buffer *rb, *wb;
