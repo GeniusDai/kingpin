@@ -4,15 +4,11 @@
 #include <mutex>
 #include <memory>
 #include <vector>
+#include <thread>
+#include <iostream>
 #include <sys/socket.h>
 #include <unistd.h>
 #include <netinet/in.h>
-
-#include <mutex>
-#include <thread>
-#include <vector>
-#include <iostream>
-#include <memory>
 
 #include "kingpin/AsyncLogger.h"
 #include "kingpin/IOHandler.h"
