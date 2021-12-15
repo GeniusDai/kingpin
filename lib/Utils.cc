@@ -6,6 +6,7 @@
 #include <unistd.h>
 #include <string>
 #include <cerrno>
+#include <vector>
 #include <cassert>
 #include <fcntl.h>
 #include <sys/epoll.h>
@@ -129,6 +130,20 @@ void epollRemove(int epfd, int fd) {
         stringstream ss;
         ss << "remove fd " << fd << " error";
         fatalError(ss.str().c_str());
+    }
+}
+
+void split(string s, string sep, vector<string>& subs) {
+    if (s.size() == 0 || s.size() < sep.size()) return;
+    uint start = 0;
+    uint end = s.find(sep);
+    while (end + sep.size() <= s.size()) {
+        subs.emplace_back(s.substr(start, end));
+        start = end + sep.size();
+        end = s.find(sep, start);
+    }
+    if (start != s.size()) {
+        subs.emplace_back(s.substr(start, s.size()));
     }
 }
 

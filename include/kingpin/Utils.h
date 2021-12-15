@@ -2,7 +2,11 @@
 #define __UTILS_H_de3094e9a992_
 
 #include <cstddef>
+#include <vector>
+#include <string>
 #include <netinet/in.h>
+
+using namespace std;
 
 static_assert(sizeof(sockaddr) == sizeof(sockaddr_in));
 
@@ -31,6 +35,8 @@ int initListen(int port, int listen_num);
 void epollRegister(int epfd, int fd, uint32_t events);
 
 void epollRemove(int epfd, int fd);
+
+void split(string s, string sep, vector<string>& subs);
 
 }
 
