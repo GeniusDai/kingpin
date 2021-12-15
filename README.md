@@ -16,9 +16,11 @@ Please refer to: [Quick Start](https://github.com/GeniusDai/kingpin/tree/dev/exa
 
 # Prerequirement
 
-* Linux >= 3.10.0
+* Linux : For epoll
 
-* g++ >= 4.8.5
+* g++ : Support c++11
+
+* gtest && cmake
 
 # Header Files
 
@@ -48,3 +50,4 @@ Build and run:
 
     $ mkdir build && cd build
     $ cmake .. && make
+    $ cd unittest && ctest
