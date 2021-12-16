@@ -26,6 +26,7 @@ public:
     void clear();
     int readNioToBuffer(int fd, int len);
     int readNioToBufferTillBlock(int fd);
+    int readNioToBufferTillBlockNoExp(int fd);
     int readNioToBufferTillEnd(int fd, const char *end, int step = _default_step);
     int writeNioFromBuffer(int fd, int len);
     int writeNioFromBufferTillBlock(int fd);

@@ -75,6 +75,13 @@ int Buffer::readNioToBufferTillBlock(int fd) {
     return total;
 }
 
+int Buffer::readNioToBufferTillBlockNoExp(int fd) {
+    int start = _offset;
+    try { readNioToBufferTillBlock(fd); }
+    catch (const EOFException &e) {}
+    return _offset - start;
+}
+
 // Read until end, if no data available, will sleep
 int Buffer::readNioToBufferTillEnd(int fd, const char *end, int step) {
     assert(step > 0);
