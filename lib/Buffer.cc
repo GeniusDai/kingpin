@@ -89,12 +89,13 @@ int Buffer::readNioToBufferTillEnd(int fd, const char *end, int step) {
     while(true) {
         int curr = readNioToBuffer(fd, step);
         if (curr == 0) { this_thread::sleep_for(chrono::milliseconds(_delay)); continue; }
-        for (int i = _offset-curr; i < _offset; ++i) {
+        for (int i = max(_offset-curr, str_len-1); i <= _offset; ++i) {
             bool found = true;
-            for (int k = str_len-1; k >= 0; --k) {
-                if (_buffer[i-k] != end[str_len-k-1]) { found = false; break; }
+            int start = i - str_len + 1;
+            for (int k = 0; k < str_len; ++k) {
+                if (_buffer[start+k] != end[k]) { found = false; break; }
             }
-            if (found) return i;
+            if (found) return start;
         }
     }
 }

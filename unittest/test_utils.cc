@@ -3,7 +3,7 @@
 
 using namespace kingpin;
 
-TEST(split, positive) {
+TEST(FUNC_split, positive) {
     vector<pair<string, string> > args = {
         {"hello, kingpin", ","},
         {"hello, kingpin", ", "},
