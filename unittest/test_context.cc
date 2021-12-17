@@ -6,8 +6,9 @@
 using namespace std;
 using namespace kingpin;
 
-class ContextFixture : public testing::TestWithParam<int> {
-public:
+class ContextTest : public testing::TestWithParam<int> {
+protected:
+    int _time_out = 500;
     struct SimpleArgs {
         int a;
         int b;
@@ -21,14 +22,12 @@ public:
         ptr->ret = ptr->a + ptr->b;
         return NULL;
     }
-
+public:
     void SetUp() override {}
     void TearDown() override {}
-
-    int _time_out = 1000;
 };
 
-TEST_P(ContextFixture, MyTest) {
+TEST_P(ContextTest, test_with_args) {
     // Param : time to sleep
     int a = GetParam();
     int b = 8888;
@@ -39,7 +38,7 @@ TEST_P(ContextFixture, MyTest) {
     else { EXPECT_FALSE(thr.run()); }
 }
 
-INSTANTIATE_TEST_SUITE_P(tc, ContextFixture, testing::Values(500, 2000));
+INSTANTIATE_TEST_SUITE_P(tc, ContextTest, testing::Values(100, 1000));
 
 int main(int argc, char **argv) {
     testing::InitGoogleTest(&argc, argv);

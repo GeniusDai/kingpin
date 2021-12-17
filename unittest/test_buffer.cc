@@ -14,7 +14,7 @@
 using namespace std;
 using namespace kingpin;
 
-class BufferFixture : public testing::Test {
+class BufferTest : public testing::Test {
 protected:
     const char *_file = "./file_for_test";
     const char *_str = "Kingpin is a high performance network library!";
@@ -31,7 +31,7 @@ protected:
     }
 };
 
-TEST_F(BufferFixture, test_read1) {
+TEST_F(BufferTest, test_read) {
     Buffer buffer;
     int fd = open(this->_file, O_RDONLY);
     EXPECT_GT(fd, 2);
@@ -43,7 +43,7 @@ TEST_F(BufferFixture, test_read1) {
     EXPECT_EQ(close(fd), 0);
 }
 
-TEST_F(BufferFixture, test_write1) {
+TEST_F(BufferTest, test_write) {
     Buffer buffer;
     int fd = open(this->_file, O_RDWR);
     EXPECT_GT(fd, 2);
