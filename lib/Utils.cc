@@ -9,10 +9,11 @@
 #include <vector>
 #include <cassert>
 #include <fcntl.h>
+#include <tuple>
 #include <sys/epoll.h>
 #include <sstream>
-
 #include "kingpin/Exception.h"
+#include "kingpin/Utils.h"
 
 namespace kingpin {
 
@@ -36,11 +37,44 @@ void timeoutError(const char *str) {
     throw TimeoutException();
 }
 
+void dnsError(const char *str) {
+    ::perror(str);
+    throw DNSException();
+}
+
 void setTcpSockaddr(struct sockaddr_in *addr_ptr, const char *ip, int port) {
     ::memset(addr_ptr, 0, sizeof(struct sockaddr));
     addr_ptr->sin_family = AF_INET;
     addr_ptr->sin_port = htons(port);
     ::inet_pton(AF_INET, ip, (void *)&(addr_ptr->sin_addr.s_addr));
+}
+
+void getTcpHostAddr(struct sockaddr_in *addr_ptr, const char *host, int port) {
+    struct addrinfo *p_info;
+    struct addrinfo info;
+    ::memset(&info, 0, sizeof(info));
+    info.ai_family = AF_INET;
+    info.ai_socktype = SOCK_STREAM;
+    info.ai_flags = AI_NUMERICSERV;
+    if (::getaddrinfo(host, to_string(port).c_str(), &info, &p_info) < 0) {
+        dnsError("syscall getaddrinfo error");
+    }
+    ::memcpy(addr_ptr, p_info[0].ai_addr, sizeof(struct sockaddr_in));
+    ::freeaddrinfo(p_info);
+}
+
+void getHostIp(const char *host, char *ip, size_t ip_len) {
+    struct addrinfo *p_info;
+    if (::getaddrinfo(host, NULL, NULL, &p_info) < 0) {
+        dnsError("syscall getaddrinfo error");
+    }
+    struct sockaddr_in addr;
+    ::memcpy(&addr, p_info[0].ai_addr, sizeof(struct sockaddr_in));
+    ::freeaddrinfo(p_info);
+    if (::getnameinfo((struct sockaddr *)&addr, sizeof(struct sockaddr_in), ip, ip_len,
+            NULL, 0, NI_NUMERICHOST) < 0) {
+        dnsError("syscall getnameinfo error");
+    }
 }
 
 void setNonBlock(int fd) {
@@ -73,19 +107,9 @@ int connectAddr(struct sockaddr_in *addr_ptr, int timeout) {
 }
 
 int connectHost(const char *host, int port, int timeout) {
-    struct addrinfo *addr_ptr;
-    struct addrinfo addr;
-    if (::memset(&addr, 0, sizeof(addr)) < 0) {
-        fatalError("syscall memset error");
-    }
-    addr.ai_family = AF_INET;
-    addr.ai_socktype = SOCK_STREAM;
-    addr.ai_flags = AI_NUMERICSERV;
-    if (::getaddrinfo(host, to_string(port).c_str(), &addr, &addr_ptr) < 0) {
-        fatalError("syscall getaddrinfo error");
-    }
-    int sock = connectAddr((struct sockaddr_in *)(addr_ptr[0].ai_addr), timeout);
-    ::freeaddrinfo(addr_ptr);
+    struct sockaddr_in addr;
+    getTcpHostAddr(&addr, host, port);
+    int sock = connectAddr(&addr, timeout);
     return sock;
 }
 

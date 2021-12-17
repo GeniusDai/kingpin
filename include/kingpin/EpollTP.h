@@ -56,8 +56,8 @@ class EpollTPServer final {
 public:
     shared_ptr<EpollTP<_IOHandler, _TPSharedData> > _tp;
 
-    EpollTPServer(int thr_num, int port, _TPSharedData *tsd) {
-        tsd->_listenfd = initListen(port, LISTEN_NUM);
+    EpollTPServer(int thr_num, _TPSharedData *tsd) {
+        tsd->_listenfd = initListen(tsd->_port, LISTEN_NUM);
         _tp = make_shared<EpollTP<_IOHandler, _TPSharedData> >(thr_num, tsd);
     }
 

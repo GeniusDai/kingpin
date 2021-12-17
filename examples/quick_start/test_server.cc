@@ -24,7 +24,8 @@ class SharedData : public ServerTPSharedData {
 
 int main() {
     SharedData data;
-    EpollTPServer<SimpleHandler, SharedData> server(8, 8888, &data);
+    data._port = 8888;
+    EpollTPServer<SimpleHandler, SharedData> server(8, &data);
     server.run();
     return 0;
 }

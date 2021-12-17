@@ -4,6 +4,7 @@
 #include <cstddef>
 #include <vector>
 #include <string>
+#include <tuple>
 #include <netinet/in.h>
 
 using namespace std;
@@ -20,7 +21,13 @@ void fdClosedError(const char *str);
 
 void timeoutError(const char *str);
 
+void dnsError(const char *str);
+
 void setTcpSockaddr(struct sockaddr_in *addr_ptr, const char *ip, int port);
+
+void getTcpHostAddr(struct sockaddr_in *addr_ptr, const char *host, int port);
+
+void getHostIp(const char *host, char *ip, size_t ip_len);
 
 void setNonBlock(int fd);
 

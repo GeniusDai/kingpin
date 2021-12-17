@@ -24,7 +24,7 @@ public:
 class ServerTPSharedData : public TPSharedData {
 public:
     virtual ~ServerTPSharedData() {}
-
+    int _port;
     // DONOT use this lock again unless you know what you're doing
     mutex _listenfd_lock;
     int _listenfd;

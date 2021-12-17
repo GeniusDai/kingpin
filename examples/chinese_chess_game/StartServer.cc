@@ -102,7 +102,8 @@ public:
 
 int main() {
     ChessGameShareData data;
-    EpollTPServer<ChessGameIOHandler, ChessGameShareData> server(8, Config::_port, &data);
+    data._port = Config::_port;
+    EpollTPServer<ChessGameIOHandler, ChessGameShareData> server(8, &data);
     server.run();
     return 0;
 }

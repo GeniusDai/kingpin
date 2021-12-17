@@ -47,8 +47,9 @@ public:
 
 int main() {
     ServerTPSharedData data;
+    data._port = PORT;
     EpollTPServer<BigFileTransferIOHandler, ServerTPSharedData>
-        server(8, PORT, &data);
+        server(8, &data);
     server.run();
     return 0;
 }

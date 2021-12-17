@@ -43,6 +43,11 @@ public:
     TimeoutException() : NonFatalException("operation timeout") {}
 };
 
+class DNSException final : public NonFatalException {
+public:
+    DNSException() : NonFatalException("dns error") {}
+};
+
 }
 
 #endif

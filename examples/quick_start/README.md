@@ -25,7 +25,7 @@ The template _Data refers to the data shared between threads. This template is e
 
 ### Step 2. Define you own TPSharedData
 
-Define the data shared between threads. Since on EXTRA DATA(except the listening socket and mutex) to be shared in this simple demo, we just derive from the base class.
+Define the data shared between threads. Since no EXTRA DATA to be shared in the simple demo, just derive from the base class (or use the base class).
 
 ```
 class SharedData : public ServerTPSharedData {
@@ -40,7 +40,8 @@ Use 8 threads to handle the connnections, and listen in 8888 port.
 ```
 int main() {
     SharedData data;
-    EpollTPServer<SimpleHandler, SharedData> server(8, 8888, &data);
+    data._port = 8888;
+    EpollTPServer<SimpleHandler, SharedData> server(8, &data);
     server.run();
     return 0;
 }
