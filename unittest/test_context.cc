@@ -1,40 +1,47 @@
-#include "kingpin/Context.h"
-
 #include <iostream>
 #include <unistd.h>
 #include <thread>
-
+#include <gtest/gtest.h>
+#include "kingpin/Context.h"
 using namespace std;
 using namespace kingpin;
 
-struct SimpleArgs {
-    int a;
-    int b;
-    int ret;
-    SimpleArgs(int a, int b) : a(a), b(b) {}
+class ContextFixture : public testing::TestWithParam<int> {
+public:
+    struct SimpleArgs {
+        int a;
+        int b;
+        int ret;
+        SimpleArgs(int a, int b) : a(a), b(b) {}
+    };
+
+    static void *simple_func(void *arg) {
+        SimpleArgs *ptr = static_cast<SimpleArgs *>(arg);
+        this_thread::sleep_for(chrono::milliseconds(ptr->a));
+        ptr->ret = ptr->a + ptr->b;
+        return NULL;
+    }
+
+    void SetUp() override {}
+    void TearDown() override {}
+
+    int _time_out = 1000;
 };
 
-void *simple_func(void *arg) {
-    SimpleArgs *ptr = static_cast<SimpleArgs *>(arg);
-    cout << "Thread will sleep " << ptr->a << " milliseconds" << endl;
-    cout << "Argument b is: " << ptr->b << endl;
-    this_thread::sleep_for(chrono::milliseconds(ptr->a));
-    ptr->ret = ptr->a + ptr->b;
-    return NULL;
+TEST_P(ContextFixture, MyTest) {
+    // Param : time to sleep
+    int a = GetParam();
+    int b = 8888;
+    Context ctx(_time_out);
+    SimpleArgs arg(a, 8888);
+    ThrWithCtx thr(simple_func, &arg, &ctx);
+    if (a < _time_out) { EXPECT_TRUE(thr.run()); EXPECT_EQ(arg.ret, a + b); }
+    else { EXPECT_FALSE(thr.run()); }
 }
 
-int main() {
-    // set the num to 1000 or 10000, you will see the difference
-    int num = 1000;
-    Context ctx(num);
-    cout << "Context timeout is " << num << " milliseconds" << endl;
+INSTANTIATE_TEST_SUITE_P(tc, ContextFixture, testing::Values(500, 2000));
 
-    SimpleArgs arg(3000, 8888);
-    ThrWithCtx t(simple_func, &arg, &ctx);
-    if (t.run()) {
-        cout << "Thread ends normally, return : " << arg.ret << endl;
-    } else {
-        cout << "Thread timeout and have been cancelled" << endl;
-    }
-    return 0;
+int main(int argc, char **argv) {
+    testing::InitGoogleTest(&argc, argv);
+    return RUN_ALL_TESTS();
 }

@@ -8,6 +8,7 @@
 #include <fcntl.h>
 #include <functional>
 #include <gtest/gtest.h>
+#include <gmock/gmock.h>
 #include "kingpin/Buffer.h"
 
 using namespace std;
@@ -35,10 +36,9 @@ TEST_F(BufferFixture, test_read1) {
     int fd = open(this->_file, O_RDONLY);
     EXPECT_GT(fd, 2);
     int pos = buffer.readNioToBufferTillEnd(fd, "high", 5);
-    string s(buffer._buffer + pos);
-    EXPECT_EQ(strcmp(s.substr(0, 4).c_str(), "high"), 0);
+    EXPECT_THAT(buffer._buffer + pos, testing::HasSubstr("high"));
     buffer.readNioToBufferTillEnd(fd, "k ", 1);
-    EXPECT_EQ(buffer.readNioToBufferTillBlockNoExp(fd), 8);
+    EXPECT_EQ(buffer.readNioToBufferTillBlockOrEOF(fd), 8);
     EXPECT_EQ(strcmp(buffer._buffer, this->_str), 0);
     EXPECT_EQ(close(fd), 0);
 }
