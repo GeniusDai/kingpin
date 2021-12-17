@@ -1,1 +1,1 @@
-add_executable(test_server test_server.cc)
+add_executable(HelloServer HelloServer.cc)
