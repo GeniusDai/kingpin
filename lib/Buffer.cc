@@ -75,7 +75,7 @@ int Buffer::readNioToBufferTillBlock(int fd) {
     return total;
 }
 
-int Buffer::readNioToBufferTillBlockNoExp(int fd) {
+int Buffer::readNioToBufferTillBlockOrEOF(int fd) {
     int start = _offset;
     try { readNioToBufferTillBlock(fd); }
     catch (const EOFException &e) {}
