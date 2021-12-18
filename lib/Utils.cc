@@ -6,6 +6,7 @@
 #include <unistd.h>
 #include <string>
 #include <cerrno>
+#include <cstring>
 #include <vector>
 #include <cassert>
 #include <fcntl.h>
@@ -14,31 +15,32 @@
 #include <sstream>
 #include "kingpin/Exception.h"
 #include "kingpin/Utils.h"
+#include "kingpin/AsyncLogger.h"
 
 namespace kingpin {
 
 void fatalError(const char *str) {
-    ::perror(str);
+    INFO << str << ": " << ::strerror(errno) << END;
     throw FatalException(str);
 }
 
 void nonFatalError(const char *str) {
-    ::perror(str);
+    INFO << str << ": " << ::strerror(errno) << END;
     throw NonFatalException(str);
 }
 
 void fdClosedError(const char *str) {
-    ::perror(str);
+    INFO << str << ": " << ::strerror(errno) << END;
     throw FdClosedException();
 }
 
 void timeoutError(const char *str) {
-    ::perror(str);
+    INFO << str << ": " << ::strerror(errno) << END;
     throw TimeoutException();
 }
 
 void dnsError(const char *str) {
-    ::perror(str);
+    INFO << str << ": " << ::strerror(errno) << END;
     throw DNSException();
 }
 
