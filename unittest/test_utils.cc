@@ -53,7 +53,7 @@ protected:
         int timeout = 1;
         try {
             if (n % 2) { sock = connectHost("localhost", _port, timeout); }
-            else { sock = connectIp("localhost", _port, timeout); }
+            else { sock = connectIp("127.0.0.1", _port, timeout); }
         } catch (const TimeoutException &e) {
             return;
         }

@@ -48,7 +48,8 @@ void setTcpSockaddr(struct sockaddr_in *addr_ptr, const char *ip, int port) {
     ::memset(addr_ptr, 0, sizeof(struct sockaddr));
     addr_ptr->sin_family = AF_INET;
     addr_ptr->sin_port = htons(port);
-    ::inet_pton(AF_INET, ip, (void *)&(addr_ptr->sin_addr.s_addr));
+    int ret = ::inet_pton(AF_INET, ip, (void *)&(addr_ptr->sin_addr.s_addr));
+    if (ret == -1 || ret == 0) { fatalError("Unknown error"); }
 }
 
 void getTcpHostAddr(struct sockaddr_in *addr_ptr, const char *host, int port) {
