@@ -1,1 +1,2 @@
-add_executable(HelloServer HelloServer.cc)
+add_executable(SimpleServer SimpleServer.cc)
+add_executable(SimpleCrawler SimpleCrawler.cc)
