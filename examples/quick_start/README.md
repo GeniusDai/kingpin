@@ -1,6 +1,6 @@
 # Quick Start:
 
-**Build a Simple Server**
+## --> Build a Simple Server
 
 In this guide, we will build a server that echo "Hello, kingpin!" to the client and then close the connection. Just several codes.
 
@@ -58,6 +58,52 @@ $ nc localhost 8888
 Hello, kingpin!
 
 Ncat: Broken pipe.
+```
+
+## --> Build a Simple Crawler
+
+Now let's use the client to build a crawler just send a simple HTTP request.
+
+### Step 1. Define your own IOHandler
+
+This step is always essential for you thread pool. We just print the page we crawled.
+
+```
+template<typename _Data>
+class CrawlerHandler : public IOHandlerForClient<_Data> {
+public:
+    CrawlerHandler(_Data *d) : IOHandlerForClient<_Data>(d) {}
+    void onMessage(int conn) {
+        INFO << "Message of socket " << conn << ":\n"
+            << this->_rbh[conn]->_buffer << END;
+    }
+};
+```
+
+### Step 2. Define you own TPSharedData
+
+In this simple crawler, we just use the default structure for client.
+
+### Step 3. Init the data and run the server
+
+Since our client will not just support crawler but also concurrency test. Our connection pool is identified by a tuple (ip, port, init_message). We could use the raw_add to add our data to the pool shared by crawler.Then Use 2 threads to handle the connnections.
+
+```
+int main() {
+    ClientTPSharedData data;
+    EpollTPClient<CrawlerHandler, ClientTPSharedData> crawler(2, &data);
+    vector<string> hosts = {
+        "fanyi.baidu.com", "xueshu.baidu.com", "www.baidu.com",
+    };
+    char ip[20];
+    for (auto h : hosts) {
+        ::memset(ip, 0, 20);
+        getHostIp(h.c_str(), ip, 20);
+        data.raw_add(string(ip), 80, "GET /test HTTP/1.1\r\n\r\n");
+    }
+    crawler.run();
+    return 0;
+}
 ```
 
 # Tutorial

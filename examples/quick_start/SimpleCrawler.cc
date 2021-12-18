@@ -1,9 +1,8 @@
-#include <netinet/in.h>
-#include <unistd.h>
-
 #include "kingpin/EpollTP.h"
 #include "kingpin/TPSharedData.h"
 #include "kingpin/IOHandler.h"
+#include <netinet/in.h>
+#include <unistd.h>
 
 using namespace std;
 using namespace kingpin;

@@ -1,7 +1,6 @@
 #include "kingpin/IOHandler.h"
 #include "kingpin/TPSharedData.h"
 #include "kingpin/EpollTP.h"
-
 #include <cstring>
 
 using namespace std;
