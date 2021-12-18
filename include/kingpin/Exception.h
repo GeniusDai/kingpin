@@ -11,6 +11,7 @@ namespace kingpin {
 class FatalException : public exception {
     const char *_what_arg;
 public:
+    FatalException() : FatalException("fatal") {}
     explicit FatalException(const char *what_arg) : _what_arg(what_arg){}
     explicit FatalException(const string &what_arg) : FatalException(what_arg.c_str()) {}
     virtual ~FatalException() {}
@@ -21,8 +22,9 @@ public:
 class NonFatalException : public exception {
     const char *_what_arg;
 public:
-    NonFatalException(const char *what_arg) : _what_arg(what_arg) {}
-    NonFatalException(const string &what_arg) : NonFatalException(what_arg.c_str()) {}
+    NonFatalException() : NonFatalException("nonfatal") {}
+    explicit NonFatalException(const char *what_arg) : _what_arg(what_arg) {}
+    explicit NonFatalException(const string &what_arg) : NonFatalException(what_arg.c_str()) {}
     virtual ~NonFatalException() {}
 
     virtual const char *what() const noexcept { return _what_arg; }
