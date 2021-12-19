@@ -9,6 +9,8 @@ Default:
 
 * Server IP: "127.0.0.1"
 
+* Concurrency test number: "20000" (Need to modify system config)
+
 Screenshot
 ----------
 

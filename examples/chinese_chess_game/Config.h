@@ -4,6 +4,7 @@
 class Config {
 public:
     static const int _port;
+    static const int _concurrency_num;
     static const char *const _ip;
     static const char *const _init_msg_red;
     static const char *const _init_msg_black;
@@ -12,6 +13,7 @@ public:
 };
 
 const int Config::_port = 8889;
+const int Config::_concurrency_num = 20000;
 const char *const Config::_ip = "127.0.0.1";
 const char *const Config::_init_msg_red = "0 0 0 0\n";
 const char *const Config::_init_msg_black = "1 1 1 1\n";

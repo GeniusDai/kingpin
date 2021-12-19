@@ -257,6 +257,7 @@ template <typename _TPSharedData>
 void IOHandlerForClient<_TPSharedData>::_run() {
     INFO << "thread start" << END;
     while (true) {
+    try {
         this->onEpollLoop();
         if (0 == this->_fd_num) {
             unique_lock<mutex> m(this->_tsd->_pool_lock);
@@ -275,6 +276,7 @@ void IOHandlerForClient<_TPSharedData>::_run() {
         int num = ::epoll_wait(this->_epfd, this->_evs,
             this->_tsd->_max_client_per_thr, this->_tsd->_ep_timeout);
         for (int i = 0; i < num; ++i) { this->processEvent(this->_evs[i]); }
+    } catch (const exception &e) { INFO << e.what() << END; }
     }
 }
 
@@ -307,6 +309,7 @@ template <typename _TPSharedData>
 void IOHandlerForServer<_TPSharedData>::_run() {
     INFO << "thread start" << END;
     while (true) {
+    try {
         this->onEpollLoop();
         bool hold_listen_lock = false;
         if (0 == this->_fd_num) {
@@ -340,6 +343,7 @@ void IOHandlerForServer<_TPSharedData>::_run() {
                 this->onConnect(conn);
             }
         }
+    } catch (const exception &e) { INFO << e.what() << END; }
     }
 }
 
