@@ -6,7 +6,9 @@
 #include <map>
 #include <memory>
 #include <functional>
-
+#include <tuple>
+#include <vector>
+#include <cassert>
 #include "kingpin/Buffer.h"
 
 using namespace std;
@@ -46,18 +48,35 @@ public:
     // DONOT use this lock again unless you know what you're doing
     mutex _pool_lock;
     condition_variable _cv;
-    multimap<_t_host, string, _HostCompare> _pool;
+    map<_t_host, vector<string>, _HostCompare> _pool;
+
+    void raw_add(string host, int port, string init) {
+        pair<string, int> target = make_pair<string &&, int &&>(move(host), move(port));
+        _pool[target].emplace_back(init);
+    }
 
     void add(string host, int port, string init) {
         {
             unique_lock<mutex> _tl(this->_pool_lock);
             raw_add(host, port, init);
         }
-        _cv.notify_one();
+        _cv.notify_all();
     }
 
-    void raw_add(string host, int port, string init) {
-        _pool.emplace(make_pair<string &&, int &&>(move(host), move(port)), init);
+    tuple<string, int, string> raw_get() {
+        assert(this->_pool.size() > 0);
+        auto iter = _pool.begin();
+        string host = iter->first.first;
+        int port = iter->first.second;
+        string init = iter->second.back();
+        iter->second.pop_back();
+        if (iter->second.size() == 0) { _pool.erase(iter->first); }
+        return forward_as_tuple(move(host), move(port), move(init));
+    }
+
+    tuple<string, int, string> get() {
+        unique_lock<mutex> _tl(this->_pool_lock);
+        return move(raw_get());
     }
 };
 

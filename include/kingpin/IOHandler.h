@@ -219,16 +219,13 @@ void IOHandlerForClient<_TPSharedData>::run() {
 
 template <typename _TPSharedData>
 void IOHandlerForClient<_TPSharedData>::_get_from_pool() {
-    assert(this->_tsd->_pool.size() > 0);
     ++(this->_fd_num);
-    auto iter = this->_tsd->_pool.begin();
-    int sock = connectIp(iter->first.first.c_str(), iter->first.second, 0);
-    INFO << "connecting to " << iter->first.first.c_str()
-        << ":" <<  iter->first.second << END;
+    tuple<string, int, string> t = this->_tsd->raw_get();
+    int sock = connectIp(get<0>(t).c_str(), get<1>(t), 0);
+    INFO << "connecting to " << get<0>(t).c_str() << ":" <<  get<1>(t) << END;
     epollRegister(_epfd_conn, sock, EPOLLOUT);
-    _conn_init_message[sock] = iter->second;
-    _conn_info[sock] = iter->first;
-    this->_tsd->_pool.erase(iter);
+    _conn_init_message[sock] = get<2>(t);
+    _conn_info[sock] = make_pair(get<0>(t), get<1>(t));
 }
 
 template <typename _TPSharedData>
