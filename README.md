@@ -24,11 +24,11 @@ Please refer to: [Quick Start](https://github.com/GeniusDai/kingpin/tree/dev/exa
 
 # Header Files
 
-* IOHandler.h: Virtual base class got a epoll fd, derived class shall implement handler functions for IO.
+* IOHandler.h: Both server's and client's IO thread.
 
-* TPSharedData.h: Data shared among threads.
+* TPSharedData.h: Data shared among thread pool.
 
-* EpollTP.h: Thread pool, initialized by IOHandler and TPSharedData.
+* EpollTP.h: Thread pool initialized by IOHandler and TPSharedData.
 
 * AsyncLogger.h: Thread safe logger, using backend thread for asynchronous output, line buffered.
 
