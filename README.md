@@ -6,7 +6,7 @@
 
 * Thread pool and IO multiplexing for both server's and client's concurrency.
 
-* Server IO threads compete for listening socket, client IO threads compete for connection pool.
+* IO threads compete for listening socket or URI pool in server and client.
 
 * Avoid excessive wrapper of classes and functions to get things complicated.
 
@@ -16,7 +16,7 @@ Please refer to: [Quick Start](https://github.com/GeniusDai/kingpin/tree/dev/exa
 
 # Prerequirement
 
-* Linux : For epoll
+* Linux : Support epoll
 
 * g++ : Support c++11
 

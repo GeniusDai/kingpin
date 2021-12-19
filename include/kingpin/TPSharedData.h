@@ -71,7 +71,7 @@ public:
         string init = iter->second.back();
         iter->second.pop_back();
         if (iter->second.size() == 0) { _pool.erase(iter->first); }
-        return forward_as_tuple(move(host), move(port), move(init));
+        return make_tuple(move(host), move(port), move(init));
     }
 
     tuple<string, int, string> get() {
