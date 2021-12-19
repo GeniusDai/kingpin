@@ -21,6 +21,10 @@ public:
     TPSharedData(const TPSharedData &) = delete;
     TPSharedData& operator=(const TPSharedData &) = delete;
     virtual ~TPSharedData() {}
+
+    // Config Param
+    int _max_client_per_thr = 2048;
+    int _ep_timeout = 1;
 };
 
 class ServerTPSharedData : public TPSharedData {
@@ -30,6 +34,9 @@ public:
     // DONOT use this lock again unless you know what you're doing
     mutex _listenfd_lock;
     int _listenfd;
+
+    // Config Param
+    int _listen_num = 1024;
 };
 
 class ClientTPSharedData : public TPSharedData {
@@ -49,6 +56,10 @@ public:
     mutex _pool_lock;
     condition_variable _cv;
     map<_t_host, vector<string>, _HostCompare> _pool;
+
+    // Config Param
+    int _batch = 1;
+    int _ep_timeout_conn = 1;
 
     void raw_add(string host, int port, string init) {
         pair<string, int> target = make_pair<string &&, int &&>(move(host), move(port));

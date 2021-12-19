@@ -18,8 +18,6 @@ using namespace std;
 
 namespace kingpin {
 
-static const int LISTEN_NUM = 1024;
-
 template <template<typename _TPSharedData> class _IOHandler,
     typename _TPSharedData>
 class EpollTP final {
@@ -61,7 +59,7 @@ public:
     unique_ptr<TP> _tp;
 
     EpollTPServer(int thr_num, _TPSharedData *tsd) {
-        tsd->_listenfd = initListen(tsd->_port, LISTEN_NUM);
+        tsd->_listenfd = initListen(tsd->_port, tsd->_listen_num);
         _tp = unique_ptr<TP>(new TP(thr_num, tsd));
     }
 

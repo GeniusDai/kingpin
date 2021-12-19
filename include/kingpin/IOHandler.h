@@ -26,16 +26,13 @@ namespace kingpin {
 
 template <typename _TPSharedData>
 class IOHandler {
+    unique_ptr<struct epoll_event[]> __evs_ptr;
 public:
-    static const int _max_client_per_thr;
-    static const int _default_epoll_timeout;
-
-    int _epfd = ::epoll_create(1);
-    struct epoll_event _evs[_max_client_per_thr];
-    shared_ptr<thread> _t;
     _TPSharedData *_tsd;
+    int _epfd = ::epoll_create(1);
+    struct epoll_event *_evs;
+    shared_ptr<thread> _t;
     int _fd_num = 0;
-    int _epoll_timeout = _default_epoll_timeout;
 
     unordered_map<int, shared_ptr<Buffer> > _rbh;
     unordered_map<int, shared_ptr<Buffer> > _wbh;
@@ -62,13 +59,10 @@ public:
 };
 
 template <typename _TPSharedData>
-const int IOHandler<_TPSharedData>::_max_client_per_thr = 2048;
-
-template <typename _TPSharedData>
-const int IOHandler<_TPSharedData>::_default_epoll_timeout = 1;    // milliseconds
-
-template <typename _TPSharedData>
-IOHandler<_TPSharedData>::IOHandler(_TPSharedData *tsd) : _tsd(tsd) {}
+IOHandler<_TPSharedData>::IOHandler(_TPSharedData *tsd) : _tsd(tsd) {
+    __evs_ptr = unique_ptr<epoll_event[]>(new epoll_event[_tsd->_max_client_per_thr]);
+    _evs = __evs_ptr.get();
+}
 
 template <typename _TPSharedData>
 IOHandler<_TPSharedData>::~IOHandler() {}
@@ -183,7 +177,6 @@ template <typename _TPSharedData>
 class IOHandlerForClient : public IOHandler<_TPSharedData> {
 public:
     int _epfd_conn = ::epoll_create(1);     // for nonblock connect
-    int _epoll_timeout_conn = this->_default_epoll_timeout;
 
     unordered_map<int, string> _conn_init_message;
     unordered_map<int, pair<string, int> > _conn_info;
@@ -196,7 +189,7 @@ public:
     virtual void onConnectFailed(int conn);   // only client
 
     void run();
-    void _get_from_pool();
+    void _get_from_pool(int batch);
     void _check_connect();
     void _run();
 };
@@ -218,20 +211,23 @@ void IOHandlerForClient<_TPSharedData>::run() {
 }
 
 template <typename _TPSharedData>
-void IOHandlerForClient<_TPSharedData>::_get_from_pool() {
-    ++(this->_fd_num);
-    tuple<string, int, string> t = this->_tsd->raw_get();
-    int sock = connectIp(get<0>(t).c_str(), get<1>(t), 0);
-    INFO << "connecting to " << get<0>(t).c_str() << ":" <<  get<1>(t) << END;
-    epollRegister(_epfd_conn, sock, EPOLLOUT);
-    _conn_init_message[sock] = get<2>(t);
-    _conn_info[sock] = make_pair(get<0>(t), get<1>(t));
+void IOHandlerForClient<_TPSharedData>::_get_from_pool(int batch) {
+    while(batch--) {
+        if (this->_tsd->_pool.size() == 0) { break; }
+        ++(this->_fd_num);
+        tuple<string, int, string> t = this->_tsd->raw_get();
+        int sock = connectIp(get<0>(t).c_str(), get<1>(t), 0);
+        INFO << "connecting to " << get<0>(t).c_str() << ":" <<  get<1>(t) << END;
+        epollRegister(_epfd_conn, sock, EPOLLOUT);
+        _conn_init_message[sock] = get<2>(t);
+        _conn_info[sock] = make_pair(get<0>(t), get<1>(t));
+    }
 }
 
 template <typename _TPSharedData>
 void IOHandlerForClient<_TPSharedData>::_check_connect() {
     int num = ::epoll_wait(_epfd_conn, this->_evs,
-        this->_max_client_per_thr, _epoll_timeout_conn);
+        this->_tsd->_max_client_per_thr, this->_tsd->_ep_timeout_conn);
     for (int i = 0; i < num; ++i) {
         uint32_t events = this->_evs[i].events;
         int fd = this->_evs[i].data.fd;
@@ -267,17 +263,17 @@ void IOHandlerForClient<_TPSharedData>::_run() {
             this->_tsd->_cv.wait(m, [this]()->bool{
                 return this->_tsd->_pool.size() != 0; });
             INFO << "thread get lock" << END;
-            _get_from_pool();
+            _get_from_pool(this->_tsd->_batch);
         } else if (this->_tsd->_pool.size() != 0 &&
                 this->_tsd->_pool_lock.try_lock()) {
             INFO << "thread get lock" << END;
-            _get_from_pool();
+            _get_from_pool(this->_tsd->_batch);
             this->_tsd->_pool_lock.unlock();
         }
         assert(this->_fd_num > 0);
         _check_connect();
         int num = ::epoll_wait(this->_epfd, this->_evs,
-            this->_max_client_per_thr, this->_epoll_timeout);
+            this->_tsd->_max_client_per_thr, this->_tsd->_ep_timeout);
         for (int i = 0; i < num; ++i) { this->processEvent(this->_evs[i]); }
     }
 }
@@ -327,7 +323,7 @@ void IOHandlerForServer<_TPSharedData>::_run() {
         }
         assert(this->_fd_num > 0);
         int num = epoll_wait(this->_epfd, this->_evs,
-            this->_max_client_per_thr, this->_epoll_timeout);
+            this->_tsd->_max_client_per_thr, this->_tsd->_ep_timeout);
         for (int i = 0; i < num; ++i) {
             int fd = this->_evs[i].data.fd;
             if (fd != this->_tsd->_listenfd) {

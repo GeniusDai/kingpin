@@ -23,7 +23,7 @@
 using namespace std;
 using namespace kingpin;
 
-class ChessGameShareData : public ServerTPSharedData {
+class ChessData : public ServerTPSharedData {
 public:
     mutex _m;
     unordered_map<int, int> _match;
@@ -31,11 +31,11 @@ public:
     map<int, string> _message;
 };
 
-template <typename ChessGameShareData>
-class ChessGameIOHandler : public IOHandlerForServer<ChessGameShareData> {
+template <typename ChessData>
+class ChessIO : public IOHandlerForServer<ChessData> {
 public:
-    ChessGameIOHandler(ChessGameShareData *tsd) :
-        IOHandlerForServer<ChessGameShareData>(tsd) {}
+    ChessIO(ChessData *tsd) :
+        IOHandlerForServer<ChessData>(tsd) {}
 
     void onConnect(int conn) {
         unique_lock<mutex>(this->_tsd->_m);
@@ -102,9 +102,9 @@ public:
 };
 
 int main() {
-    ChessGameShareData data;
+    ChessData data;
     data._port = Config::_port;
-    EpollTPServer<ChessGameIOHandler, ChessGameShareData> server(8, &data);
+    EpollTPServer<ChessIO, ChessData> server(32, &data);
     server.run();
     return 0;
 }

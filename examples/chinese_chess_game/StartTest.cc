@@ -16,10 +16,13 @@
 using namespace std;
 using namespace kingpin;
 
+// Need to modify ulimit
+static const int NUM = 20000;
+
 template <typename _Data>
-class ConcurrencyTestIOHandler : public IOHandlerForClient<_Data> {
+class HighConHandler : public IOHandlerForClient<_Data> {
 public:
-    ConcurrencyTestIOHandler(_Data *tsd) : IOHandlerForClient<_Data>(tsd) {}
+    HighConHandler(_Data *tsd) : IOHandlerForClient<_Data>(tsd) {}
 
     void onMessage(int conn) {
         Buffer *rb = this->_rbh[conn].get();
@@ -31,8 +34,9 @@ public:
 
 int main() {
     ClientTPSharedData data;
-    for (int i = 0; i < 800; ++i) { data.raw_add(Config::_ip, Config::_port, ""); }
-    EpollTPClient<ConcurrencyTestIOHandler, ClientTPSharedData> concurrency(16, &data);
-    concurrency.run();
+    data._batch = 50;
+    for (int i = 0; i < NUM; ++i) { data.raw_add(Config::_ip, Config::_port, ""); }
+    EpollTPClient<HighConHandler, ClientTPSharedData> hc_client(32, &data);
+    hc_client.run();
     return 0;
 }
