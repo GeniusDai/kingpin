@@ -45,6 +45,8 @@ void epollRemove(int epfd, int fd);
 
 void split(string s, string sep, vector<string>& subs);
 
+void ignoreSignal(int sig);
+
 }
 
 #endif

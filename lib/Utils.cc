@@ -13,6 +13,7 @@
 #include <tuple>
 #include <sys/epoll.h>
 #include <sstream>
+#include <signal.h>
 #include "kingpin/Exception.h"
 #include "kingpin/Utils.h"
 #include "kingpin/AsyncLogger.h"
@@ -171,6 +172,16 @@ void split(string s, string sep, vector<string>& subs) {
     }
     if (start != s.size()) {
         subs.emplace_back(s.substr(start, s.size()));
+    }
+}
+
+void ignoreSignal(int sig) {
+    struct sigaction sigact;
+    ::memset(&sigact, 0, sizeof(struct sigaction));
+    sigact.sa_handler = SIG_IGN;
+    sigact.sa_flags = SA_RESTART;
+    if (::sigaction(sig, &sigact, NULL) == -1) {
+        fatalError("ignore signal error");
     }
 }
 

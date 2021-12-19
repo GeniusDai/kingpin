@@ -11,14 +11,13 @@
 #include <unordered_set>
 #include <ctime>
 #include <mutex>
-
+#include <set>
 #include "kingpin/EpollTP.h"
 #include "kingpin/IOHandler.h"
 #include "kingpin/TPSharedData.h"
 #include "kingpin/Exception.h"
 #include "kingpin/AsyncLogger.h"
 #include "kingpin/Buffer.h"
-
 #include "Config.h"
 
 using namespace std;
@@ -69,15 +68,17 @@ public:
     void onEpollLoop() {
         unique_lock<mutex>(this->_tsd->_m);
         map<int, string> &message = this->_tsd->_message;
+        set<int> dels;
         for (auto iter = message.begin(); iter != message.end(); ++iter) {
             if (this->_wbh.find(iter->first) != this->_wbh.cend()) {
                 INFO << "find message for " << iter->first << END;
                 this->_wbh[iter->first]->appendToBuffer(message[iter->first].c_str());
                 this->writeToBuffer(iter->first);
                 // erase will cause iter loses efficacy ?
-                message[iter->first] = "";
+                dels.insert(iter->first);
             }
         }
+        for (auto fd : dels) { message.erase(fd); }
     }
 
     void onWriteComplete(int conn) {

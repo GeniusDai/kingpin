@@ -9,6 +9,7 @@
 #include <sys/socket.h>
 #include <unistd.h>
 #include <netinet/in.h>
+#include <signal.h>
 
 #include "kingpin/AsyncLogger.h"
 #include "kingpin/IOHandler.h"
@@ -33,6 +34,7 @@ public:
     }
 
     void run() {
+        ignoreSignal(SIGPIPE);
         for (auto h : _handlers) { h->run(); }
         for (auto h : _handlers) { h->join(); }
     }
