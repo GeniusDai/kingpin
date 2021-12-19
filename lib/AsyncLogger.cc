@@ -19,7 +19,7 @@ namespace kingpin {
 
 AsyncLogger::AsyncLogger(int level) : _level(level) {
     if (_level != 1 && _level != 2) return;
-    _thr_ptr = make_shared<thread>(&AsyncLogger::_run, this);
+    _thr_ptr = unique_ptr<thread>(new thread(&AsyncLogger::_run, this));
 }
 
 AsyncLogger &AsyncLogger::operator<<(const long num) {

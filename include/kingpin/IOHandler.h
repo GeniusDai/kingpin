@@ -31,11 +31,11 @@ public:
     _TPSharedData *_tsd;
     int _epfd = ::epoll_create(1);
     struct epoll_event *_evs;
-    shared_ptr<thread> _t;
+    unique_ptr<thread> _t;
     int _fd_num = 0;
 
-    unordered_map<int, shared_ptr<Buffer> > _rbh;
-    unordered_map<int, shared_ptr<Buffer> > _wbh;
+    unordered_map<int, unique_ptr<Buffer> > _rbh;
+    unordered_map<int, unique_ptr<Buffer> > _wbh;
 
     explicit IOHandler(_TPSharedData *tsd);
     IOHandler(const IOHandler &) = delete;
@@ -87,8 +87,8 @@ void IOHandler<_TPSharedData>::join() { _t->join(); }
 
 template <typename _TPSharedData>
 void IOHandler<_TPSharedData>::createBuffer(int conn) {
-    _rbh[conn] = shared_ptr<Buffer>(new Buffer());
-    _wbh[conn] = shared_ptr<Buffer>(new Buffer());
+    _rbh[conn] = unique_ptr<Buffer>(new Buffer());
+    _wbh[conn] = unique_ptr<Buffer>(new Buffer());
 }
 
 template <typename _TPSharedData>
@@ -207,7 +207,7 @@ void IOHandlerForClient<_TPSharedData>::onConnectFailed(int conn) {}
 
 template <typename _TPSharedData>
 void IOHandlerForClient<_TPSharedData>::run() {
-    this->_t = make_shared<thread>(&IOHandlerForClient::_run, this);
+    this->_t = unique_ptr<thread>(new thread(&IOHandlerForClient::_run, this));
 }
 
 template <typename _TPSharedData>
@@ -302,7 +302,7 @@ IOHandlerForServer<_TPSharedData>::~IOHandlerForServer() {}
 
 template <typename _TPSharedData>
 void IOHandlerForServer<_TPSharedData>::run() {
-    this->_t = make_shared<thread>(&IOHandlerForServer::_run, this);
+    this->_t = unique_ptr<thread>(new thread(&IOHandlerForServer::_run, this));
 }
 
 template <typename _TPSharedData>

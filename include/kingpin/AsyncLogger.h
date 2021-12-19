@@ -16,7 +16,7 @@ class AsyncLogger final {
     Buffer _buffer;
     recursive_mutex _m;
     condition_variable_any _thr_cv;
-    shared_ptr<thread> _thr_ptr;
+    unique_ptr<thread> _thr_ptr;
     int _recur_level = 0;
     bool _stop = false;
     bool _flush = true;
