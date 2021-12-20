@@ -22,7 +22,7 @@ template <template<typename _TPSharedData> class _IOHandler,
     typename _TPSharedData>
 class EpollTP final {
     using Handler = _IOHandler<_TPSharedData>;
-    vector<shared_ptr<Handler> > _handlers;
+    vector<unique_ptr<Handler> > _handlers;
     int _thr_num;
     _TPSharedData *_tsd;
 public:
@@ -33,8 +33,8 @@ public:
 
     void run() {
         ignoreSignal(SIGPIPE);
-        for (auto h : _handlers) { h->run(); }
-        for (auto h : _handlers) { h->join(); }
+        for (auto &h : _handlers) { h->run(); }
+        for (auto &h : _handlers) { h->join(); }
     }
 };
 
