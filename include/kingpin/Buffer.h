@@ -7,6 +7,8 @@ namespace kingpin {
 
 // NOT thread safe
 class Buffer final {
+private:
+    unique_ptr<char []> __buffer;
 public:
     int _cap;   // capacity size
     int _offset = 0;    // data size total

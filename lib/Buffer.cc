@@ -5,6 +5,8 @@
 #include <cerrno>
 #include <cstdio>
 #include <unistd.h>
+#include <memory>
+#include <functional>
 #include "kingpin/Exception.h"
 #include "kingpin/Utils.h"
 #include "kingpin/Buffer.h"
@@ -16,21 +18,22 @@ namespace kingpin {
 Buffer::Buffer() : Buffer(_default_cap) {}
 
 Buffer::Buffer(int cap) : _cap(cap) {
-    _buffer = new char[_cap];
+    __buffer = unique_ptr<char[]>(new char[_cap]);
+    _buffer = __buffer.get();
     ::memset(_buffer, 0, _cap);
 }
 
-Buffer::~Buffer() { delete _buffer; }
+Buffer::~Buffer() {}
 
 // resize to at least cap
 void Buffer::resize(int cap) {
     if (_cap >= cap) return;
     while(_cap < cap) { _cap *= 2; }
-    char *nbuffer = new char[_cap];
-    ::memset(nbuffer, 0, _cap);
-    for (int i = _start; i < _offset; ++i) { nbuffer[i] = _buffer[i]; }
-    delete _buffer;
-    _buffer = nbuffer;
+    unique_ptr<char[]>nbuffer = unique_ptr<char[]>(new char[_cap]);
+    ::memset(nbuffer.get(), 0, _cap);
+    for (int i = _start; i < _offset; ++i) { nbuffer.get()[i] = _buffer[i]; }
+    __buffer = move(nbuffer);
+    _buffer = __buffer.get();
 }
 
 void Buffer::clear() {
