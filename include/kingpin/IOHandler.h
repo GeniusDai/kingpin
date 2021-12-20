@@ -13,6 +13,7 @@
 #include <chrono>
 #include <unistd.h>
 #include <unordered_map>
+#include <unordered_set>
 
 #include "kingpin/Exception.h"
 #include "kingpin/AsyncLogger.h"
@@ -22,8 +23,7 @@ using namespace std;
 
 namespace kingpin {
 
-// IOHandler --> thread
-
+// Base IO Thread
 template <typename _TPSharedData>
 class IOHandler {
     unique_ptr<struct epoll_event[]> __evs_ptr;
@@ -173,13 +173,13 @@ void IOHandler<_TPSharedData>::processEvent(struct epoll_event &event) {
 }
 
 
+// Client IO Thread
 template <typename _TPSharedData>
 class IOHandlerForClient : public IOHandler<_TPSharedData> {
 public:
-    int _epfd_conn = ::epoll_create(1);     // for nonblock connect
-
     unordered_map<int, string> _conn_init_message;
     unordered_map<int, pair<string, int> > _conn_info;
+    unordered_set<int> _syn_sent;
 
     explicit IOHandlerForClient(_TPSharedData *tsd);
     IOHandlerForClient(const IOHandlerForClient &) = delete;
@@ -190,7 +190,6 @@ public:
 
     void run();
     void _get_from_pool(int batch);
-    void _check_connect();
     void _run();
 };
 
@@ -218,40 +217,13 @@ void IOHandlerForClient<_TPSharedData>::_get_from_pool(int batch) {
         tuple<string, int, string> t = this->_tsd->raw_get();
         int sock = connectIp(get<0>(t).c_str(), get<1>(t), 0);
         INFO << "connecting to " << get<0>(t).c_str() << ":" <<  get<1>(t) << END;
-        epollRegister(_epfd_conn, sock, EPOLLOUT);
+        epollRegister(this->_epfd, sock, EPOLLOUT);
         _conn_init_message[sock] = get<2>(t);
         _conn_info[sock] = make_pair(get<0>(t), get<1>(t));
+        _syn_sent.insert(sock);
     }
 }
 
-template <typename _TPSharedData>
-void IOHandlerForClient<_TPSharedData>::_check_connect() {
-    int num = ::epoll_wait(_epfd_conn, this->_evs,
-        this->_tsd->_max_client_per_thr, this->_tsd->_ep_timeout_conn);
-    for (int i = 0; i < num; ++i) {
-        uint32_t events = this->_evs[i].events;
-        int fd = this->_evs[i].data.fd;
-        assert(events & EPOLLOUT);
-        epollRemove(_epfd_conn, fd);
-        int optval;
-        socklen_t len = sizeof(optval);
-        if (::getsockopt(fd, SOL_SOCKET, SO_ERROR, &optval, &len) < 0) {
-            fatalError("syscall getsockopt error");
-        }
-        if (0 == optval) {
-            INFO << "connect succeed with conn " << fd << END;
-            int size = _conn_init_message[fd].size();
-            if (size) { ::write(fd, _conn_init_message[fd].c_str(), size); }
-            this->createBuffer(fd);
-            this->onConnect(fd);
-            epollRegister(this->_epfd, fd, EPOLLIN);
-        } else {
-            INFO << "connect failed with conn " << fd << END;
-            this->onConnectFailed(fd);
-            ::close(fd);
-        }
-    }
-}
 
 template <typename _TPSharedData>
 void IOHandlerForClient<_TPSharedData>::_run() {
@@ -272,15 +244,41 @@ void IOHandlerForClient<_TPSharedData>::_run() {
             this->_tsd->_pool_lock.unlock();
         }
         assert(this->_fd_num > 0);
-        _check_connect();
         int num = ::epoll_wait(this->_epfd, this->_evs,
             this->_tsd->_max_client_per_thr, this->_tsd->_ep_timeout);
-        for (int i = 0; i < num; ++i) { this->processEvent(this->_evs[i]); }
+        for (int i = 0; i < num; ++i) {
+            int fd = this->_evs[i].data.fd;
+            if (0 == _syn_sent.count(fd)) {
+                this->processEvent(this->_evs[i]);
+            } else {
+                assert(this->_evs[i].events & EPOLLOUT);
+                epollRemove(this->_epfd, fd);
+                int optval;
+                socklen_t len = sizeof(optval);
+                if (::getsockopt(fd, SOL_SOCKET, SO_ERROR, &optval, &len) < 0) {
+                    fatalError("syscall getsockopt error");
+                }
+                _syn_sent.erase(fd);
+                if (0 == optval) {
+                    INFO << "connect succeeded with conn " << fd << END;
+                    int size = _conn_init_message[fd].size();
+                    if (size) { ::write(fd, _conn_init_message[fd].c_str(), size); }
+                    this->createBuffer(fd);
+                    this->onConnect(fd);
+                    epollRegister(this->_epfd, fd, EPOLLIN);
+                } else {
+                    INFO << "connect failed with conn " << fd << END;
+                    this->onConnectFailed(fd);
+                    ::close(fd);
+                }
+            }
+        }
     } catch (const exception &e) { INFO << e.what() << END; }
     }
 }
 
 
+// Server IO Thread
 template <typename _TPSharedData>
 class IOHandlerForServer : public IOHandler<_TPSharedData> {
 public:

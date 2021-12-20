@@ -59,7 +59,6 @@ public:
 
     // Config Param
     int _batch = 1;
-    int _ep_timeout_conn = 1;
 
     void raw_add(string host, int port, string init) {
         pair<string, int> target = make_pair<string &&, int &&>(move(host), move(port));
