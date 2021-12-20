@@ -70,17 +70,14 @@ public:
     void onEpollLoop() {
         unique_lock<recursive_mutex> lg(this->_tsd->_m);
         map<int, string> &message = this->_tsd->_message;
-        vector<int> dels;
-        for (auto iter = message.begin(); iter != message.end(); ++iter) {
+        for (auto iter = message.begin(); iter != message.end(); ) {
             if (this->_wbh.find(iter->first) != this->_wbh.cend()) {
                 INFO << "find message for " << iter->first << END;
                 this->_wbh[iter->first]->appendToBuffer(message[iter->first].c_str());
                 this->writeToBuffer(iter->first);
-                // erase will cause iter loses efficacy ?
-                dels.push_back(iter->first);
-            }
+                iter = message.erase(iter);
+            } else { ++iter; }
         }
-        for (uint i = 0; i < dels.size(); ++i) { message.erase(dels[i]); }
     }
 
     void onWriteComplete(int conn) {
