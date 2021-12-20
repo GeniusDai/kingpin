@@ -29,7 +29,7 @@ Buffer::~Buffer() {}
 void Buffer::resize(int cap) {
     if (_cap >= cap) return;
     while(_cap < cap) { _cap *= 2; }
-    unique_ptr<char[]>nbuffer = unique_ptr<char[]>(new char[_cap]);
+    unique_ptr<char[]> nbuffer = unique_ptr<char[]>(new char[_cap]);
     ::memset(nbuffer.get(), 0, _cap);
     for (int i = _start; i < _offset; ++i) { nbuffer.get()[i] = _buffer[i]; }
     __buffer = move(nbuffer);
@@ -53,8 +53,7 @@ int Buffer::readNioToBuffer(int fd, int len) {
     while (true) {
         int curr = ::read(fd, _buffer + _offset, len - total);
         if (curr == -1) {
-            if (errno == EINTR) { continue; }
-            else if (errno == EAGAIN || errno == EWOULDBLOCK) { break; }
+            if (errno == EAGAIN || errno == EWOULDBLOCK) { break; }
             else if (errno == ECONNRESET) {
                 fdClosedError(str);
             } else { fatalError(str); }
@@ -113,8 +112,7 @@ int Buffer::writeNioFromBuffer(int fd, int len) {
     while (0 != len) {
         int curr = ::write(fd, _buffer + _start, len);
         if (curr == -1) {
-            if (errno == EINTR) { continue; }
-            else if (errno == EAGAIN || errno == EWOULDBLOCK) { break; }
+            if (errno == EAGAIN || errno == EWOULDBLOCK) { break; }
             else if (errno == EPIPE || errno == ECONNRESET) {
                 fdClosedError(str);
             } else { fatalError(str); }

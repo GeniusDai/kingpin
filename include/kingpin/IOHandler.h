@@ -27,6 +27,7 @@ namespace kingpin {
 template <typename _TPSharedData>
 class IOHandler {
     unique_ptr<struct epoll_event[]> __evs_ptr;
+    vector<shared_ptr<Buffer> > _buffer_pool;
 public:
     _TPSharedData *_tsd;
     int _epfd = ::epoll_create(1);
@@ -34,8 +35,8 @@ public:
     unique_ptr<thread> _t;
     int _fd_num = 0;
 
-    unordered_map<int, unique_ptr<Buffer> > _rbh;
-    unordered_map<int, unique_ptr<Buffer> > _wbh;
+    unordered_map<int, shared_ptr<Buffer> > _rbh;
+    unordered_map<int, shared_ptr<Buffer> > _wbh;
 
     explicit IOHandler(_TPSharedData *tsd);
     IOHandler(const IOHandler &) = delete;
@@ -87,12 +88,23 @@ void IOHandler<_TPSharedData>::join() { _t->join(); }
 
 template <typename _TPSharedData>
 void IOHandler<_TPSharedData>::createBuffer(int conn) {
-    _rbh[conn] = unique_ptr<Buffer>(new Buffer());
-    _wbh[conn] = unique_ptr<Buffer>(new Buffer());
+    int size = _buffer_pool.size();
+    if (size < 2) {
+        _rbh[conn] = shared_ptr<Buffer>(new Buffer());
+        _wbh[conn] = shared_ptr<Buffer>(new Buffer());
+    } else {
+        _rbh[conn] = _buffer_pool[size-1];
+        _wbh[conn] = _buffer_pool[size-2];
+        _buffer_pool.pop_back();
+        _buffer_pool.pop_back();
+    }
+
 }
 
 template <typename _TPSharedData>
 void IOHandler<_TPSharedData>::destoryBuffer(int conn) {
+    _buffer_pool.push_back(_rbh[conn]);
+    _buffer_pool.push_back(_wbh[conn]);
     _rbh.erase(conn);
     _wbh.erase(conn);
 }
@@ -229,7 +241,6 @@ template <typename _TPSharedData>
 void IOHandlerForClient<_TPSharedData>::_run() {
     INFO << "thread start" << END;
     while (true) {
-    try {
         this->onEpollLoop();
         if (0 == this->_fd_num) {
             unique_lock<mutex> m(this->_tsd->_pool_lock);
@@ -273,7 +284,6 @@ void IOHandlerForClient<_TPSharedData>::_run() {
                 }
             }
         }
-    } catch (const exception &e) { INFO << e.what() << END; }
     }
 }
 
@@ -307,7 +317,6 @@ template <typename _TPSharedData>
 void IOHandlerForServer<_TPSharedData>::_run() {
     INFO << "thread start" << END;
     while (true) {
-    try {
         this->onEpollLoop();
         bool hold_listen_lock = false;
         if (0 == this->_fd_num) {
@@ -337,11 +346,15 @@ void IOHandlerForServer<_TPSharedData>::_run() {
                 this->_tsd->_listenfd_lock.unlock();
                 INFO << "thread release lock" << END;
                 this->createBuffer(conn);
-                epollRegister(this->_epfd, conn, EPOLLIN);
-                this->onConnect(conn);
+                try {
+                    epollRegister(this->_epfd, conn, EPOLLIN);
+                    this->onConnect(conn);
+                } catch (...) {
+                    this->destoryBuffer(conn);
+                    ::close(conn);
+                }
             }
         }
-    } catch (const exception &e) { INFO << e.what() << END; }
     }
 }
 

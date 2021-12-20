@@ -12,6 +12,7 @@
 #include <ctime>
 #include <mutex>
 #include <set>
+#include <vector>
 #include "kingpin/EpollTP.h"
 #include "kingpin/IOHandler.h"
 #include "kingpin/TPSharedData.h"
@@ -25,9 +26,9 @@ using namespace kingpin;
 
 class ChessData : public ServerTPSharedData {
 public:
-    mutex _m;
+    recursive_mutex _m;
     unordered_map<int, int> _match;
-    unordered_set<int> _single;
+    set<int> _single;
     map<int, string> _message;
 };
 
@@ -38,23 +39,24 @@ public:
         IOHandlerForServer<ChessData>(tsd) {}
 
     void onConnect(int conn) {
-        unique_lock<mutex>(this->_tsd->_m);
+        unique_lock<recursive_mutex> lg(this->_tsd->_m);
         if (this->_tsd->_single.empty()) {
             this->_tsd->_single.insert(conn);
             INFO << "single client " << conn << " arrived"<< END;
         } else {
             auto iter = this->_tsd->_single.begin();
-            this->_tsd->_match[*iter] = conn;
+            int oppo = *iter;
+            this->_tsd->_match[oppo] = conn;
             this->_tsd->_match[conn] = *iter;
-            INFO << "match client " << conn << " & " << *iter << END;
+            INFO << "match client " << conn << " & " << oppo << END;
             ::write(conn, Config::_init_msg_black, strlen(Config::_init_msg_black));
-            ::write(*iter, Config::_init_msg_red, strlen(Config::_init_msg_red));
-            this->_tsd->_single.erase(*iter);
+            ::write(oppo, Config::_init_msg_red, strlen(Config::_init_msg_red));
+            this->_tsd->_single.erase(oppo);
         }
     }
 
     void onMessage(int conn) {
-        unique_lock<mutex>(this->_tsd->_m);
+        unique_lock<recursive_mutex> lg(this->_tsd->_m);
         if (this->_tsd->_match.find(conn) == this->_tsd->_match.end()) { return; }
         int oppo = this->_tsd->_match[conn];
         Buffer *rb = this->_rbh[conn].get();
@@ -66,19 +68,19 @@ public:
     }
 
     void onEpollLoop() {
-        unique_lock<mutex>(this->_tsd->_m);
+        unique_lock<recursive_mutex> lg(this->_tsd->_m);
         map<int, string> &message = this->_tsd->_message;
-        set<int> dels;
+        vector<int> dels;
         for (auto iter = message.begin(); iter != message.end(); ++iter) {
             if (this->_wbh.find(iter->first) != this->_wbh.cend()) {
                 INFO << "find message for " << iter->first << END;
                 this->_wbh[iter->first]->appendToBuffer(message[iter->first].c_str());
                 this->writeToBuffer(iter->first);
                 // erase will cause iter loses efficacy ?
-                dels.insert(iter->first);
+                dels.push_back(iter->first);
             }
         }
-        for (auto fd : dels) { message.erase(fd); }
+        for (uint i = 0; i < dels.size(); ++i) { message.erase(dels[i]); }
     }
 
     void onWriteComplete(int conn) {
@@ -87,7 +89,7 @@ public:
     }
 
     void onPassivelyClosed(int conn) {
-        unique_lock<mutex>(this->_tsd->_m);
+        unique_lock<recursive_mutex> lg(this->_tsd->_m);
         int oppo = -1;
         INFO << "client " << conn << " closed the socket" << END;
         ::close(conn);
