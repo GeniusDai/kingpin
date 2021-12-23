@@ -54,6 +54,7 @@ public:
     void createBuffer(int conn);
     void destoryBuffer(int conn);
     void writeToBuffer(int conn);
+    void writeToBuffer(int conn, const char *str);
     void onWritable(int conn);
     void onReadable(int conn);
     void processEvent(struct epoll_event &event);
@@ -132,6 +133,12 @@ void IOHandler<_TPSharedData>::writeToBuffer(int conn) {
         destoryBuffer(conn);
         ::close(conn);
     }
+}
+
+template<typename _TPSharedData>
+void IOHandler<_TPSharedData>::writeToBuffer(int conn, const char *str) {
+    _wbh[conn]->appendToBuffer(str);
+    writeToBuffer(conn);
 }
 
 

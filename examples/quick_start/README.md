@@ -6,18 +6,17 @@ In this guide, we will build a server that echo "Hello, kingpin!" to the client 
 
 ### Step 1. Define your own IOHandler
 
-Implement a IOHandler, this could tell the thread what to do when handling a connection.
+Implement a IOHandler, this could tell the thread what to do when handling a connection. We just echo the string and close the connection when write completes.
 
 ```
 template<typename _Data>
 class SimpleHandler : public IOHandlerForServer<_Data> {
 public:
     SimpleHandler(_Data *d) : IOHandlerForServer<_Data>(d) {}
-    void onConnect(int conn) {
-        const char *str = "Hello, kingpin!";
-        ::write(conn, str, strlen(str));
-        ::close(conn);
-    }
+
+    void onConnect(int conn) { this->writeToBuffer(conn, "Hello, kingpin!"); }
+
+    void onWriteComplete(int conn) { ::close(conn); }
 };
 ```
 
@@ -28,9 +27,7 @@ The template _Data refers to the data shared between threads. This template is e
 Define the data shared between threads. Since no EXTRA DATA to be shared in the simple demo, just derive from the base class (or use the base class).
 
 ```
-class SharedData : public ServerTPSharedData {
-
-};
+class SharedData : public ServerTPSharedData {};
 ```
 
 ### Step 3. Init the data and run the server

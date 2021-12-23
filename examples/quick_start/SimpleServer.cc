@@ -10,16 +10,13 @@ template<typename _Data>
 class SimpleHandler : public IOHandlerForServer<_Data> {
 public:
     SimpleHandler(_Data *d) : IOHandlerForServer<_Data>(d) {}
-    void onConnect(int conn) {
-        const char *str = "Hello, kingpin!";
-        ::write(conn, str, strlen(str));
-        ::close(conn);
-    }
+
+    void onConnect(int conn) { this->writeToBuffer(conn, "Hello, kingpin!"); }
+
+    void onWriteComplete(int conn) { ::close(conn); }
 };
 
-class SharedData : public ServerTPSharedData {
-
-};
+class SharedData : public ServerTPSharedData {};
 
 int main() {
     SharedData data;
