@@ -166,10 +166,9 @@ void IOHandler<_TPSharedData>::onReadable(int conn) {
     Buffer *rb;
     try {
         rb = _rbh[conn].get();
-        rb->readNioToBufferTillBlock(conn);
+        rb->readNioToBufferTillBlockOrEOF(conn);
         onMessage(conn);
-    } catch(const NonFatalException &e) {
-        // opposite end may collapse or close the conn
+    } catch(const FdClosedException &e) {
         INFO << e << END;
         onPassivelyClosed(conn);
         destoryBuffer(conn);

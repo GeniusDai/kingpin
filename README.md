@@ -16,11 +16,13 @@ Please refer to: [Quick Start](https://github.com/GeniusDai/kingpin/tree/dev/exa
 
 # Prerequirement
 
-* Linux : Support epoll
+* Linux
 
-* g++ : Support c++11
+* g++ -std=c++11
 
-* gtest && cmake
+* googletest
+
+* cmake suite
 
 # Header Files
 
@@ -42,7 +44,7 @@ Please refer to: [Quick Start](https://github.com/GeniusDai/kingpin/tree/dev/exa
 
 A wealth of cases:
 
-* [Chinese Chess Game](https://github.com/GeniusDai/kingpin/tree/dev/examples/chinese_chess_game): Chess game server and client, also implement a high concurrency test client.
+* [Chinese Chess Game](https://github.com/GeniusDai/kingpin/tree/dev/examples/chinese_chess_game): Chess game server and client, also implements a high concurrency test client.
 
 * [File Transfer](https://github.com/GeniusDai/kingpin/tree/dev/examples/file_transfer): File transfer server and client, IO and exceptions are both well handled.
 
