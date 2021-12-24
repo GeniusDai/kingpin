@@ -27,7 +27,7 @@ void setTcpSockaddr(struct sockaddr_in *addr_ptr, const char *ip, int port);
 
 void getTcpHostAddr(struct sockaddr_in *addr_ptr, const char *host, int port);
 
-void getHostIp(const char *host, char *ip, size_t ip_len);
+string getHostIp(const char *host);
 
 void setNonBlock(int fd);
 

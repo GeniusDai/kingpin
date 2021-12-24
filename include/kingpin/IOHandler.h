@@ -278,9 +278,8 @@ void IOHandlerForClient<_TPSharedData>::_run() {
                 _syn_sent.erase(fd);
                 if (0 == optval) {
                     INFO << "connect succeeded with conn " << fd << END;
-                    int size = _conn_init_message[fd].size();
-                    if (size) { ::write(fd, _conn_init_message[fd].c_str(), size); }
                     this->createBuffer(fd);
+                    this->writeToBuffer(fd, _conn_init_message[fd].c_str());
                     this->onConnect(fd);
                     epollRegister(this->_epfd, fd, EPOLLIN);
                 } else {

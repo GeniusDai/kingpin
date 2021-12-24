@@ -67,7 +67,10 @@ void getTcpHostAddr(struct sockaddr_in *addr_ptr, const char *host, int port) {
     ::freeaddrinfo(p_info);
 }
 
-void getHostIp(const char *host, char *ip, size_t ip_len) {
+string getHostIp(const char *host) {
+    int ip_len = 32;
+    char ip[ip_len];
+    ::memset(ip, 0, ip_len);
     struct addrinfo *p_info;
     if (::getaddrinfo(host, NULL, NULL, &p_info) < 0) {
         dnsError("syscall getaddrinfo error");
@@ -79,6 +82,7 @@ void getHostIp(const char *host, char *ip, size_t ip_len) {
             NULL, 0, NI_NUMERICHOST) < 0) {
         dnsError("syscall getnameinfo error");
     }
+    return string(ip);
 }
 
 void setNonBlock(int fd) {

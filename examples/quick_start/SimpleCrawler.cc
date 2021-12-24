@@ -21,11 +21,10 @@ int main() {
     ClientTPSharedData data;
     EpollTPClient<CrawlerHandler, ClientTPSharedData> crawler(2, &data);
     vector<string> hosts = { "fanyi.baidu.com", "xueshu.baidu.com", "www.baidu.com" };
-    char ip[20];
     for (auto &h : hosts) {
-        ::memset(ip, 0, 20);
-        getHostIp(h.c_str(), ip, 20);
-        data.raw_add(string(ip), 80, "GET /test HTTP/1.1\r\n\r\n");
+        string ip = getHostIp(h.c_str());
+        const char *request = "GET /TEST HTTP/1.1\r\n\r\n";
+        data.raw_add(ip, 80, request);
     }
     crawler.run();
     return 0;
