@@ -96,7 +96,7 @@ Since our client will not just support crawler but also concurrency test. Our co
 int main() {
     ClientTPSharedData data;
     EpollTPClient<CrawlerHandler, ClientTPSharedData> crawler(2, &data);
-    vector<string> hosts = { "fanyi.baidu.com", "xueshu.baidu.com", "www.baidu.com" };
+    vector<string> hosts = { "www.taobao.com", "www.bytedance.com", "www.baidu.com" };
     for (auto &h : hosts) {
         string ip = getHostIp(h.c_str());
         const char *request = "GET /TEST HTTP/1.1\r\n\r\n";
