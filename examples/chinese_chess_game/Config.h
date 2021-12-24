@@ -9,7 +9,7 @@ public:
     static const char *const _init_msg_red;
     static const char *const _init_msg_black;
     static const char *const _end_msg;
-    virtual ~Config() {}
+    virtual ~Config() = 0;
 };
 
 const int Config::_port = 8889;

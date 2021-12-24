@@ -18,11 +18,11 @@ Please refer to: [Quick Start](https://github.com/GeniusDai/kingpin/tree/dev/exa
 
 * Linux
 
-* g++ -std=c++11
+* g++
 
-* googletest
+* gtest
 
-* cmake suite
+* cmake
 
 # Header Files
 
