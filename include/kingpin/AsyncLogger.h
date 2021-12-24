@@ -27,6 +27,7 @@ public:
 
     AsyncLogger &operator<<(const long num);
     AsyncLogger &operator<<(const char *str);
+    AsyncLogger &operator<<(const string &s);
     AsyncLogger &operator<<(const exception &e);
     AsyncLogger &operator<<(const AsyncLogger &);
 

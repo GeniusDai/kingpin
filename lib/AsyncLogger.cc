@@ -22,15 +22,7 @@ AsyncLogger::AsyncLogger(int level) : _level(level) {
     _thr_ptr = unique_ptr<thread>(new thread(&AsyncLogger::_run, this));
 }
 
-AsyncLogger &AsyncLogger::operator<<(const long num) {
-    int size = 100;
-    char buffer[size];
-    ::memset(buffer, 0, size);
-    ::snprintf(buffer, size, "%ld", num);
-    return (*this << buffer);
-}
-
-// All the overloads will call "operator<<(const char *str)"
+// All the overloads except END will call "operator<<(const char *str)"
 AsyncLogger &AsyncLogger::operator<<(const char *str) {
     _m.lock();
     _recur_level++;
@@ -40,6 +32,18 @@ AsyncLogger &AsyncLogger::operator<<(const char *str) {
 
     _buffer.appendToBuffer(str);
     return *this;
+}
+
+AsyncLogger &AsyncLogger::operator<<(const long num) {
+    int size = 100;
+    char buffer[size];
+    ::memset(buffer, 0, size);
+    ::snprintf(buffer, size, "%ld", num);
+    return (*this << buffer);
+}
+
+AsyncLogger &AsyncLogger::operator<<(const string &s) {
+    return (*this << s.c_str());
 }
 
 AsyncLogger &AsyncLogger::operator<<(const exception &e) {

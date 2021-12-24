@@ -41,7 +41,7 @@ public:
     explicit IOHandler(_TPSharedData *tsd);
     IOHandler(const IOHandler &) = delete;
     IOHandler &operator=(const IOHandler &) = delete;
-    virtual ~IOHandler();
+    virtual ~IOHandler() = 0;
 
     virtual void onEpollLoop();
     virtual void onConnect(int conn);
@@ -57,6 +57,7 @@ public:
     void writeToBuffer(int conn, const char *str);
     void onWritable(int conn);
     void onReadable(int conn);
+    void onClean(int conn);
     void processEvent(struct epoll_event &event);
 };
 
@@ -110,6 +111,13 @@ void IOHandler<_TPSharedData>::destoryBuffer(int conn) {
     _wbh.erase(conn);
 }
 
+template <typename _TPSharedData>
+void IOHandler<_TPSharedData>::onClean(int conn) {
+    onPassivelyClosed(conn);
+    destoryBuffer(conn);
+    ::close(conn);
+}
+
 // This function would be executed by one thread serially
 // with onMessage, so NO worry about write buffer's parallel
 // write. And conn be registered EPOLLIN while write is not
@@ -127,11 +135,9 @@ void IOHandler<_TPSharedData>::writeToBuffer(int conn) {
             epollRemove(_epfd, conn);
             epollRegister(_epfd, conn, EPOLLOUT);
         }
-    } catch(const FdClosedException &e) {
+    } catch(const exception &e) {
         INFO << e << END;
-        onPassivelyClosed(conn);
-        destoryBuffer(conn);
-        ::close(conn);
+        onClean(conn);
     }
 }
 
@@ -153,11 +159,9 @@ void IOHandler<_TPSharedData>::onWritable(int conn) {
             onWriteComplete(conn);
             epollRegister(_epfd, conn, EPOLLIN);
         }
-    } catch(const FdClosedException &e) {
+    } catch(const exception &e) {
         INFO << e << END;
-        onPassivelyClosed(conn);
-        destoryBuffer(conn);
-        ::close(conn);
+        onClean(conn);
     }
 }
 
@@ -166,13 +170,11 @@ void IOHandler<_TPSharedData>::onReadable(int conn) {
     Buffer *rb;
     try {
         rb = _rbh[conn].get();
-        rb->readNioToBufferTillBlockOrEOF(conn);
+        rb->readNioToBufferTillBlock(conn);
         onMessage(conn);
-    } catch(const FdClosedException &e) {
+    } catch(const exception &e) {
         INFO << e << END;
-        onPassivelyClosed(conn);
-        destoryBuffer(conn);
-        ::close(conn);
+        onClean(conn);
     }
 }
 

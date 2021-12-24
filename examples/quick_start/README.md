@@ -70,10 +70,17 @@ template<typename _Data>
 class CrawlerHandler : public IOHandlerForClient<_Data> {
 public:
     CrawlerHandler(_Data *d) : IOHandlerForClient<_Data>(d) {}
-    void onMessage(int conn) {
-        INFO << "Message of socket " << conn << ":\n"
-            << this->_rbh[conn]->_buffer << END;
+    void _print(int conn) {
+        if (0 == this->_rbh[conn]->_offset) return;
+        INFO << "Host of socket " << conn << ": " << this->_conn_info[conn].first
+                << "\nMessage of socket " << conn << ":\n"
+                << this->_rbh[conn]->_buffer << END;
+        this->_rbh[conn]->clear();
     }
+
+    void onMessage(int conn) { _print(conn); }
+
+    void onPassivelyClosed(int conn) { _print(conn); }
 };
 ```
 
