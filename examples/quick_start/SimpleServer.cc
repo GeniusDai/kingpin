@@ -16,7 +16,7 @@ public:
     void onWriteComplete(int conn) { ::close(conn); }
 };
 
-class SharedData : public ServerTPSharedData {};
+class SharedData : public TPSharedDataForServer {};
 
 int main() {
     SharedData data;

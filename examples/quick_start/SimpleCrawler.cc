@@ -25,8 +25,8 @@ public:
 };
 
 int main() {
-    ClientTPSharedData data;
-    EpollTPClient<CrawlerHandler, ClientTPSharedData> crawler(2, &data);
+    TPSharedDataForClient data;
+    EpollTPClient<CrawlerHandler, TPSharedDataForClient> crawler(2, &data);
     vector<string> hosts = { "www.taobao.com", "www.bytedance.com", "www.baidu.com" };
     for (auto &h : hosts) {
         string ip = getHostIp(h.c_str());

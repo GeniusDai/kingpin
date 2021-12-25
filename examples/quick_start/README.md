@@ -27,7 +27,7 @@ The template _Data refers to the data shared between threads. This template is e
 Define the data shared between threads. Since no EXTRA DATA to be shared in the simple demo, just derive from the base class (or use the base class).
 
 ```
-class SharedData : public ServerTPSharedData {};
+class SharedData : public TPSharedDataForServer {};
 ```
 
 ### Step 3. Init the data and run the server
@@ -94,8 +94,8 @@ Since our client will not just support crawler but also concurrency test. Our co
 
 ```
 int main() {
-    ClientTPSharedData data;
-    EpollTPClient<CrawlerHandler, ClientTPSharedData> crawler(2, &data);
+    TPSharedDataForClient data;
+    EpollTPClient<CrawlerHandler, TPSharedDataForClient> crawler(2, &data);
     vector<string> hosts = { "www.taobao.com", "www.bytedance.com", "www.baidu.com" };
     for (auto &h : hosts) {
         string ip = getHostIp(h.c_str());

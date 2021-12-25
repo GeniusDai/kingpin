@@ -27,9 +27,9 @@ public:
     int _ep_timeout = 1;
 };
 
-class ServerTPSharedData : public TPSharedData {
+class TPSharedDataForServer : public TPSharedData {
 public:
-    virtual ~ServerTPSharedData() {}
+    virtual ~TPSharedDataForServer() {}
     int _port;
     // DONOT use this lock again unless you know what you're doing
     mutex _listenfd_lock;
@@ -39,9 +39,9 @@ public:
     int _listen_num = 1024;
 };
 
-class ClientTPSharedData : public TPSharedData {
+class TPSharedDataForClient : public TPSharedData {
 public:
-    virtual ~ClientTPSharedData() {}
+    virtual ~TPSharedDataForClient() {}
     using _t_host = pair<string, int>;
     struct _HostCompare {
         size_t _hash(const _t_host &s) const {

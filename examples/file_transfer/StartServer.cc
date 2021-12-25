@@ -46,9 +46,9 @@ public:
 };
 
 int main() {
-    ServerTPSharedData data;
+    TPSharedDataForServer data;
     data._port = PORT;
-    EpollTPServer<BigFileTransferIOHandler, ServerTPSharedData>
+    EpollTPServer<BigFileTransferIOHandler, TPSharedDataForServer>
         server(8, &data);
     server.run();
     return 0;

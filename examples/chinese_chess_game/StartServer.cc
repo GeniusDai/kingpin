@@ -24,7 +24,7 @@
 using namespace std;
 using namespace kingpin;
 
-class ChessData : public ServerTPSharedData {
+class ChessData : public TPSharedDataForServer {
 public:
     recursive_mutex _m;
     unordered_map<int, int> _match;

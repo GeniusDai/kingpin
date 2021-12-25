@@ -30,11 +30,11 @@ public:
 };
 
 int main() {
-    ClientTPSharedData data;
+    TPSharedDataForClient data;
     data._batch = 50;
     for (int i = 0; i < Config::_concurrency_num; ++i)
         { data.raw_add(Config::_ip, Config::_port, ""); }
-    EpollTPClient<HighConHandler, ClientTPSharedData> hc_client(32, &data);
+    EpollTPClient<HighConHandler, TPSharedDataForClient> hc_client(32, &data);
     hc_client.run();
     return 0;
 }
