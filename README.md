@@ -6,7 +6,7 @@
 
 * Thread pool and IO multiplexing for both server's and client's concurrency.
 
-* IO threads compete for listening socket or URI pool in server and client.
+* IO threads compete for listening socket or target host pool in server and client.
 
 * Avoid excessive wrapper of classes and functions to get things complicated.
 
