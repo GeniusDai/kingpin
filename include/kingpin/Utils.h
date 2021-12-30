@@ -31,11 +31,11 @@ string getHostIp(const char *host);
 
 void setNonBlock(int fd);
 
-int connectAddr(struct sockaddr_in *addr_ptr, int timeout);
+int connectAddr(struct sockaddr_in *addr_ptr, int timeout = 0);
 
-int connectHost(const char *host, int port, int timeout);
+int connectHost(const char *host, int port, int timeout = 0);
 
-int connectIp(const char *ip, int port, int timeout);
+int connectIp(const char *ip, int port, int timeout = 0);
 
 int initListen(int port, int listen_num, bool nio = true);
 
