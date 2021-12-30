@@ -102,6 +102,7 @@ public:
 
 int main() {
     ChessData data;
+    data._batch = 5;
     data._port = Config::_port;
     EpollTPServer<ChessIO, ChessData> server(32, &data);
     server.run();

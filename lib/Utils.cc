@@ -127,9 +127,10 @@ int connectIp(const char *ip, int port, int timeout) {
     return connectAddr(&addr, timeout);
 }
 
-int initListen(int port, int listen_num) {
+int initListen(int port, int listen_num, bool nio) {
     int sock = ::socket(AF_INET, SOCK_STREAM, 0);
     if (sock < 0) { fatalError("syscall socket error"); }
+    if (nio) { setNonBlock(sock); }
     int optval = 1;
     if (::setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(optval)) == -1) {
         fatalError("syscall setsockopt error");

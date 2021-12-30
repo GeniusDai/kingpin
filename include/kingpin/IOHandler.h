@@ -6,6 +6,7 @@
 #include <cassert>
 #include <cstring>
 #include <cstdio>
+#include <cerrno>
 #include <mutex>
 #include <memory>
 #include <thread>
@@ -306,6 +307,7 @@ public:
 
     void run();
     void _run();
+    void _remove_listen();
 };
 
 template <typename _TPSharedData>
@@ -318,6 +320,13 @@ IOHandlerForServer<_TPSharedData>::~IOHandlerForServer() {}
 template <typename _TPSharedData>
 void IOHandlerForServer<_TPSharedData>::run() {
     this->_t = unique_ptr<thread>(new thread(&IOHandlerForServer::_run, this));
+}
+
+template <typename _TPSharedData>
+void IOHandlerForServer<_TPSharedData>::_remove_listen() {
+    epollRemove(this->_epfd, this->_tsd->_listenfd);
+    this->_tsd->_listenfd_lock.unlock();
+    INFO << "thread release lock" << END;
 }
 
 template <typename _TPSharedData>
@@ -346,20 +355,25 @@ void IOHandlerForServer<_TPSharedData>::_run() {
             if (fd != this->_tsd->_listenfd) {
                 this->processEvent(this->_evs[i]);
             } else {
-                int conn = ::accept4(fd, NULL, NULL, SOCK_NONBLOCK);
-                if (conn < 0) { fatalError("syscall accept4 error"); }
-                INFO << "new connection " << conn << " accepted" << END;
-                epollRemove(this->_epfd, fd);
-                this->_tsd->_listenfd_lock.unlock();
-                INFO << "thread release lock" << END;
-                this->createBuffer(conn);
-                try {
-                    epollRegister(this->_epfd, conn, EPOLLIN);
-                    this->onConnect(conn);
-                } catch (...) {
-                    this->destoryBuffer(conn);
-                    ::close(conn);
+                for (int j = 0; j < this->_tsd->_batch; ++j) {
+                    int conn = ::accept4(fd, NULL, NULL, SOCK_NONBLOCK);
+                    if (conn < 0) {
+                        if (errno == EAGAIN || errno == EWOULDBLOCK) {
+                            INFO << "accepted " << j << " sock(s), will release lock" << END;
+                            break;
+                        } else { fatalError("syscall accept4 error"); }
+                    }
+                    INFO << "new connection " << conn << " accepted" << END;
+                    this->createBuffer(conn);
+                    try {
+                        epollRegister(this->_epfd, conn, EPOLLIN);
+                        this->onConnect(conn);
+                    } catch (...) {
+                        this->destoryBuffer(conn);
+                        ::close(conn);
+                    }
                 }
+                _remove_listen();
             }
         }
     }
