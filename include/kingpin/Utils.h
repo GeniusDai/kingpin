@@ -39,7 +39,7 @@ int connectHost(const char *host, int port, int timeout = 0);
 
 int connectIp(const char *ip, int port, int timeout = 0);
 
-int initListen(int port, int listen_num, bool nio = true);
+int initListen(int port, int listen_num = 1024, bool nio = true);
 
 void epollRegister(int epfd, int fd, uint32_t events);
 
