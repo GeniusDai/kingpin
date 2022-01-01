@@ -38,6 +38,8 @@ Please refer to: [Quick Start](https://github.com/GeniusDai/kingpin/tree/dev/exa
 
 * Buffer.h: IO Buffer pre-allocated on heap, support nonblock socket and disk fd. NOT thread safe.
 
+* Mutex.h: Easy to debug wrapper for read-write lock and recursive lock in libpthread.
+
 * Context.h: Function call timeout wrapper.
 
 * Utils.h: Some utility functions.
