@@ -13,6 +13,8 @@ static_assert(sizeof(sockaddr) == sizeof(sockaddr_in));
 
 namespace kingpin {
 
+pid_t gettid();
+
 void fatalError(const char *str);
 
 void nonFatalError(const char *str);

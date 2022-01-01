@@ -14,11 +14,16 @@
 #include <sys/epoll.h>
 #include <sstream>
 #include <signal.h>
+#include <sys/syscall.h>
 #include "kingpin/Exception.h"
 #include "kingpin/Utils.h"
 #include "kingpin/AsyncLogger.h"
 
 namespace kingpin {
+
+pid_t gettid() {
+    return syscall(SYS_gettid);
+}
 
 void fatalError(const char *str) {
     INFO << str << ": " << ::strerror(errno) << END;

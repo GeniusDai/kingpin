@@ -1,8 +1,7 @@
 cmake_minimum_required(VERSION 2.6)
-project(examples CXX)
+project(KINGPIN CXX)
 
-set(CXX_STANDARD C++11)
-set(CMAKE_CXX_FLAGS "-g -O0 -Wall")
+set(CMAKE_CXX_FLAGS "-g -O0 -Wall -std=c++11")
 
 include_directories("./include")
 link_libraries("gtest")
