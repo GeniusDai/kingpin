@@ -21,7 +21,7 @@ void log() {
 }
 
 int main() {
-    int n_thr = 5;
+    int n_thr = 100;
     vector<shared_ptr<thread> > tp;
     for (int i = 0; i < n_thr; ++i) {
         tp.push_back(shared_ptr<thread>(new thread(&log)));
