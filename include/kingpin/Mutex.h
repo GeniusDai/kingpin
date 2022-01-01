@@ -10,8 +10,10 @@ namespace kingpin {
 
 class RWLock final {
     pid_t _wr_owner;
+#ifdef _KINGPIN_DEBUG_
     unordered_set<pid_t> _rd_owner;
     mutex _debug_lock;
+#endif
 public:
     enum LOCK_TYPE {
         READ,
@@ -41,10 +43,12 @@ public:
     }
     void unlock() {
         if (_wr_owner == gettid()) { _wr_owner = 0; }
+#ifdef _KINGPIN_DEBUG_
         {
             unique_lock<mutex> lock(_debug_lock);
             _rd_owner.erase(gettid());
         }
+#endif
         if (::pthread_rwlock_unlock(_rw_lock) != 0)
             { fatalError("syscall pthread_rwlock_unlock error"); }
     }
@@ -53,15 +57,19 @@ public:
         if (::pthread_rwlock_rdlock(_rw_lock) != 0)
             { fatalError("syscall pthread_rwlock_rdlock error"); }
         assert(_wr_owner == 0);
+#ifdef _KINGPIN_DEBUG_
         {
             unique_lock<mutex> lock(_debug_lock);
             _rd_owner.insert(gettid());
         }
+#endif
     }
     void wr_lock() {
         if (::pthread_rwlock_wrlock(_rw_lock) != 0)
             { fatalError("syscall pthread_rwlock_wrlock error"); }
+#ifdef _KINGPIN_DEBUG_
         assert(_rd_owner.empty());
+#endif
         _wr_owner = gettid();
     }
 };
