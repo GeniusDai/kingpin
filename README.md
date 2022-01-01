@@ -16,13 +16,15 @@ Please refer to: [Quick Start](https://github.com/GeniusDai/kingpin/tree/dev/exa
 
 # Prerequirement
 
-* Linux
+* Linux && g++ && googletest && cmake
 
-* g++
+* Linux: Support epoll, and glibc > 2.15 to avoid pthread_rwlock deadlock bug!
 
-* gtest
+* g++: Support C++ 11
 
-* cmake
+* googletest: Support unittest. If you don't want it, just modify CMakeLists.txt
+
+* cmake: This is essential
 
 # Header Files
 
