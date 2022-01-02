@@ -10,3 +10,12 @@ link_libraries("pthread")
 add_subdirectory("./lib")
 add_subdirectory("./examples")
 add_subdirectory("./unittest")
+
+install (
+    TARGETS kingpin_static kingpin_shared
+    ARCHIVE DESTINATION lib
+    LIBRARY DESTINATION lib
+)
+install (
+    DIRECTORY include/kingpin DESTINATION include
+)
