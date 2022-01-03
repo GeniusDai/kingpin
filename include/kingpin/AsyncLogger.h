@@ -18,15 +18,14 @@ using namespace std;
 namespace kingpin {
 
 class AsyncLogger final {
-    int _level;
-    unordered_map<pid_t, tuple<shared_ptr<Buffer>, shared_ptr<RecursiveLock>,
-            int, time_t> > _t_buffers;
     RWLock _map_lock;
     condition_variable_any _thr_cv;
     unique_ptr<thread> _thr_ptr;
-    int _recur_level = 0;
     bool _stop = false;
 public:
+    int _level;
+    unordered_map<pid_t, tuple<shared_ptr<Buffer>, shared_ptr<RecursiveLock>,
+            int, time_t> > _t_buffers;
     time_t _expired = 120;
 
     explicit AsyncLogger(int level);
