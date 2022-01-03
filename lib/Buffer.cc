@@ -158,6 +158,10 @@ void Buffer::appendToBuffer(const char *str) {
     _offset += str_len;
 }
 
+void Buffer::appendToBuffer(const string &str) {
+    appendToBuffer(str.c_str());
+}
+
 void Buffer::stripEnd(char end) {
     for (int i = _offset-1; i >= 0; --i) {
         if (_buffer[i] == end) { _buffer[i] = '\0'; _offset--; }

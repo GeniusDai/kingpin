@@ -34,6 +34,7 @@ public:
     int writeNioFromBufferTillBlock(int fd);
     int writeNioFromBufferTillEnd(int fd, int step = _default_step);
     void appendToBuffer(const char *str);
+    void appendToBuffer(const string &str);
     void stripEnd(char end);
     bool writeComplete();
     bool endsWith(const char *str) const;

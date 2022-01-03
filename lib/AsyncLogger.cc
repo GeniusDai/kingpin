@@ -33,9 +33,7 @@ void AsyncLogger::_write_head() {
 }
 
 void AsyncLogger::_write_time() {
-    time_t t = scTime();
-    char *str = ctime(&t); // will end by '\n'
-    str[::strlen(str)-1] = '\0';
+    string str = timestamp();
     pid_t id = gettid();
     get<0>(_t_buffers[id])->appendToBuffer("[");
     get<0>(_t_buffers[id])->appendToBuffer(str);

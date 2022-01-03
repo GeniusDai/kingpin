@@ -31,6 +31,18 @@ time_t scTime() {
     return t;
 }
 
+string timestamp(time_t t, const char *format) {
+    if (t == 0) { t = scTime(); }
+    if (format == nullptr) { format = "%F %T"; }
+    tm s_tm;
+    localtime_r(&t, &s_tm);
+    char buf[1024]; ::memset(buf, 0, 1024);
+    if (0 == strftime(buf, 1024, format, &s_tm)) {
+        fatalError("syscall strftime error");
+    }
+    return buf;
+}
+
 void fatalError(const char *str) {
     INFO << str << ": " << ::strerror(errno) << END;
     throw FatalException(str);

@@ -17,6 +17,8 @@ pid_t gettid();
 
 time_t scTime();
 
+string timestamp(time_t t = 0, const char *format = nullptr);
+
 void fatalError(const char *str);
 
 void nonFatalError(const char *str);
