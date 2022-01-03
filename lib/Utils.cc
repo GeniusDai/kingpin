@@ -33,7 +33,7 @@ time_t scTime() {
 
 string timestamp(time_t t, const char *format) {
     if (t == 0) { t = scTime(); }
-    if (format == nullptr) { format = "%F %T"; }
+    if (format == nullptr) { format = "%F %T %Z"; }
     tm s_tm;
     localtime_r(&t, &s_tm);
     char buf[1024]; ::memset(buf, 0, 1024);
