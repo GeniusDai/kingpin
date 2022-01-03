@@ -15,6 +15,8 @@ namespace kingpin {
 
 pid_t gettid();
 
+time_t scTime();
+
 void fatalError(const char *str);
 
 void nonFatalError(const char *str);

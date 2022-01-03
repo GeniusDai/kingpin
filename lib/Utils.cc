@@ -25,6 +25,12 @@ pid_t gettid() {
     return syscall(SYS_gettid);
 }
 
+time_t scTime() {
+    time_t t = ::time(NULL);
+    if (t == -1) { fatalError("syscall time error"); }
+    return t;
+}
+
 void fatalError(const char *str) {
     INFO << str << ": " << ::strerror(errno) << END;
     throw FatalException(str);

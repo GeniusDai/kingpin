@@ -8,10 +8,12 @@
 #include <cstdio>
 #include <sstream>
 #include <cassert>
+#include <set>
 
 #include "kingpin/Exception.h"
 #include "kingpin/Buffer.h"
 #include "kingpin/AsyncLogger.h"
+#include "kingpin/Utils.h"
 
 using namespace std;
 
@@ -30,10 +32,8 @@ void AsyncLogger::_write_head() {
     get<0>(_t_buffers[id])->appendToBuffer(str);
 }
 
-// Not thread safe !
 void AsyncLogger::_write_time() {
-    time_t t = ::time(NULL);
-    if (t == -1) { throw FatalException("get time failed"); }
+    time_t t = scTime();
     char *str = ctime(&t); // will end by '\n'
     str[::strlen(str)-1] = '\0';
     pid_t id = gettid();
@@ -85,7 +85,7 @@ void AsyncLogger::_check_or_init_tid_buffer() {
     }
     WRLockGuard lock(_map_lock);
     _t_buffers[id] = make_tuple<>
-        (shared_ptr<Buffer>(new Buffer), shared_ptr<RecursiveLock>(new RecursiveLock), 0);
+        (shared_ptr<Buffer>(new Buffer), shared_ptr<RecursiveLock>(new RecursiveLock), 0, scTime());
 }
 
 // All the overloads except END will call "operator<<(const char *str)"
@@ -112,6 +112,8 @@ AsyncLogger &AsyncLogger::operator<<(const AsyncLogger &) {
         int recur_num = get<2>(_t_buffers[id]) + 1;
         get<2>(_t_buffers[id]) = 0;
         get<0>(_t_buffers[id])->appendToBuffer("\n");
+        time_t t = scTime();
+        get<3>(_t_buffers[id]) = t;
         for (int i = 0; i < recur_num; ++i) { get<1>(_t_buffers[id])->unlock(); }
     }
     _thr_cv.notify_one();
@@ -121,17 +123,27 @@ AsyncLogger &AsyncLogger::operator<<(const AsyncLogger &) {
 void AsyncLogger::_run() {
     while (true) {
         bool shall_delay = true;
+        set<pid_t> remove_list;
         {
             RDLockGuard lock(_map_lock);
             for (auto iter = _t_buffers.cbegin(); iter != _t_buffers.cend(); ++iter) {
-                RecursiveLock *elem_lock = (get<1>(iter->second)).get();
-                elem_lock->lock();
+                unique_lock<RecursiveLock> lock(*((get<1>(iter->second)).get()));
                 Buffer *buffer = get<0>(iter->second).get();
                 if (buffer->_offset) {
                     buffer->writeNioFromBufferTillEnd(_level);
                     shall_delay = false;
                 }
-                elem_lock->unlock();
+                if (get<3>(iter->second) + _expired < scTime()
+                        && 0 == get<0>(iter->second)->_offset)
+                    { remove_list.insert(iter->first); }
+            }
+        }
+        if (remove_list.size()) {
+            WRLockGuard lock(_map_lock);
+            for (auto iter = remove_list.cbegin(); iter != remove_list.cend(); ++iter) {
+                if (get<3>(_t_buffers[*iter]) + _expired < scTime()
+                        && 0 == get<0>(_t_buffers[*iter])->_offset)
+                    { _t_buffers.erase(*iter); }
             }
         }
         if (shall_delay) {
