@@ -75,44 +75,46 @@ AsyncLogger &AsyncLogger::operator<<(const exception &e) {
     return (*this << e.what());
 }
 
-void AsyncLogger::_check_or_init_tid_buffer() {
-    pid_t id = gettid();
-    {
-        RDLockGuard lock(_map_lock);
-        if (_t_buffers.count(id)) { return; }
-    }
+void AsyncLogger::_init_buffer(pid_t tid) {
     WRLockGuard lock(_map_lock);
-    _t_buffers[id] = make_tuple<>
+    _t_buffers[tid] = make_tuple<>
         (shared_ptr<Buffer>(new Buffer), shared_ptr<RecursiveLock>(new RecursiveLock), 0, scTime());
 }
 
 // All the overloads except END will call "operator<<(const char *str)"
 AsyncLogger &AsyncLogger::operator<<(const char *str) {
-    _check_or_init_tid_buffer();
+    pid_t tid = gettid();
     {
         RDLockGuard lock(_map_lock);
-        pid_t id = gettid();
-        get<1>(_t_buffers[id])->lock();
-        ++get<2>(_t_buffers[id]);
-        if (1 == get<2>(_t_buffers[id])) { _write_debug(); }
-        get<0>(_t_buffers[id])->appendToBuffer(str);
+        if (0 == _t_buffers.count(tid)) {
+            lock.unlock();
+            _init_buffer(tid);
+            lock.lock();
+        }
+        get<1>(_t_buffers[tid])->lock();
+        ++get<2>(_t_buffers[tid]);
+        if (1 == get<2>(_t_buffers[tid])) { _write_debug(); }
+        get<0>(_t_buffers[tid])->appendToBuffer(str);
     }
     return *this;
 }
 
 // Release lock and notify cv
 AsyncLogger &AsyncLogger::operator<<(const AsyncLogger &) {
-    _check_or_init_tid_buffer();
+    pid_t tid = gettid();
     {
         RDLockGuard lock(_map_lock);
-        pid_t id = gettid();
-        get<1>(_t_buffers[id])->lock();
-        int recur_num = get<2>(_t_buffers[id]) + 1;
-        get<2>(_t_buffers[id]) = 0;
-        get<0>(_t_buffers[id])->appendToBuffer("\n");
-        time_t t = scTime();
-        get<3>(_t_buffers[id]) = t;
-        for (int i = 0; i < recur_num; ++i) { get<1>(_t_buffers[id])->unlock(); }
+        if (0 == _t_buffers.count(tid)) {
+            lock.unlock();
+            _init_buffer(tid);
+            lock.lock();
+        }
+        get<1>(_t_buffers[tid])->lock();
+        int recur_num = get<2>(_t_buffers[tid]) + 1;
+        get<2>(_t_buffers[tid]) = 0;
+        get<0>(_t_buffers[tid])->appendToBuffer("\n");
+        get<3>(_t_buffers[tid]) = scTime();
+        for (int i = 0; i < recur_num; ++i) { get<1>(_t_buffers[tid])->unlock(); }
     }
     _thr_cv.notify_one();
     return *this;
@@ -130,17 +132,16 @@ void AsyncLogger::_run() {
                 if (buffer->_offset) {
                     buffer->writeNioFromBufferTillEnd(_level);
                     shall_delay = false;
+                } else {
+                    if (get<3>(iter->second) + _expired < scTime())
+                        { remove_list.insert(iter->first); }
                 }
-                if (get<3>(iter->second) + _expired < scTime()
-                        && 0 == get<0>(iter->second)->_offset)
-                    { remove_list.insert(iter->first); }
             }
         }
         if (remove_list.size()) {
             WRLockGuard lock(_map_lock);
             for (auto iter = remove_list.cbegin(); iter != remove_list.cend(); ++iter) {
-                if (get<3>(_t_buffers[*iter]) + _expired < scTime()
-                        && 0 == get<0>(_t_buffers[*iter])->_offset)
+                if (0 == get<0>(_t_buffers[*iter])->_offset)
                     { _t_buffers.erase(*iter); }
             }
         }

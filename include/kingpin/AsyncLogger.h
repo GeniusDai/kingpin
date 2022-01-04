@@ -41,7 +41,7 @@ public:
     void _write_time();
     void _write_tid();
     void _write_debug();
-    void _check_or_init_tid_buffer();
+    void _init_buffer(pid_t tid);
     bool _no_log();
     void _run();
 };
