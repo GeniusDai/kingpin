@@ -88,7 +88,7 @@ public:
 
 In this simple crawler, we just use the default structure for client.
 
-### Step 3. Init the data and run the client
+### Step 3. Init the data and run the crawler
 
 Since our client will not just support crawler but also concurrency test. Our connection pool is identified by a tuple (ip, port, init_message). We could use the raw_add to add our data to the pool shared by crawler.Then Use 2 threads to handle the connnections.
 
