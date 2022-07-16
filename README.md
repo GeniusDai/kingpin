@@ -53,3 +53,7 @@ Build and run:
     $ mkdir build && cd build
     $ cmake .. && make
     $ cd unittest && ctest
+
+# Others
+
+Architecture design for this repo is poor, although performance is very good. So a more well designed repo that have similar function : https://github.com/GeniusDai/cppev
