@@ -56,4 +56,6 @@ Build and run:
 
 # Others
 
-Architecture design for this repo is poor, although performance is very good. So a more well designed repo that have similar function : https://github.com/GeniusDai/cppev
+Architecture design for this repo is poor, although performance is very good.
+
+A more well designed repo that have similar function : https://github.com/GeniusDai/cppev
